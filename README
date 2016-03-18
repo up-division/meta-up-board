@@ -22,11 +22,11 @@ This layer depends on:
 
   URI: git://git.openembedded.org/openembedded-core
   layers: meta
-  branch: master
+  branch: jethro
 
   URI: git://git.yoctoproject.org/meta-intel
   layers: meta-intel
-  branch: master
+  branch: jethro
 
 
 Patches
@@ -41,25 +41,28 @@ Table of Contents
 =================
 
   I. Building the meta-up-board BSP layer
- II. Booting the images in /binary
+ II. Booting the live USB image
+III. Device Notes
 
 
 I. Building the meta-up-board BSP layer
 ========================================
 
-In order to build an image with BSP support for a given release, you
-need to download the corresponding BSP tarball from the 'Board Support
-Package (BSP) Downloads' page of the Yocto Project website.
+In order to use this layer, you need to make the build system
+aware of it.
 
-Having done that, and assuming you extracted the BSP tarball contents
-at the top-level of your yocto build tree, you can build a
-up-board image by adding the location of the meta-up-board
-layer to bblayers.conf, along with any other layers needed (to access
-common metadata shared between BSPs) e.g.:
+Assuming the meta-up-board layer exists at the top-level of your
+yocto build tree, you can add it to the build system by adding
+the location of the meta-up-board layer to bblayers.conf, along
+with the meta-intel layer and any other layers needed. e.g.:
 
-  yocto/meta-intel \
-  yocto/meta-up-board \
-
+  BBLAYERS ?= " \
+    /path/to/yocto/meta \
+    /path/to/yocto/meta-yocto \
+    /path/to/yocto/meta-yocto-bsp \
+    /path/to/yocto/meta-intel \
+    /path/to/yocto/meta-up-board \
+    "
 To enable the up-board layer, add the up-board MACHINE to local.conf:
 
   MACHINE ?= "up-board"
@@ -71,30 +74,22 @@ You should then be able to build a up-board image as such:
 
 At the end of a successful build, you should have a live image that
 you can boot from a USB flash drive (see instructions on how to do
-that below, in the section 'Booting the images from /binary').
-
-As an alternative to downloading the BSP tarball, you can also work
-directly from the meta-up-board git repository.  For each BSP in the
-'meta-up-board' repository, there are multiple branches, one
-corresponding to each major release starting with 'laverne' (0.90),
-in addition to the latest code which tracks the current master (note
-that not all BSPs are present in every release).  Instead of
-extracting a BSP tarball at the top level of your yocto build tree,
-you can equivalently check out the appropriate branch from the
-meta-up-board repository at the same location.
+that below, in the section 'Booting the live USB image').
 
 
-II. Booting the images in /binary
-=================================
+II. Booting the live USB image
+==============================
 
-This BSP contains bootable live images, which can be used to directly
-boot Yocto off of a USB flash drive.
+This BSP creates bootable live images, which can be used to directly
+boot Yocto off of a USB flash drive.  Upon completion of a successful
+build, described in the previous section, the images are created in
+a sub-folder named ./tmp/deploy/images/intel-corei7-64/
 
 Under Linux, insert a USB flash drive.  Assuming the USB flash drive
 takes device /dev/sdf, use dd to copy the live image to it.  For
 example:
 
-# dd if=core-image-sato-up-board-20101207053738.hddimg of=/dev/sdf
+# dd if=core-image-sato-intel-corei7-64.hddimg of=/dev/sdf
 # sync
 # eject /dev/sdf
 
@@ -120,6 +115,7 @@ the syslinux boot: prompt, or the boot: prompt contains strange
 characters), try doing this first:
 
 # dd if=/dev/zero of=/dev/sdf bs=1M count=512
+
 
 III. Device Notes
 ================================
