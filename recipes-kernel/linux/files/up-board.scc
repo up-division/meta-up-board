@@ -1,0 +1,10 @@
+kconf hardware up-board.cfg
+
+include features/serial/8250.scc
+include features/i915/i915.scc
+
+include cfg/usb-mass-storage.scc
+include features/power/intel.scc
+
+kconf hardware up-board-user-config.cfg
+include up-board-user-patches.scc

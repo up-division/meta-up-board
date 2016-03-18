@@ -1,0 +1,15 @@
+define KMACHINE up-board
+
+define KARCH x86_64
+
+include ktypes/preempt-rt/preempt-rt.scc
+define KTYPE standard/base
+branch up-board
+
+include up-board.scc
+
+# default policy for preempt-rt kernels
+include cfg/usb-mass-storage.scc
+include cfg/boot-live.scc
+include features/latencytop/latencytop.scc
+include features/profiling/profiling.scc

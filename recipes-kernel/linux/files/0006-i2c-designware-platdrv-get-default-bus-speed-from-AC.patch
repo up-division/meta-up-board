@@ -1,0 +1,100 @@
+From 0df2d88c8a779e4f2ced71d4bea7488e106b85a6 Mon Sep 17 00:00:00 2001
+From: Dan O'Donovan <dan@emutex.com>
+Date: Wed, 17 Feb 2016 14:14:29 +0000
+Subject: [PATCH 6/7] i2c: designware-platdrv: get default bus speed from ACPI
+ method
+
+On some platforms, the I2C bus speed mode for some ports needs to
+differ from the default 400kHz speed set by this driver.  This
+change allows the speed to be specified per port by the BIOS
+through an ACPI method named "FREQ".
+
+Signed-off-by: Dan O'Donovan <dan@emutex.com>
+---
+ drivers/i2c/busses/i2c-designware-platdrv.c | 36 ++++++++++++++++++++---------
+ 1 file changed, 25 insertions(+), 11 deletions(-)
+
+diff --git a/drivers/i2c/busses/i2c-designware-platdrv.c b/drivers/i2c/busses/i2c-designware-platdrv.c
+index 37936d0..f2f86d5 100644
+--- a/drivers/i2c/busses/i2c-designware-platdrv.c
++++ b/drivers/i2c/busses/i2c-designware-platdrv.c
+@@ -94,7 +94,20 @@ static void dw_i2c_acpi_params(struct platform_device *pdev, char method[],
+ 	kfree(buf.pointer);
+ }
+ 
+-static int dw_i2c_acpi_configure(struct platform_device *pdev)
++static void dw_i2c_acpi_freq_param(struct platform_device *pdev, u32 *freq)
++{
++	acpi_handle handle = ACPI_HANDLE(&pdev->dev);
++	unsigned long long tmp;
++
++	if (ACPI_FAILURE(acpi_evaluate_integer(handle, "FREQ", NULL, &tmp)))
++		return;
++
++	*freq = (u32)tmp;
++	dev_dbg(&pdev->dev, "%u Hz bus speed specified by 'FREQ' ACPI method\n",
++		*freq);
++}
++
++static int dw_i2c_acpi_configure(struct platform_device *pdev, u32 *freq)
+ {
+ 	struct dw_i2c_dev *dev = platform_get_drvdata(pdev);
+ 	const struct acpi_device_id *id;
+@@ -120,6 +133,9 @@ static int dw_i2c_acpi_configure(struct platform_device *pdev)
+ 	dw_i2c_acpi_params(pdev, "FMCN", &dev->fs_hcnt, &dev->fs_lcnt,
+ 			   &dev->sda_hold_time);
+ 
++	/* Try to get default speed mode from an ACPI method if it exists */
++	dw_i2c_acpi_freq_param(pdev, freq);
++
+ 	/*
+ 	 * Provide a way for Designware I2C host controllers that are not
+ 	 * based on Intel LPSS to specify their input clock frequency via
+@@ -155,7 +171,7 @@ static const struct acpi_device_id dw_i2c_acpi_match[] = {
+ };
+ MODULE_DEVICE_TABLE(acpi, dw_i2c_acpi_match);
+ #else
+-static inline int dw_i2c_acpi_configure(struct platform_device *pdev)
++static inline int dw_i2c_acpi_configure(struct platform_device *pdev, u32 *freq)
+ {
+ 	return -ENODEV;
+ }
+@@ -194,7 +210,7 @@ static int dw_i2c_probe(struct platform_device *pdev)
+ 	clk_freq = 400000;
+ 
+ 	if (has_acpi_companion(&pdev->dev)) {
+-		dw_i2c_acpi_configure(pdev);
++		dw_i2c_acpi_configure(pdev, &clk_freq);
+ 	} else if (pdev->dev.of_node) {
+ 		of_property_read_u32(pdev->dev.of_node,
+ 					"i2c-sda-hold-time-ns", &ht);
+@@ -208,20 +224,18 @@ static int dw_i2c_probe(struct platform_device *pdev)
+ 
+ 		of_property_read_u32(pdev->dev.of_node, "clock-frequency",
+ 				     &clk_freq);
+-
+-		/* Only standard mode at 100kHz and fast mode at 400kHz
+-		 * are supported.
+-		 */
+-		if (clk_freq != 100000 && clk_freq != 400000) {
+-			dev_err(&pdev->dev, "Only 100kHz and 400kHz supported");
+-			return -EINVAL;
+-		}
+ 	} else {
+ 		pdata = dev_get_platdata(&pdev->dev);
+ 		if (pdata)
+ 			clk_freq = pdata->i2c_scl_freq;
+ 	}
+ 
++	/* Only standard mode at 100kHz and fast mode at 400kHz are supported */
++	if (clk_freq != 100000 && clk_freq != 400000) {
++		dev_err(&pdev->dev, "Only 100kHz and 400kHz supported");
++		return -EINVAL;
++	}
++
+ 	r = i2c_dw_eval_lock_support(dev);
+ 	if (r)
+ 		return r;
+-- 
+2.1.4
+

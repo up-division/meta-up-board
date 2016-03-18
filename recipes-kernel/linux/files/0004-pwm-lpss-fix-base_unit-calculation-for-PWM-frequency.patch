@@ -1,0 +1,54 @@
+From e25249cf794836d9f3cdd8b33329edc72c4794fe Mon Sep 17 00:00:00 2001
+From: Dan O'Donovan <dan@emutex.com>
+Date: Wed, 17 Feb 2016 14:07:29 +0000
+Subject: [PATCH 4/7] pwm: lpss: fix base_unit calculation for PWM frequency
+
+The base_unit calculation applies an offset of 0x2 which adds significant
+error for lower frequencies and doesn't appear to be justified - rounding
+the division result gives a correct value.
+
+Also, the upper limit check for base_unit is off-by-one; the upper nibble of
+base_unit is invalid if >=128 according to the Table 88 in the Z8000 Processor
+Series Datasheet Volume 1 (Rev. 2).
+
+Signed-off-by: Dan O'Donovan <dan@emutex.com>
+---
+ drivers/pwm/pwm-lpss.c | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/pwm/pwm-lpss.c b/drivers/pwm/pwm-lpss.c
+index e979825..c11366e 100644
+--- a/drivers/pwm/pwm-lpss.c
++++ b/drivers/pwm/pwm-lpss.c
+@@ -25,8 +25,7 @@
+ #define PWM_BASE_UNIT_SHIFT		8
+ #define PWM_BASE_UNIT_MASK		0x00ffff00
+ #define PWM_ON_TIME_DIV_MASK		0x000000ff
+-#define PWM_DIVISION_CORRECTION		0x2
+-#define PWM_LIMIT			(0x8000 + PWM_DIVISION_CORRECTION)
++#define PWM_LIMIT			0x7fff
+ #define NSECS_PER_SEC			1000000000UL
+ 
+ struct pwm_lpss_chip {
+@@ -63,15 +62,14 @@ static int pwm_lpss_config(struct pwm_chip *chip, struct pwm_device *pwm,
+ 
+ 	do_div(freq, period_ns);
+ 
+-	/* The equation is: base_unit = ((freq / c) * 65536) + correction */
+-	base_unit = freq * 65536;
++	/* The equation is: base_unit = (round(freq / c) * 65536) */
++	freq *= 65536;
+ 
+ 	c = lpwm->clk_rate;
+ 	if (!c)
+ 		return -EINVAL;
+ 
+-	do_div(base_unit, c);
+-	base_unit += PWM_DIVISION_CORRECTION;
++	base_unit = DIV_ROUND_CLOSEST_ULL(freq, c);
+ 	if (base_unit > PWM_LIMIT)
+ 		return -EINVAL;
+ 
+-- 
+2.1.4
+

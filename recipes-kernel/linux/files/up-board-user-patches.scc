@@ -1,0 +1,9 @@
+patch 0001-platform-x86-add-platform-drivers-for-UP-Board.patch
+patch 0002-pinctrl-cherryview-add-option-to-set-open-drain-pin-.patch
+patch 0003-pinctrl-cherryview-add-handlers-for-pin_config_group.patch
+patch 0004-pwm-lpss-fix-base_unit-calculation-for-PWM-frequency.patch
+patch 0005-i2c-designware-platdrv-use-ACPI-UID-for-bus-numberin.patch
+patch 0006-i2c-designware-platdrv-get-default-bus-speed-from-AC.patch
+patch 0007-spi-pxa2xx-use-DMA-by-default-if-supported.patch
+patch 0008-spi-spi-pxa2xx-use-cs_gpio-if-valid.patch
+patch 0009-spi-spi-pxa2xx-add-GPIO-CS-lines-for-UP-platform.patch

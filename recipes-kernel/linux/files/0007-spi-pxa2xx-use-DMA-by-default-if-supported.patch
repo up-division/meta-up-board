@@ -1,0 +1,56 @@
+From 8c20f4c2336d96b5d67fc83a91fa0d4de3f85274 Mon Sep 17 00:00:00 2001
+From: Dan O'Donovan <dan@emutex.com>
+Date: Wed, 17 Feb 2016 14:17:52 +0000
+Subject: [PATCH 7/7] spi: pxa2xx: use DMA by default if supported
+
+Currently, even if the PXA2xx SPI master supports DMA, it won't be
+enabled unless (i) the slave device is enumerated through ACPI, or
+(ii) the slave device is registered with board-specific
+controller_data specified.  Even then, there isn't a field in the
+controller_data that explicitly enables dma - it just gets enabled
+if the master supports it and controller_data is non-NULL.
+
+This means that drivers which register SPI devices on a bus without
+knowledge of the controller cannot avail of DMA performance gains.
+
+This patch allows DMA transfers to be used if supported.
+
+Signed-off-by: Dan O'Donovan <dan@emutex.com>
+---
+ drivers/spi/spi-pxa2xx.c | 10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
+
+diff --git a/drivers/spi/spi-pxa2xx.c b/drivers/spi/spi-pxa2xx.c
+index f089082..f314257 100644
+--- a/drivers/spi/spi-pxa2xx.c
++++ b/drivers/spi/spi-pxa2xx.c
+@@ -1119,7 +1119,7 @@ static int setup(struct spi_device *spi)
+ 			chip->frm = spi->chip_select;
+ 		} else
+ 			chip->gpio_cs = -1;
+-		chip->enable_dma = 0;
++		chip->enable_dma = drv_data->master_info->enable_dma;
+ 		chip->timeout = TIMOUT_DFLT;
+ 	}
+ 
+@@ -1138,17 +1138,9 @@ static int setup(struct spi_device *spi)
+ 			tx_hi_thres = chip_info->tx_hi_threshold;
+ 		if (chip_info->rx_threshold)
+ 			rx_thres = chip_info->rx_threshold;
+-		chip->enable_dma = drv_data->master_info->enable_dma;
+ 		chip->dma_threshold = 0;
+ 		if (chip_info->enable_loopback)
+ 			chip->cr1 = SSCR1_LBM;
+-	} else if (ACPI_HANDLE(&spi->dev)) {
+-		/*
+-		 * Slave devices enumerated from ACPI namespace don't
+-		 * usually have chip_info but we still might want to use
+-		 * DMA with them.
+-		 */
+-		chip->enable_dma = drv_data->master_info->enable_dma;
+ 	}
+ 
+ 	chip->lpss_rx_threshold = SSIRF_RxThresh(rx_thres);
+-- 
+2.1.4
+
