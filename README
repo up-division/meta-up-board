@@ -83,13 +83,13 @@ II. Booting the live USB image
 This BSP creates bootable live images, which can be used to directly
 boot Yocto off of a USB flash drive.  Upon completion of a successful
 build, described in the previous section, the images are created in
-a sub-folder named ./tmp/deploy/images/intel-corei7-64/
+a sub-folder named ./tmp/deploy/images/up-board/
 
 Under Linux, insert a USB flash drive.  Assuming the USB flash drive
 takes device /dev/sdf, use dd to copy the live image to it.  For
 example:
 
-# dd if=core-image-sato-intel-corei7-64.hddimg of=/dev/sdf
+# dd if=core-image-sato-up-board.hddimg of=/dev/sdf
 # sync
 # eject /dev/sdf
 
