@@ -1,0 +1,3 @@
+Common targets are:
+    core-image-minimal
+    core-image-sato

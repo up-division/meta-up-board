@@ -48,28 +48,9 @@ III. Device Notes
 I. Building the meta-up-board BSP layer
 ========================================
 
-In order to use this layer, you need to make the build system
-aware of it.
+You should be able to build a up-board image as such:
 
-Assuming the meta-up-board layer exists at the top-level of your
-yocto build tree, you can add it to the build system by adding
-the location of the meta-up-board layer to bblayers.conf, along
-with the meta-intel layer and any other layers needed. e.g.:
-
-  BBLAYERS ?= " \
-    /path/to/yocto/meta \
-    /path/to/yocto/meta-yocto \
-    /path/to/yocto/meta-yocto-bsp \
-    /path/to/yocto/meta-intel \
-    /path/to/yocto/meta-up-board \
-    "
-To enable the up-board layer, add the up-board MACHINE to local.conf:
-
-  MACHINE ?= "up-board"
-
-You should then be able to build a up-board image as such:
-
-  $ source oe-init-build-env
+  $ TEMPLATECONF=meta-up-board/conf source oe-init-build-env
   $ bitbake core-image-sato
 
 At the end of a successful build, you should have a live image that
