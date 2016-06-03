@@ -1,7 +1,7 @@
-From 98474c28eaa08c2ae400e46c445bdd704357fde8 Mon Sep 17 00:00:00 2001
+From a518c72a69a9e054aa60be58655e30fd62b24789 Mon Sep 17 00:00:00 2001
 From: Dan O'Donovan <dan@emutex.com>
 Date: Tue, 15 Mar 2016 21:48:21 +0000
-Subject: [PATCH 1/2] spi: spi-pxa2xx: use cs_gpio if valid
+Subject: [PATCH 17/23] spi: spi-pxa2xx: use cs_gpio if valid
 
 The spi_device structure contains a field named cs_gpio, which
 can be used to specify a GPIO pin to use for chip-select
@@ -15,10 +15,10 @@ Signed-off-by: Dan O'Donovan <dan@emutex.com>
  1 file changed, 17 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/spi/spi-pxa2xx.c b/drivers/spi/spi-pxa2xx.c
-index fe20d83..6661a15 100644
+index f3aee3a..26884d1 100644
 --- a/drivers/spi/spi-pxa2xx.c
 +++ b/drivers/spi/spi-pxa2xx.c
-@@ -1072,7 +1072,7 @@ static int setup_cs(struct spi_device *spi, struct chip_data *chip,
+@@ -1117,7 +1117,7 @@ static int setup_cs(struct spi_device *spi, struct chip_data *chip,
  {
  	int err = 0;
  
@@ -27,7 +27,7 @@ index fe20d83..6661a15 100644
  		return 0;
  
  	/* NOTE: setup() can be called multiple times, possibly with
-@@ -1082,26 +1082,30 @@ static int setup_cs(struct spi_device *spi, struct chip_data *chip,
+@@ -1127,26 +1127,30 @@ static int setup_cs(struct spi_device *spi, struct chip_data *chip,
  		gpio_free(chip->gpio_cs);
  
  	/* If (*cs_control) is provided, ignore GPIO chip select */
@@ -71,5 +71,5 @@ index fe20d83..6661a15 100644
  }
  
 -- 
-2.1.4
+2.8.0
 

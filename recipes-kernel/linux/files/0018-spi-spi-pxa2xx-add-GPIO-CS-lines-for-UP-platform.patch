@@ -1,7 +1,7 @@
-From b3b44603bb28948757a1a65b7aea08b9f059aa3a Mon Sep 17 00:00:00 2001
+From 06fd6fd511b7a43266b718cbdf822da6a4ab4f99 Mon Sep 17 00:00:00 2001
 From: Dan O'Donovan <dan@emutex.com>
-Date: Fri, 18 Mar 2016 19:43:50 +0000
-Subject: [PATCH] spi: spi-pxa2xx: add GPIO CS lines for UP platform
+Date: Wed, 16 Mar 2016 17:36:42 +0000
+Subject: [PATCH 18/23] spi: spi-pxa2xx: add GPIO CS lines for UP platform
 
 The PXA2xx SPI controller on Intel X5-Z83xx SoC provides a
 single hardware-controlled chip-select signal.  The UP board
@@ -26,10 +26,10 @@ Signed-off-by: Dan O'Donovan <dan@emutex.com>
  2 files changed, 43 insertions(+)
 
 diff --git a/drivers/spi/spi-pxa2xx.c b/drivers/spi/spi-pxa2xx.c
-index ca905b3..fce460e 100644
+index 26884d1..30e772a 100644
 --- a/drivers/spi/spi-pxa2xx.c
 +++ b/drivers/spi/spi-pxa2xx.c
-@@ -30,6 +30,7 @@
+@@ -32,6 +32,7 @@
  #include <linux/clk.h>
  #include <linux/pm_runtime.h>
  #include <linux/acpi.h>
@@ -37,10 +37,10 @@ index ca905b3..fce460e 100644
  
  #include "spi-pxa2xx.h"
  
-@@ -1242,11 +1243,38 @@ static void cleanup(struct spi_device *spi)
+@@ -1364,6 +1365,32 @@ static bool pxa2xx_spi_idma_filter(struct dma_chan *chan, void *param)
+ 	return true;
  }
  
- #ifdef CONFIG_ACPI
 +struct pxa2xx_cs_info {
 +	u16 num_chipselect;
 +	int *cs_gpios;
@@ -68,15 +68,17 @@ index ca905b3..fce460e 100644
 +};
 +
  static struct pxa2xx_spi_master *
- pxa2xx_spi_acpi_get_pdata(struct platform_device *pdev)
+ pxa2xx_spi_init_pdata(struct platform_device *pdev)
  {
- 	struct pxa2xx_spi_master *pdata;
- 	struct acpi_device *adev;
-+        struct dmi_system_id *system_id;
- 	struct ssp_device *ssp;
+@@ -1373,6 +1400,7 @@ pxa2xx_spi_init_pdata(struct platform_device *pdev)
  	struct resource *res;
- 	int devid;
-@@ -1282,6 +1310,17 @@ pxa2xx_spi_acpi_get_pdata(struct platform_device *pdev)
+ 	const struct acpi_device_id *adev_id = NULL;
+ 	const struct pci_device_id *pcidev_id = NULL;
++	const struct dmi_system_id *system_id;
+ 	int type;
+ 
+ 	adev = ACPI_COMPANION(&pdev->dev);
+@@ -1423,6 +1451,17 @@ pxa2xx_spi_init_pdata(struct platform_device *pdev)
  	pdata->num_chipselect = 1;
  	pdata->enable_dma = true;
  
@@ -94,19 +96,19 @@ index ca905b3..fce460e 100644
  	return pdata;
  }
  
-@@ -1351,6 +1390,7 @@ static int pxa2xx_spi_probe(struct platform_device *pdev)
+@@ -1481,6 +1520,7 @@ static int pxa2xx_spi_probe(struct platform_device *pdev)
+ 	master->mode_bits = SPI_CPOL | SPI_CPHA | SPI_CS_HIGH | SPI_LOOP;
  
  	master->bus_num = ssp->port_id;
- 	master->num_chipselect = platform_info->num_chipselect;
 +	master->cs_gpios = platform_info->cs_gpios;
  	master->dma_alignment = DMA_ALIGNMENT;
  	master->cleanup = cleanup;
  	master->setup = setup;
 diff --git a/include/linux/spi/pxa2xx_spi.h b/include/linux/spi/pxa2xx_spi.h
-index 6d36dac..fb2fc62 100644
+index 9ec4c14..935a463 100644
 --- a/include/linux/spi/pxa2xx_spi.h
 +++ b/include/linux/spi/pxa2xx_spi.h
-@@ -34,6 +34,9 @@ struct pxa2xx_spi_master {
+@@ -33,6 +33,9 @@ struct pxa2xx_spi_master {
  
  	/* For non-PXA arches */
  	struct ssp_device ssp;
@@ -117,5 +119,5 @@ index 6d36dac..fb2fc62 100644
  
  /* spi_board_info.controller_data for SPI slave devices,
 -- 
-2.1.4
+2.8.0
 

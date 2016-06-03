@@ -1,12 +1,13 @@
-From 187d220d10044c92d10801955731602d872e487f Mon Sep 17 00:00:00 2001
+From 3c57432284573d1b28c9b4e69eb28ccd9705e11e Mon Sep 17 00:00:00 2001
 From: Dan O'Donovan <dan@emutex.com>
-Date: Wed, 17 Feb 2016 14:09:36 +0000
-Subject: [PATCH 5/7] i2c: designware-platdrv: use ACPI UID for bus numbering
+Date: Thu, 7 Jan 2016 11:32:35 +0000
+Subject: [PATCH 05/23] i2c: designware-platdrv: use fixed bus numbering, based
+ on ACPI UID
 
-The bus numbering for these devices is automatic by default, and
-thus inconsistent.  This creates problems when registering I2C
-platform devices on a specific bus.  This changes forces a
-consistent bus numbering based on the ACPI UID.
+The bus numbers for these devices is automatic by default, and thus
+inconsistent.  This creates problems when registering I2C platform
+devices on a specific bus.  This changes forces a consistent bus
+numbering based on the ACPI UID.
 
 Signed-off-by: Dan O'Donovan <dan@emutex.com>
 ---
@@ -14,10 +15,10 @@ Signed-off-by: Dan O'Donovan <dan@emutex.com>
  1 file changed, 9 insertions(+)
 
 diff --git a/drivers/i2c/busses/i2c-designware-platdrv.c b/drivers/i2c/busses/i2c-designware-platdrv.c
-index 3f7d487..37936d0 100644
+index 6b00061c..7718fae 100644
 --- a/drivers/i2c/busses/i2c-designware-platdrv.c
 +++ b/drivers/i2c/busses/i2c-designware-platdrv.c
-@@ -98,11 +98,20 @@ static int dw_i2c_acpi_configure(struct platform_device *pdev)
+@@ -94,11 +94,20 @@ static int dw_i2c_acpi_configure(struct platform_device *pdev)
  {
  	struct dw_i2c_dev *dev = platform_get_drvdata(pdev);
  	const struct acpi_device_id *id;
@@ -39,5 +40,5 @@ index 3f7d487..37936d0 100644
  	 * Try to get SDA hold time and *CNT values from an ACPI method if
  	 * it exists for both supported speed modes.
 -- 
-2.1.4
+2.8.0
 

@@ -1,7 +1,7 @@
-From f134b0c2b5d4c18034cf99a03702c7c1d9735997 Mon Sep 17 00:00:00 2001
+From 0496646328aa756d1afdb6ba0d493d272b1f0b27 Mon Sep 17 00:00:00 2001
 From: Dan O'Donovan <dan@emutex.com>
-Date: Wed, 17 Feb 2016 14:05:43 +0000
-Subject: [PATCH 3/7] pinctrl: cherryview: add handlers for
+Date: Fri, 29 Jan 2016 16:56:42 +0000
+Subject: [PATCH 13/23] pinctrl: cherryview: add handlers for
  pin_config_group_get/set
 
 Pin config get/set handlers for pin groups were previously not
@@ -16,7 +16,7 @@ Signed-off-by: Dan O'Donovan <dan@emutex.com>
  1 file changed, 42 insertions(+)
 
 diff --git a/drivers/pinctrl/intel/pinctrl-cherryview.c b/drivers/pinctrl/intel/pinctrl-cherryview.c
-index 27e1f43..1b53db9 100644
+index c086c1a..00ef0be 100644
 --- a/drivers/pinctrl/intel/pinctrl-cherryview.c
 +++ b/drivers/pinctrl/intel/pinctrl-cherryview.c
 @@ -1169,10 +1169,52 @@ static int chv_config_set(struct pinctrl_dev *pctldev, unsigned pin,
@@ -73,5 +73,5 @@ index 27e1f43..1b53db9 100644
  
  static struct pinctrl_desc chv_pinctrl_desc = {
 -- 
-2.1.4
+2.8.0
 

@@ -1,7 +1,7 @@
-From 5f4370a0d1ef7004d88a2905c9f89617452974ae Mon Sep 17 00:00:00 2001
+From 9e3533d318c7439078cd5f921f585f2f20413cee Mon Sep 17 00:00:00 2001
 From: Dan O'Donovan <dan@emutex.com>
-Date: Wed, 17 Feb 2016 14:03:58 +0000
-Subject: [PATCH 2/2] pinctrl: cherryview: add option to set open-drain pin
+Date: Fri, 29 Jan 2016 14:02:01 +0000
+Subject: [PATCH 12/23] pinctrl: cherryview: add option to set open-drain pin
  config
 
 On some CHV platforms, we need an option to configure the
@@ -15,7 +15,7 @@ Signed-off-by: Dan O'Donovan <dan@emutex.com>
  1 file changed, 33 insertions(+)
 
 diff --git a/drivers/pinctrl/intel/pinctrl-cherryview.c b/drivers/pinctrl/intel/pinctrl-cherryview.c
-index 732ff75..2e33903 100644
+index 84936ba..c086c1a 100644
 --- a/drivers/pinctrl/intel/pinctrl-cherryview.c
 +++ b/drivers/pinctrl/intel/pinctrl-cherryview.c
 @@ -1101,6 +1101,27 @@ static int chv_config_set_pull(struct chv_pinctrl *pctrl, unsigned pin,
@@ -29,7 +29,7 @@ index 732ff75..2e33903 100644
 +	unsigned long flags;
 +	u32 ctrl1;
 +
-+	spin_lock_irqsave(&pctrl->lock, flags);
++	raw_spin_lock_irqsave(&pctrl->lock, flags);
 +	ctrl1 = readl(reg);
 +
 +	if (enable)
@@ -38,7 +38,7 @@ index 732ff75..2e33903 100644
 +		ctrl1 &= ~CHV_PADCTRL1_ODEN;
 +
 +	chv_writel(ctrl1, reg);
-+	spin_unlock_irqrestore(&pctrl->lock, flags);
++	raw_spin_unlock_irqrestore(&pctrl->lock, flags);
 +
 +	return 0;
 +}
@@ -66,5 +66,5 @@ index 732ff75..2e33903 100644
  			return -ENOTSUPP;
  		}
 -- 
-2.1.4
+2.8.0
 
