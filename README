@@ -1,54 +1,56 @@
-This README file contains information on building the meta-up-board
-BSP layer, and booting the images contained in the /binary directory.
-Please see the corresponding sections below for details.
+This README file contains information on building the meta-up-board BSP
+layer.  Please see the corresponding sections below for details.
 
 For more information on the UP board see:
 http://up-board.org
 
-UP Board is based on the Intel(R) Atom(TM) x5-Z83xx SoC (formerly Cherry Trail).
-It includes 1/2/4GB RAM, 16/32/64GB eMMC flash, 6 USB2.0 ports, 1 USB 3.0 OTG
-port, 1 Gigabit Ethernet, HDMI and DSI/eDP Graphics ports, RTC and a 40-pin I/O
-header.  The form-factor for the board is based on the Raspberry Pi 2, and can
-be used with many of the add-on HAT boards designed for the Raspberry Pi 2.
-
-
-Dependencies
-============
-
-This layer depends on:
-
-  URI: git://git.openembedded.org/bitbake
-  branch: master
-
-  URI: git://git.openembedded.org/openembedded-core
-  layers: meta
-  branch: krogoth
-
-  URI: git://git.yoctoproject.org/meta-intel
-  layers: meta-intel
-  branch: krogoth
-
-
-Patches
-=======
-
-Please submit any patches against this BSP to the maintainer:
-
-Maintainer: Dan O'Donovan <dan@emutex.com>
+UP Board is based on the Intel(R) Atom(TM) x5-Z83xx SoC (formerly Cherry
+Trail).  It includes 1/2/4GB RAM, 16/32/64GB eMMC flash, 6 USB2.0 ports, 1
+USB 3.0 OTG port, 1 Gigabit Ethernet, HDMI and DSI/eDP Graphics ports,
+CSI, RTC and a 40-pin I/O header.  The form-factor for the board is based
+on the Raspberry Pi 2, and it can be used with many of the add-on HAT boards
+designed for the Raspberry Pi 2.
 
 
 Table of Contents
 =================
 
-  I. Building the meta-up-board BSP layer
- II. Booting the live USB image
-III. Device Notes
+  I. Prerequisites
+ II. Building the meta-up-board BSP layer
+III. Booting the live USB image
+ IV. Device Notes
+  V. Additional Resources
 
 
-I. Building the meta-up-board BSP layer
+I. Prerequisites
+================
+
+Supported Yocto versions
+------------------------
+* Yocto 2.1 (Krogoth)
+
+Supported hardware versions
+---------------------------
+* UP Board V0.1 (EVT1)
+* UP Board V0.2 (EVT2)
+* UP Board V0.3 (EVT3)
+* UP Board V0.4 (DVT/production)
+
+
+II. Building the meta-up-board BSP layer
 ========================================
 
-You should be able to build a up-board image as such:
+Download the latest Krogoth release and enter the poky directory:
+  git clone -b krogoth-15.0.0 git://git.yoctoproject.org/poky.git
+  cd poky
+
+Download the latest Intel BSP layer version for Krogoth:
+  git clone -b krogoth git://git.yoctoproject.org/meta-intel.git
+
+Download this UP Board BSP layer for Krogoth:
+  git clone -b krogoth https://github.com/emutex/meta-up-board
+
+From the poky directory, you can build an up-board image as such:
 
   $ TEMPLATECONF=meta-up-board/conf source oe-init-build-env
   $ bitbake core-image-sato
@@ -70,9 +72,9 @@ Under Linux, insert a USB flash drive.  Assuming the USB flash drive
 takes device /dev/sdf, use dd to copy the live image to it.  For
 example:
 
-# dd if=core-image-sato-up-board.hddimg of=/dev/sdf
-# sync
-# eject /dev/sdf
+  # dd if=core-image-sato-up-board.hddimg of=/dev/sdf
+  # sync
+  # eject /dev/sdf
 
 This should give you a bootable USB flash device.  Insert the device
 into a bootable USB socket on the target, and power on.  At the
@@ -95,11 +97,11 @@ If you find you're getting corrupt images on the USB (it doesn't show
 the syslinux boot: prompt, or the boot: prompt contains strange
 characters), try doing this first:
 
-# dd if=/dev/zero of=/dev/sdf bs=1M count=512
+  # dd if=/dev/zero of=/dev/sdf bs=1M count=512
 
 
-III. Device Notes
-================================
+IV. Device Notes
+=================
 
 a. GPIO pin mapping (40-pin HAT connector)
 ------------------------------------------
@@ -202,10 +204,13 @@ signals are not exposed, so software flow-control may be needed for
 rates above 115200.  A console UART is also available but is not fully
 supported at this time.
 
-IV. Additional Resources
+V. Additional Resources
 =======================
 In addition to this README, please see the following URLs for details
 and additional documentation:
 
 http://up-board.org/
-http://up-community.org/
+https://up-community.org/
+
+Please submit any patches against this BSP to the maintainer:
+Maintainer: Dan O'Donovan <dan@emutex.com>
