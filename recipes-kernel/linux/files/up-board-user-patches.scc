@@ -25,3 +25,16 @@ patch 0025-pinctrl-cherryview-prevent-concurrent-access-to-GPIO.patch
 patch 0026-x86-up-prevent-concurrent-access-to-CPLD-config.patch
 patch 0027-iio-adc-ti-adc081c-add-acpi-match-ID.patch
 patch 0028-x86-up-support-ACPI-device-registration-for-ADC.patch
+patch hdmiaudio/0001-drm-i915-remove-intel_hdmi-variable-declaration.patch
+patch hdmiaudio/0002-drm-i915-Add-headers-for-non-HDAudio-HDMI-interface.patch
+patch hdmiaudio/0003-drm-i915-changes-for-non-HDAudio-HDMI-interface.patch
+patch hdmiaudio/0004-drm-i915-power-related-changes-non-HDAudio-HDMI-inte.patch
+patch hdmiaudio/0005-drm-i915-Add-API-code-for-non-HDAudio-HDMI-interface.patch
+patch hdmiaudio/0006-drm-i915-enable-non-HDAudio-HDMI-interface-Makefile.patch
+patch hdmiaudio/0007-ALSA-Intel-Atom-add-Atom-non-HDAudio-HDMI-interface.patch
+patch hdmiaudio/0008-add-dependency-on-PM_RUNTIME.patch
+patch hdmiaudio/0009-hdmi_audio-Improve-position-reporting.patch
+patch hdmiaudio/0010-hdmi_audio-Fixup-some-monitor.patch
+patch hdmiaudio/0011-hdmi_audio-Fix-mishandling-of-AUD_HDMI_STATUS_v2-reg.patch
+patch hdmiaudio/0012-Create-a-platform-device-for-hdmi-audio-driver-and-a.patch
+patch hdmiaudio/0013-drm-i915-fix-LPE-audio-issues-when-resolution-change.patch

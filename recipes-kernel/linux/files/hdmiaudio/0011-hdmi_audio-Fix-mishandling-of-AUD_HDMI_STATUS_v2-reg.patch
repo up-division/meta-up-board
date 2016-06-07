@@ -1,0 +1,32 @@
+From af07ecce96e564e5ddd3560ebbe12a89dbee2d94 Mon Sep 17 00:00:00 2001
+From: Toyo Abe <toyo.abe@gmail.com>
+Date: Thu, 3 Mar 2016 12:57:41 +0900
+Subject: [PATCH 11/12] hdmi_audio: Fix mishandling of AUD_HDMI_STATUS_v2
+ register.
+
+According to the datasheet, write one to clear these UNDERRUN flag bits.
+This fixes the following warning in dmesg.
+
+[15357.574902] had: Unable to clear UNDERRUN bits
+
+Signed-off-by: Toyo Abe <toyo.abe@gmail.com>
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/hdmi_audio/intel_mid_hdmi_audio.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/sound/hdmi_audio/intel_mid_hdmi_audio.c b/sound/hdmi_audio/intel_mid_hdmi_audio.c
+index 1667748..86db38e 100644
+--- a/sound/hdmi_audio/intel_mid_hdmi_audio.c
++++ b/sound/hdmi_audio/intel_mid_hdmi_audio.c
+@@ -1135,7 +1135,6 @@ static void had_clear_underrun_intr_v2(struct snd_intelhad *intelhaddata)
+ 		pr_debug("HDMI status =0x%x\n", hdmi_status);
+ 		if (hdmi_status & AUD_CONFIG_MASK_UNDERRUN) {
+ 			i++;
+-			hdmi_status &= ~AUD_CONFIG_MASK_UNDERRUN;
+ 			had_write_register(AUD_HDMI_STATUS_v2, hdmi_status);
+ 		} else
+ 			break;
+-- 
+2.8.0
+

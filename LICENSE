@@ -1,0 +1,17 @@
+Different parts of this layer have different licenses.
+
+recipes-kernel/linux/files/hdmiaudio/0001-drm-i915-remove-intel_hdmi-variable-declaration.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0002-drm-i915-Add-headers-for-non-HDAudio-HDMI-interface.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0003-drm-i915-changes-for-non-HDAudio-HDMI-interface.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0004-drm-i915-power-related-changes-non-HDAudio-HDMI-inte.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0005-drm-i915-Add-API-code-for-non-HDAudio-HDMI-interface.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0006-drm-i915-enable-non-HDAudio-HDMI-interface-Makefile.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0007-ALSA-Intel-Atom-add-Atom-non-HDAudio-HDMI-interface.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0008-add-dependency-on-PM_RUNTIME.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0009-hdmi_audio-Improve-position-reporting.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0010-hdmi_audio-Fixup-some-monitor.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0011-hdmi_audio-Fix-mishandling-of-AUD_HDMI_STATUS_v2-reg.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0012-Create-a-platform-device-for-hdmi-audio-driver-and-a.patch (GPLv2)
+recipes-kernel/linux/files/hdmiaudio/0013-drm-i915-fix-LPE-audio-issues-when-resolution-change.patch (GPLv2)
+
+Files not explicitly stated to have a license default to MIT.
