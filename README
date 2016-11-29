@@ -41,7 +41,7 @@ II. Building the meta-up-board BSP layer
 ========================================
 
 Download the latest Krogoth release and enter the poky directory:
-  git clone -b krogoth-15.0.0 git://git.yoctoproject.org/poky.git
+  git clone -b krogoth-15.0.2 git://git.yoctoproject.org/poky.git
   cd poky
 
 Download the latest Intel BSP layer version for Krogoth:
@@ -137,10 +137,10 @@ application code between the Raspberry Pi and UP platforms.
 | 5            | I2C SCL1 |  3         | I2C1 (/dev/i2c-1)    |
 | 6            | GND      |            |                      |
 | 7            | GPIO(4)  |  4         |                      |
-| 8            | UART TX1 | 14         | UART1 (/dev/ttyS1)   |
+| 8            | UART TX  | 14         | UART1 (/dev/ttyS1)   |
 | 9            | GND      |            |                      |
-| 10           | UART RX1 | 15         | UART1 (/dev/ttyS1)   |
-| 11           | GPIO(17) | 17         |                      |
+| 10           | UART RX  | 15         | UART1 (/dev/ttyS1)   |
+| 11           | UART RTS | 17         | UART1 (/dev/ttyS1)   |
 | 12           | I2S CLK  | 18         | I2S (PCM Audio)      |
 | 13           | GPIO(27) | 27         |                      |
 | 14           | GND      |            |                      |
@@ -165,7 +165,7 @@ application code between the Raspberry Pi and UP platforms.
 | 33           | PWM1     | 13         | PWM Chip 1 Channel 0 |
 | 34           | GND      |            |                      |
 | 35           | I2S FRM  | 19         | I2S (PCM Audio)      |
-| 36           | GPIO(16) | 16         |                      |
+| 36           | UART CTS | 16         | UART1 (/dev/ttyS1)   |
 | 37           | GPIO(26) | 26         |                      |
 | 38           | I2S DIN  | 20         | I2S (PCM Audio)      |
 | 39           | GND      |            |                      |
@@ -200,9 +200,7 @@ e. UART
 -------
 A high-speed UART is available, supporting baud rates up to
 support baud rates between 300 and 3686400.  Hardware flow-control
-signals are not exposed, so software flow-control may be needed for
-rates above 115200.  A console UART is also available but is not fully
-supported at this time.
+signals are available on pins 11/36 (RTS/CTS).
 
 V. Additional Resources
 =======================

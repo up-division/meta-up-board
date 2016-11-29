@@ -1,4 +1,4 @@
-From af07ecce96e564e5ddd3560ebbe12a89dbee2d94 Mon Sep 17 00:00:00 2001
+From fbad36dca91688d71593b61bd170cf4c39eb24fb Mon Sep 17 00:00:00 2001
 From: Toyo Abe <toyo.abe@gmail.com>
 Date: Thu, 3 Mar 2016 12:57:41 +0900
 Subject: [PATCH 11/12] hdmi_audio: Fix mishandling of AUD_HDMI_STATUS_v2
@@ -28,5 +28,5 @@ index 1667748..86db38e 100644
  		} else
  			break;
 -- 
-2.8.0
+1.9.1
 

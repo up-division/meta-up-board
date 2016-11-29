@@ -1,0 +1,34 @@
+From 8d8bb3c777ac954124f1fc797c14cfa7bdda0878 Mon Sep 17 00:00:00 2001
+From: Javier Arteaga <javier@emutex.com>
+Date: Fri, 10 Jun 2016 11:54:02 +0100
+Subject: [PATCH] x86/up: default up_board.spidev1 to false
+
+The patch:
+"x86/up: register spidev device on UP Board SPI 2-1"
+added a gpio-based SPI chip-select to the external I/O pin header.
+
+However, this means the GPIO was reserved by the up_board module by default,
+which is not the case for other function pins. This caused non-obvious issues
+for GPIO users.
+
+Signed-off-by: Javier Arteaga <javier@emutex.com>
+---
+ drivers/platform/x86/up_board.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/platform/x86/up_board.c b/drivers/platform/x86/up_board.c
+index 14e1a34..6cee4b0 100644
+--- a/drivers/platform/x86/up_board.c
++++ b/drivers/platform/x86/up_board.c
+@@ -44,7 +44,7 @@ static bool spidev0 = true;
+ module_param(spidev0, bool, S_IRUGO);
+ MODULE_PARM_DESC(spidev0, "register a spidev device on SPI bus 2-0");
+ 
+-static bool spidev1 = true;
++static bool spidev1 = false;
+ module_param(spidev1, bool, S_IRUGO);
+ MODULE_PARM_DESC(spidev1, "register a spidev device on SPI bus 2-1");
+ 
+-- 
+2.8.3
+

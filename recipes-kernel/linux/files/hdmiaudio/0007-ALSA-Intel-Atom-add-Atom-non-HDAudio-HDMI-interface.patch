@@ -1,4 +1,4 @@
-From 7b8ccaedea44b2a7151121fad14208c37f468538 Mon Sep 17 00:00:00 2001
+From 8213760904b873b68e55f5c707921704d0ff4c8f Mon Sep 17 00:00:00 2001
 From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
 Date: Thu, 3 Mar 2016 11:09:26 -0600
 Subject: [PATCH 07/12] ALSA: Intel: Atom: add Atom non-HDAudio HDMI interface
@@ -3389,5 +3389,5 @@ index 0000000..acc407d
 +	return retval;
 +}
 -- 
-2.8.0
+1.9.1
 

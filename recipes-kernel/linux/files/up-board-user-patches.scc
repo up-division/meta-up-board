@@ -1,7 +1,6 @@
 patch 0001-platform-x86-add-platform-drivers-for-UP-Board.patch
 patch 0002-x86-up-enable-I2C-GPIO-expanders-on-UP-Board-v0.2.patch
 patch 0003-x86-up-create-pinctrl-driver-for-UP-Board.patch
-patch 0004-pwm-lpss-fix-base_unit-calculation-for-PWM-frequency.patch
 patch 0005-i2c-designware-platdrv-use-fixed-bus-numbering-based.patch
 patch 0006-i2c-designware-platdrv-add-ACPI-method-query-to-get-.patch
 patch 0007-x86-up-register-spidev-device-by-default-on-UP-Board.patch
@@ -20,11 +19,10 @@ patch 0020-x86-up-adding-dmi-match-for-V0.3-board-version.patch
 patch 0021-x86-up-add-support-for-v0.4-UP-board-with-CPLD.patch
 patch 0022-x86-up-fix-datatypes-for-32-bit-CPLD-registers.patch
 patch 0023-x86-up-add-driver-for-the-UP-board-LEDs.patch
-patch 0024-pinctrl-cherryview-restore-padctrl1-reg-when-gpio-is.patch
-patch 0025-pinctrl-cherryview-prevent-concurrent-access-to-GPIO.patch
 patch 0026-x86-up-prevent-concurrent-access-to-CPLD-config.patch
 patch 0027-iio-adc-ti-adc081c-add-acpi-match-ID.patch
 patch 0028-x86-up-support-ACPI-device-registration-for-ADC.patch
+patch 0029-x86-up-default-up_board.spidev1-to-false.patch
 patch hdmiaudio/0001-drm-i915-remove-intel_hdmi-variable-declaration.patch
 patch hdmiaudio/0002-drm-i915-Add-headers-for-non-HDAudio-HDMI-interface.patch
 patch hdmiaudio/0003-drm-i915-changes-for-non-HDAudio-HDMI-interface.patch
@@ -37,4 +35,3 @@ patch hdmiaudio/0009-hdmi_audio-Improve-position-reporting.patch
 patch hdmiaudio/0010-hdmi_audio-Fixup-some-monitor.patch
 patch hdmiaudio/0011-hdmi_audio-Fix-mishandling-of-AUD_HDMI_STATUS_v2-reg.patch
 patch hdmiaudio/0012-Create-a-platform-device-for-hdmi-audio-driver-and-a.patch
-patch hdmiaudio/0013-drm-i915-fix-LPE-audio-issues-when-resolution-change.patch

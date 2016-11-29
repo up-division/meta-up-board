@@ -1,4 +1,4 @@
-From 6022e75aafb62235445ae1a1256332ebb35a5365 Mon Sep 17 00:00:00 2001
+From b172cffb536124dba41ff37793a67dc6f9a6a39c Mon Sep 17 00:00:00 2001
 From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
 Date: Thu, 3 Mar 2016 11:08:10 -0600
 Subject: [PATCH 05/12] drm/i915: Add API code for non-HDAudio HDMI interface
@@ -21,7 +21,7 @@ Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
 
 diff --git a/drivers/gpu/drm/i915/hdmi_audio_if.c b/drivers/gpu/drm/i915/hdmi_audio_if.c
 new file mode 100644
-index 0000000..2bc723b
+index 0000000..c7c5f8f
 --- /dev/null
 +++ b/drivers/gpu/drm/i915/hdmi_audio_if.c
 @@ -0,0 +1,425 @@
@@ -188,7 +188,7 @@ index 0000000..2bc723b
 +		return 0;
 +
 +	if (IS_HDMI_AUDIO_I915(reg))
-+		I915_WRITE((VLV_DISPLAY_BASE + reg), val);
++		I915_WRITE(_MMIO(VLV_DISPLAY_BASE + reg), val);
 +	else
 +		ret = -EINVAL;
 +
@@ -211,7 +211,7 @@ index 0000000..2bc723b
 +		return 0;
 +
 +	if (IS_HDMI_AUDIO_I915(reg))
-+		*val = I915_READ((VLV_DISPLAY_BASE + reg));
++		*val = I915_READ(_MMIO(VLV_DISPLAY_BASE + reg));
 +	else
 +		ret = -EINVAL;
 +
@@ -233,8 +233,8 @@ index 0000000..2bc723b
 +
 +	if (IS_HDMI_AUDIO_I915(reg)) {
 +		val_tmp = (val & mask) |
-+			(I915_READ((VLV_DISPLAY_BASE + reg)) & ~mask);
-+		I915_WRITE((VLV_DISPLAY_BASE + reg), val_tmp);
++			(I915_READ(_MMIO(VLV_DISPLAY_BASE + reg)) & ~mask);
++		I915_WRITE(_MMIO(VLV_DISPLAY_BASE + reg), val_tmp);
 +	} else {
 +		ret = -EINVAL;
 +	}
@@ -302,18 +302,18 @@ index 0000000..2bc723b
 +
 +	switch (set_element) {
 +	case HAD_SET_ENABLE_AUDIO:
-+		hdmi_reg = I915_READ((hdmi_priv->hdmi_reg));
++		hdmi_reg = I915_READ(_MMIO(hdmi_priv->hdmi_reg));
 +		if (hdmi_reg & PORT_ENABLE)
 +			hdmi_reg |= SDVO_AUDIO_ENABLE;
 +
-+		I915_WRITE((hdmi_priv->hdmi_reg), hdmi_reg);
-+		I915_READ((hdmi_priv->hdmi_reg));
++		I915_WRITE(_MMIO(hdmi_priv->hdmi_reg), hdmi_reg);
++		I915_READ(_MMIO(hdmi_priv->hdmi_reg));
 +		break;
 +	case HAD_SET_DISABLE_AUDIO:
-+		hdmi_reg = I915_READ((hdmi_priv->hdmi_reg)) &
++		hdmi_reg = I915_READ(_MMIO(hdmi_priv->hdmi_reg)) &
 +			~SDVO_AUDIO_ENABLE;
-+		I915_WRITE((hdmi_priv->hdmi_reg), hdmi_reg);
-+		I915_READ((hdmi_priv->hdmi_reg));
++		I915_WRITE(_MMIO(hdmi_priv->hdmi_reg), hdmi_reg);
++		I915_READ(_MMIO(hdmi_priv->hdmi_reg));
 +		break;
 +
 +	case HAD_SET_ENABLE_AUDIO_INT:
@@ -451,5 +451,5 @@ index 0000000..2bc723b
 +EXPORT_SYMBOL(mid_hdmi_audio_register);
 +#endif
 -- 
-2.8.0
+1.9.1
 

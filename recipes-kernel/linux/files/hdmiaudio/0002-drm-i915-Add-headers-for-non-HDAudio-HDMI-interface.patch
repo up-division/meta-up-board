@@ -1,4 +1,4 @@
-From 399b21cd093ce44a2d05a56ed2bc50f349bac71e Mon Sep 17 00:00:00 2001
+From 0dffccdf5025a92d38f18c1698e542a8bd2de903 Mon Sep 17 00:00:00 2001
 From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
 Date: Tue, 1 Mar 2016 16:25:04 -0600
 Subject: [PATCH 02/12] drm/i915: Add headers for non-HDAudio HDMI interface
@@ -16,10 +16,10 @@ Signed-off-by: David Henningsson <david.henningsson@canonical.com>
 Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
 ---
  drivers/gpu/drm/i915/hdmi_audio_if.h | 125 +++++++++++++++++++++++++++++++++++
- drivers/gpu/drm/i915/i915_drv.h      |  31 +++++++++
- drivers/gpu/drm/i915/i915_reg.h      |  32 +++++++--
+ drivers/gpu/drm/i915/i915_drv.h      |  32 +++++++++
+ drivers/gpu/drm/i915/i915_reg.h      |  22 ++++++
  drivers/gpu/drm/i915/intel_drv.h     |  13 ++++
- 4 files changed, 197 insertions(+), 4 deletions(-)
+ 4 files changed, 192 insertions(+)
  create mode 100644 drivers/gpu/drm/i915/hdmi_audio_if.h
 
 diff --git a/drivers/gpu/drm/i915/hdmi_audio_if.h b/drivers/gpu/drm/i915/hdmi_audio_if.h
@@ -154,18 +154,19 @@ index 0000000..165bba5
 +
 +#endif /* __HDMI_AUDIO_IF_H */
 diff --git a/drivers/gpu/drm/i915/i915_drv.h b/drivers/gpu/drm/i915/i915_drv.h
-index f4af19a..15c42a1 100644
+index bc3f2e6..7c2577d 100644
 --- a/drivers/gpu/drm/i915/i915_drv.h
 +++ b/drivers/gpu/drm/i915/i915_drv.h
-@@ -51,6 +51,7 @@
- #include <linux/kref.h>
- #include <linux/pm_qos.h>
- #include "intel_guc.h"
-+#include "hdmi_audio_if.h"
+@@ -61,6 +61,8 @@
+ #include "i915_gem_gtt.h"
+ #include "i915_gem_render_state.h"
  
++#include "hdmi_audio_if.h"
++
  /* General customization:
   */
-@@ -1170,6 +1171,18 @@ struct intel_gen6_power_mgmt {
+ 
+@@ -1165,6 +1167,18 @@ struct intel_gen6_power_mgmt {
  	struct mutex hw_lock;
  };
  
@@ -184,9 +185,9 @@ index f4af19a..15c42a1 100644
  /* defined intel_pm.c */
  extern spinlock_t mchdev_lock;
  
-@@ -1956,6 +1969,19 @@ struct drm_i915_private {
- 	/* perform PHY state sanity checks? */
- 	bool chv_phy_assert[2];
+@@ -1997,6 +2011,19 @@ struct drm_i915_private {
+ 
+ 	struct intel_encoder *dig_port_map[I915_MAX_PORTS];
  
 +	/* Added for HDMI Audio */
 +	had_event_call_back had_event_callbacks;
@@ -204,7 +205,7 @@ index f4af19a..15c42a1 100644
  	/*
  	 * NOTE: This is the dri1/ums dungeon, don't add stuff here. Your patch
  	 * will be rejected. Instead look for a better place.
-@@ -3444,6 +3470,11 @@ int intel_freq_opcode(struct drm_i915_private *dev_priv, int val);
+@@ -3634,6 +3661,11 @@ int intel_freq_opcode(struct drm_i915_private *dev_priv, int val);
  	} while (upper != old_upper && loop++ < 2);			\
  	(u64)upper << 32 | lower; })
  
@@ -217,16 +218,16 @@ index f4af19a..15c42a1 100644
  #define POSTING_READ16(reg)	(void)I915_READ16_NOTRACE(reg)
  
 diff --git a/drivers/gpu/drm/i915/i915_reg.h b/drivers/gpu/drm/i915/i915_reg.h
-index bc7b8fa..a36d315 100644
+index 3fcf7dd..d3e5935 100644
 --- a/drivers/gpu/drm/i915/i915_reg.h
 +++ b/drivers/gpu/drm/i915/i915_reg.h
-@@ -1993,7 +1993,25 @@ enum skl_disp_power_wells {
+@@ -2113,7 +2113,25 @@ enum skl_disp_power_wells {
  #define I915_WINVALID_INTERRUPT				(1<<1)
  #define I915_USER_INTERRUPT				(1<<1)
  #define I915_ASLE_INTERRUPT				(1<<0)
-+#define I915_LPE_AUDIO_HDMI_STATUS_A	(dev_priv->info.display_mmio_offset + 0x65064)
-+#define I915_LPE_AUDIO_HDMI_STATUS_B	(dev_priv->info.display_mmio_offset + 0x65864)
-+#define I915_LPE_AUDIO_HDMI_STATUS_C	(dev_priv->info.display_mmio_offset + 0x65964)
++#define I915_LPE_AUDIO_HDMI_STATUS_A	_MMIO(dev_priv->info.display_mmio_offset + 0x65064)
++#define I915_LPE_AUDIO_HDMI_STATUS_B	_MMIO(dev_priv->info.display_mmio_offset + 0x65864)
++#define I915_LPE_AUDIO_HDMI_STATUS_C	_MMIO(dev_priv->info.display_mmio_offset + 0x65964)
 +#define I915_HDMI_AUDIO_UNDERRUN			(1UL<<31)
 +#define I915_HDMI_AUDIO_BUFFER_DONE			(1UL<<29)
  #define I915_BSD_USER_INTERRUPT				(1<<25)
@@ -244,41 +245,31 @@ index bc7b8fa..a36d315 100644
 +	(pipe ? (HDMI_LPE_AUDIO_PIPE_BC_OFFSET(pipe)) : \
 +	I915_LPE_AUDIO_HDMI_STATUS_A)
  
- #define GEN6_BSD_RNCID			0x12198
+ #define GEN6_BSD_RNCID			_MMIO(0x12198)
  
-@@ -3296,8 +3314,13 @@ enum skl_disp_power_wells {
- 
- /* SDVO and HDMI port control.
-  * The same register may be used for SDVO or HDMI */
--#define GEN3_SDVOB	0x61140
--#define GEN3_SDVOC	0x61160
-+#define _GEN3_SDVOB	0x61140
-+#define _GEN3_SDVOC	0x61160
-+#define GEN3_SDVOB	(_GEN3_SDVOB)
-+#define GEN3_SDVOC	(_GEN3_SDVOC)
+@@ -3433,6 +3451,9 @@ enum skl_disp_power_wells {
+ #define _GEN3_SDVOC	0x61160
+ #define GEN3_SDVOB	_MMIO(_GEN3_SDVOB)
+ #define GEN3_SDVOC	_MMIO(_GEN3_SDVOC)
 +#define HDMIB	(dev_priv->info.display_mmio_offset + 0x61140)
 +#define HDMIC	(dev_priv->info.display_mmio_offset + 0x61160)
 +#define HDMID	(dev_priv->info.display_mmio_offset + 0x6116C)
  #define GEN4_HDMIB	GEN3_SDVOB
  #define GEN4_HDMIC	GEN3_SDVOC
- #define VLV_HDMIB	(VLV_DISPLAY_BASE + GEN4_HDMIB)
-@@ -3305,8 +3328,9 @@ enum skl_disp_power_wells {
- #define CHV_HDMID	(VLV_DISPLAY_BASE + 0x6116C)
- #define PCH_SDVOB	0xe1140
+ #define VLV_HDMIB	_MMIO(VLV_DISPLAY_BASE + 0x61140)
+@@ -3442,6 +3463,7 @@ enum skl_disp_power_wells {
  #define PCH_HDMIB	PCH_SDVOB
--#define PCH_HDMIC	0xe1150
--#define PCH_HDMID	0xe1160
-+#define PCH_HDMIC	(0xe1150)
-+#define PCH_HDMID	(0xe1160)
+ #define PCH_HDMIC	_MMIO(0xe1150)
+ #define PCH_HDMID	_MMIO(0xe1160)
 +#define PORT_ENABLE	(1 << 31)
  
- #define PORT_DFT_I9XX				0x61150
+ #define PORT_DFT_I9XX				_MMIO(0x61150)
  #define   DC_BALANCE_RESET			(1 << 25)
 diff --git a/drivers/gpu/drm/i915/intel_drv.h b/drivers/gpu/drm/i915/intel_drv.h
-index 0d00f07..fd7ecc9 100644
+index f7f0f01..2820ef2 100644
 --- a/drivers/gpu/drm/i915/intel_drv.h
 +++ b/drivers/gpu/drm/i915/intel_drv.h
-@@ -676,6 +676,14 @@ struct cxsr_latency {
+@@ -751,6 +751,14 @@ struct cxsr_latency {
  #define to_intel_plane_state(x) container_of(x, struct intel_plane_state, base)
  #define intel_fb_obj(x) (x ? to_intel_framebuffer(x)->obj : NULL)
  
@@ -291,9 +282,9 @@ index 0d00f07..fd7ecc9 100644
 +#define   HDMI_EDID_RETRY_COUNT			3
 +
  struct intel_hdmi {
- 	u32 hdmi_reg;
+ 	i915_reg_t hdmi_reg;
  	int ddc_bus;
-@@ -687,6 +695,9 @@ struct intel_hdmi {
+@@ -766,6 +774,9 @@ struct intel_hdmi {
  	bool rgb_quant_range_selectable;
  	enum hdmi_picture_aspect aspect_ratio;
  	struct intel_connector *attached_connector;
@@ -303,15 +294,15 @@ index 0d00f07..fd7ecc9 100644
  	void (*write_infoframe)(struct drm_encoder *encoder,
  				enum hdmi_infoframe_type type,
  				const void *frame, ssize_t len);
-@@ -1106,6 +1117,8 @@ intel_rotation_90_or_270(unsigned int rotation)
+@@ -1196,6 +1207,8 @@ intel_rotation_90_or_270(unsigned int rotation)
  
  void intel_create_rotation_property(struct drm_device *dev,
  					struct intel_plane *plane);
 +void chv_set_lpe_audio_reg_pipe(struct drm_device *dev,
 +				int encoder_type, enum port port);
  
- /* shared dpll functions */
- struct intel_shared_dpll *intel_crtc_to_shared_dpll(struct intel_crtc *crtc);
+ void assert_pch_transcoder_disabled(struct drm_i915_private *dev_priv,
+ 				    enum pipe pipe);
 -- 
-2.8.0
+1.9.1
 

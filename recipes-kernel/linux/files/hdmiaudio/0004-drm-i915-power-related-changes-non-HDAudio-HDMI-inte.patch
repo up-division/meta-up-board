@@ -1,4 +1,4 @@
-From b6a9b9e1fe2670c3c98e47f521b4247c4fc43a15 Mon Sep 17 00:00:00 2001
+From bea9d15e00603196e4d138af691327bbf6a86af0 Mon Sep 17 00:00:00 2001
 From: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
 Date: Tue, 1 Mar 2016 16:25:04 -0600
 Subject: [PATCH 04/12] drm/i915: power-related changes non-HDAudio HDMI
@@ -503,7 +503,7 @@ index 0000000..511311c
 +
 +#endif /*CONFIG_PM_RUNTIME*/
 diff --git a/drivers/gpu/drm/i915/intel_pm.c b/drivers/gpu/drm/i915/intel_pm.c
-index f091ad1..8c63215 100644
+index 2863b92..883b13c 100644
 --- a/drivers/gpu/drm/i915/intel_pm.c
 +++ b/drivers/gpu/drm/i915/intel_pm.c
 @@ -31,6 +31,17 @@
@@ -522,9 +522,9 @@ index f091ad1..8c63215 100644
 +#endif
 +
  /**
-  * RC6 is a special power stage which allows the GPU to enter an very
-  * low-voltage mode when idle, using down to 0V while at this stage.  This
-@@ -7040,6 +7051,7 @@ void intel_suspend_hw(struct drm_device *dev)
+  * DOC: RC6
+  *
+@@ -7264,6 +7275,7 @@ void intel_init_clock_gating_hooks(struct drm_i915_private *dev_priv)
  void intel_init_pm(struct drm_device *dev)
  {
  	struct drm_i915_private *dev_priv = dev->dev_private;
@@ -532,9 +532,9 @@ index f091ad1..8c63215 100644
  
  	intel_fbc_init(dev_priv);
  
-@@ -7332,3 +7344,44 @@ void intel_pm_setup(struct drm_device *dev)
- 
- 	dev_priv->pm.suspended = false;
+@@ -7496,3 +7508,44 @@ void intel_pm_setup(struct drm_device *dev)
+ 	atomic_set(&dev_priv->pm.wakeref_count, 0);
+ 	atomic_set(&dev_priv->pm.atomic_seq, 0);
  }
 +
 +bool ospm_power_is_hw_on(int hw_islands)
@@ -578,5 +578,5 @@ index f091ad1..8c63215 100644
 +}
 +EXPORT_SYMBOL(ospm_power_using_hw_end);
 -- 
-2.8.0
+1.9.1
 

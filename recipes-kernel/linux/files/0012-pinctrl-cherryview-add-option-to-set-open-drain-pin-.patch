@@ -1,8 +1,7 @@
-From 9e3533d318c7439078cd5f921f585f2f20413cee Mon Sep 17 00:00:00 2001
+From a45c3d971bee51f059ac0430d50c213343c88f58 Mon Sep 17 00:00:00 2001
 From: Dan O'Donovan <dan@emutex.com>
 Date: Fri, 29 Jan 2016 14:02:01 +0000
-Subject: [PATCH 12/23] pinctrl: cherryview: add option to set open-drain pin
- config
+Subject: [PATCH] pinctrl: cherryview: add option to set open-drain pin config
 
 On some CHV platforms, we need an option to configure the
 open-drain setting for these pins.  This adds support for the
@@ -15,10 +14,10 @@ Signed-off-by: Dan O'Donovan <dan@emutex.com>
  1 file changed, 33 insertions(+)
 
 diff --git a/drivers/pinctrl/intel/pinctrl-cherryview.c b/drivers/pinctrl/intel/pinctrl-cherryview.c
-index 84936ba..c086c1a 100644
+index 4e37759..e069f21 100644
 --- a/drivers/pinctrl/intel/pinctrl-cherryview.c
 +++ b/drivers/pinctrl/intel/pinctrl-cherryview.c
-@@ -1101,6 +1101,27 @@ static int chv_config_set_pull(struct chv_pinctrl *pctrl, unsigned pin,
+@@ -1110,6 +1110,27 @@ static int chv_config_set_pull(struct chv_pinctrl *pctrl, unsigned pin,
  	return 0;
  }
  
@@ -29,7 +28,7 @@ index 84936ba..c086c1a 100644
 +	unsigned long flags;
 +	u32 ctrl1;
 +
-+	raw_spin_lock_irqsave(&pctrl->lock, flags);
++	raw_spin_lock_irqsave(&chv_lock, flags);
 +	ctrl1 = readl(reg);
 +
 +	if (enable)
@@ -38,7 +37,7 @@ index 84936ba..c086c1a 100644
 +		ctrl1 &= ~CHV_PADCTRL1_ODEN;
 +
 +	chv_writel(ctrl1, reg);
-+	raw_spin_unlock_irqrestore(&pctrl->lock, flags);
++	raw_spin_unlock_irqrestore(&chv_lock, flags);
 +
 +	return 0;
 +}
@@ -46,7 +45,7 @@ index 84936ba..c086c1a 100644
  static int chv_config_set(struct pinctrl_dev *pctldev, unsigned pin,
  			  unsigned long *configs, unsigned nconfigs)
  {
-@@ -1125,6 +1146,18 @@ static int chv_config_set(struct pinctrl_dev *pctldev, unsigned pin,
+@@ -1134,6 +1155,18 @@ static int chv_config_set(struct pinctrl_dev *pctldev, unsigned pin,
  				return ret;
  			break;
  
@@ -66,5 +65,5 @@ index 84936ba..c086c1a 100644
  			return -ENOTSUPP;
  		}
 -- 
-2.8.0
+1.9.1
 
