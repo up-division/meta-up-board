@@ -1,0 +1,57 @@
+From 655311fe038a81bc54d4da2b27830677c29e57e9 Mon Sep 17 00:00:00 2001
+From: Adrian Hunter <adrian.hunter@intel.com>
+Date: Tue, 22 Nov 2016 11:54:05 +0200
+Subject: [PATCH] mmc: sdhci: Fix recovery from tuning timeout
+
+Clearing the tuning bits should reset the tuning circuit. However there is
+more to do. Reset the command and data lines for good measure, and then
+for eMMC ensure the card is not still trying to process a tuning command by
+sending a stop command.
+
+Note the JEDEC eMMC specification says the stop command (CMD12) can be used
+to stop a tuning command (CMD21) whereas the SD specification is silent on
+the subject with respect to the SD tuning command (CMD19). Considering that
+CMD12 is not a valid SDIO command, the stop command is sent only when the
+tuning command is CMD21 i.e. for eMMC. That addresses cases seen so far
+which have been on eMMC.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 64a4289..7277dfd 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2040,7 +2040,27 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 			ctrl &= ~SDHCI_CTRL_EXEC_TUNING;
+ 			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 
++			sdhci_do_reset(host, SDHCI_RESET_CMD);
++			sdhci_do_reset(host, SDHCI_RESET_DATA);
++
+ 			err = -EIO;
++
++			if (cmd.opcode != MMC_SEND_TUNING_BLOCK_HS200)
++				goto out;
++
++			sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
++			sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
++
++			spin_unlock_irqrestore(&host->lock, flags);
++
++			memset(&cmd, 0, sizeof(cmd));
++			cmd.opcode = MMC_STOP_TRANSMISSION;
++			cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
++			cmd.busy_timeout = 50;
++			mmc_wait_for_cmd(mmc, &cmd, 0);
++
++			spin_lock_irqsave(&host->lock, flags);
++
+ 			goto out;
+ 		}
+ 
+-- 
+2.7.4
+

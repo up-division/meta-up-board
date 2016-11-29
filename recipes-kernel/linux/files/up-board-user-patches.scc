@@ -23,6 +23,7 @@ patch 0026-x86-up-prevent-concurrent-access-to-CPLD-config.patch
 patch 0027-iio-adc-ti-adc081c-add-acpi-match-ID.patch
 patch 0028-x86-up-support-ACPI-device-registration-for-ADC.patch
 patch 0029-x86-up-default-up_board.spidev1-to-false.patch
+patch 0030-mmc-sdhci-Fix-recovery-from-tuning-timeout.patch
 patch hdmiaudio/0001-drm-i915-remove-intel_hdmi-variable-declaration.patch
 patch hdmiaudio/0002-drm-i915-Add-headers-for-non-HDAudio-HDMI-interface.patch
 patch hdmiaudio/0003-drm-i915-changes-for-non-HDAudio-HDMI-interface.patch
