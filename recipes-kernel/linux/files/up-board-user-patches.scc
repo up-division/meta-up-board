@@ -36,3 +36,19 @@ patch hdmiaudio/0009-hdmi_audio-Improve-position-reporting.patch
 patch hdmiaudio/0010-hdmi_audio-Fixup-some-monitor.patch
 patch hdmiaudio/0011-hdmi_audio-Fix-mishandling-of-AUD_HDMI_STATUS_v2-reg.patch
 patch hdmiaudio/0012-Create-a-platform-device-for-hdmi-audio-driver-and-a.patch
+ssdt_overlays/0001-efi-Merge-boolean-flag-arguments.patch
+ssdt_overlays/0002-spi-Uninline-spi_unregister_device.patch
+ssdt_overlays/0003-spi-Mark-instantiated-device-nodes-with-OF_POPULATE.patch
+ssdt_overlays/0004-ACPI-spi-attach-GPIO-IRQ-from-ACPI-description-to-SP.patch
+ssdt_overlays/0005-Documentation-acpi-add-SSDT-overlays-documentation.patch
+ssdt_overlays/0006-acpi-fix-enumeration-visited-flags-for-bus-rescans.patch
+ssdt_overlays/0007-acpi-add-support-for-ACPI-reconfiguration-notifiers.patch
+ssdt_overlays/0008-i2c-add-support-for-ACPI-reconfigure-notifications.patch
+ssdt_overlays/0009-spi-add-support-for-ACPI-reconfigure-notifications.patch
+ssdt_overlays/0010-efi-load-SSTDs-from-EFI-variables.patch
+ssdt_overlays/0011-acpi-Export-acpi_of_modalias-equiv-of-of_modalias_no.patch
+ssdt_overlays/0012-acpi-i2c-Initialize-info.type-from-of_compatible.patch
+ssdt_overlays/0013-acpi-spi-Initialize-modalias-from-of_compatible.patch
+ssdt_overlays/0014-spi-spidev-Add-ACPI-probing-support.patch
+ssdt_overlays/0015-ACPI-OSL-Clean-up-initrd-table-override-code.patch
+ssdt_overlays/0016-ACPI-OSL-Add-support-to-install-tables-via-initrd.patch
