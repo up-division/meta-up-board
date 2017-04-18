@@ -52,3 +52,10 @@ ssdt_overlays/0013-acpi-spi-Initialize-modalias-from-of_compatible.patch
 ssdt_overlays/0014-spi-spidev-Add-ACPI-probing-support.patch
 ssdt_overlays/0015-ACPI-OSL-Clean-up-initrd-table-override-code.patch
 ssdt_overlays/0016-ACPI-OSL-Add-support-to-install-tables-via-initrd.patch
+patch kexec_i2c/0001-x86-platform-iosf_mbi-Remove-duplicate-definitions.patch
+patch kexec_i2c/0002-device-core-add-BUS_NOTIFY_DRIVER_NOT_BOUND-notifica.patch
+patch kexec_i2c/0003-Revert-ACPI-LPSS-allow-to-use-specific-PM-domain-dur.patch
+patch kexec_i2c/0004-ACPI-LPSS-allow-to-use-specific-PM-domain-during-pro.patch
+patch kexec_i2c/0005-ACPI-LPSS-do-delay-for-all-LPSS-devices-when-D3-D0.patch
+patch kexec_i2c/0006-ACPI-LPSS-power-on-when-probe-and-otherwise-when-rem.patch
+
