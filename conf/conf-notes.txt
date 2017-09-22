@@ -1,0 +1,12 @@
+Building an image for UP family....
+
+Common targets are:
+    core-image-minimal
+    core-image-sato
+    meta-toolchain
+    meta-ide-support
+
+UP specific targets:
+    upboard-image-sato
+
+You can also run generated qemu images with a command like 'runqemu qemux86'
