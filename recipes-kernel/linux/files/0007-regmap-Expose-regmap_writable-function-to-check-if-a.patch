@@ -1,7 +1,7 @@
-From e1b4d6e55292a9e3e07b7e7abbf2391dd655806e Mon Sep 17 00:00:00 2001
+From b3bb9e5a3d12d702cac876879f4237886b55ed13 Mon Sep 17 00:00:00 2001
 From: Nicola Lunghi <nicola.lunghi@emutex.com>
 Date: Thu, 27 Jul 2017 17:55:34 +0100
-Subject: [PATCH 07/10] regmap: Expose regmap_writable function to check if a
+Subject: [PATCH 07/19] regmap: Expose regmap_writable function to check if a
  register is writable
 
 Signed-off-by: Nicola Lunghi <nicola.lunghi@emutex.com>
@@ -29,7 +29,7 @@ index 2a4435d..b294022 100644
  		  unsigned int val);
  
 diff --git a/drivers/base/regmap/regmap.c b/drivers/base/regmap/regmap.c
-index ae63bb0..4bfcdbf 100644
+index 8fd0802..ed09b77 100644
 --- a/drivers/base/regmap/regmap.c
 +++ b/drivers/base/regmap/regmap.c
 @@ -92,6 +92,7 @@ bool regmap_writeable(struct regmap *map, unsigned int reg)
@@ -73,10 +73,10 @@ index ae63bb0..4bfcdbf 100644
  static bool regmap_volatile_range(struct regmap *map, unsigned int reg,
  	size_t num)
 diff --git a/include/linux/regmap.h b/include/linux/regmap.h
-index f667313..b8aea04 100644
+index 0c5e822..708a952 100644
 --- a/include/linux/regmap.h
 +++ b/include/linux/regmap.h
-@@ -784,6 +784,12 @@ int regcache_drop_region(struct regmap *map, unsigned int min,
+@@ -871,6 +871,12 @@ void regcache_mark_dirty(struct regmap *map);
  bool regmap_check_range_table(struct regmap *map, unsigned int reg,
  			      const struct regmap_access_table *table);
  
@@ -90,5 +90,5 @@ index f667313..b8aea04 100644
  			  int num_regs);
  int regmap_parse_val(struct regmap *map, const void *buf,
 -- 
-1.9.1
+2.7.4
 

@@ -1,7 +1,7 @@
-From 3986de8157eef0c0462c06d60656e011c3efaf20 Mon Sep 17 00:00:00 2001
-From: Javier Arteaga <javier@emutex.com>
-Date: Mon, 3 Jul 2017 14:55:42 +0100
-Subject: [PATCH 06/10] pinctrl: allow multiple pin controllers for a GPIO
+From b7bf5492189bbc4885adee091ef234499d150b8a Mon Sep 17 00:00:00 2001
+From: Carlos Calderon <carlos@emutex.com>
+Date: Fri, 4 Jan 2019 10:58:24 +0000
+Subject: [PATCH 06/19] pinctrl: allow multiple pin controllers for a GPIO
 
 Add support for chaining pinctrl drivers controlling the same GPIO line.
 This allows for hardware configurations where multiple controllers must
@@ -15,47 +15,15 @@ there is a FPGA between the SoC and these physical pins. In its default
 configuration, this FPGA implements a pin controller for FPGA-connected
 pins. This setup requires coordination between the SoC GPIO controller
 and the FPGA-based controller, hence this patch.
-
-Suggested-by: Dan O'Donovan <dan@emutex.com>
-Signed-off-by: Javier Arteaga <javier@emutex.com>
 ---
- Documentation/pinctrl.txt |  10 +-
- drivers/pinctrl/core.c    | 266 +++++++++++++++++++++++-----------------------
- 2 files changed, 139 insertions(+), 137 deletions(-)
+ drivers/pinctrl/core.c | 268 +++++++++++++++++++++++++------------------------
+ 1 file changed, 137 insertions(+), 131 deletions(-)
 
-diff --git a/Documentation/pinctrl.txt b/Documentation/pinctrl.txt
-index 0d3b9ce0..c128599 100644
---- a/Documentation/pinctrl.txt
-+++ b/Documentation/pinctrl.txt
-@@ -288,7 +288,7 @@ situations a cross-subsystem mapping between pins and GPIOs is needed.
- 
- Since the pin controller subsystem has its pinspace local to the pin controller
- we need a mapping so that the pin control subsystem can figure out which pin
--controller handles control of a certain GPIO pin. Since a single pin controller
-+controllers handle control of a certain GPIO pin. Since a single pin controller
- may be muxing several GPIO ranges (typically SoCs that have one set of pins,
- but internally several GPIO silicon blocks, each modelled as a struct
- gpio_chip) any number of GPIO ranges can be added to a pin controller instance
-@@ -365,10 +365,10 @@ group "foo":
- pinctrl_get_group_pins(pctl, "foo", &gpio_range.pins, &gpio_range.npins);
- 
- When GPIO-specific functions in the pin control subsystem are called, these
--ranges will be used to look up the appropriate pin controller by inspecting
--and matching the pin to the pin ranges across all controllers. When a
--pin controller handling the matching range is found, GPIO-specific functions
--will be called on that specific pin controller.
-+ranges will be used to look up the appropriate pin controllers by inspecting
-+and matching the pin to the pin ranges across all controllers. For each pin
-+controller handling the matching range, GPIO-specific functions will be called
-+on that specific pin controller.
- 
- For all functionalities dealing with pin biasing, pin muxing etc, the pin
- controller subsystem will look up the corresponding pin number from the passed
 diff --git a/drivers/pinctrl/core.c b/drivers/pinctrl/core.c
-index fb38e20..d3a0f8b 100644
+index c555173..f1c46d2 100644
 --- a/drivers/pinctrl/core.c
 +++ b/drivers/pinctrl/core.c
-@@ -291,8 +291,7 @@ static int pinctrl_register_pins(struct pinctrl_dev *pctldev,
+@@ -289,8 +289,7 @@ static int pinctrl_register_pins(struct pinctrl_dev *pctldev,
   * and pin list based GPIO ranges is managed correctly by this function.
   *
   * This function assumes the gpio is part of the specified GPIO range, use
@@ -65,7 +33,7 @@ index fb38e20..d3a0f8b 100644
   */
  static inline int gpio_to_pin(struct pinctrl_gpio_range *range,
  				unsigned int gpio)
-@@ -332,92 +331,6 @@ static inline int gpio_to_pin(struct pinctrl_gpio_range *range,
+@@ -330,92 +329,6 @@ pinctrl_match_gpio_range(struct pinctrl_dev *pctldev, unsigned gpio)
  }
  
  /**
@@ -141,7 +109,7 @@ index fb38e20..d3a0f8b 100644
 -		struct pinctrl_gpio_range *range;
 -
 -		range = pinctrl_match_gpio_range(pctldev, gpio);
--		if (range != NULL) {
+-		if (range) {
 -			*outdev = pctldev;
 -			*outrange = range;
 -			mutex_unlock(&pinctrldev_list_mutex);
@@ -158,7 +126,7 @@ index fb38e20..d3a0f8b 100644
   * pinctrl_add_gpio_range() - register a GPIO range for a controller
   * @pctldev: pin controller device to add the range to
   * @range: the GPIO range to add
-@@ -572,6 +485,57 @@ int pinctrl_get_group_selector(struct pinctrl_dev *pctldev,
+@@ -732,6 +645,57 @@ int pinctrl_get_group_selector(struct pinctrl_dev *pctldev,
  	return -EINVAL;
  }
  
@@ -216,7 +184,7 @@ index fb38e20..d3a0f8b 100644
  /**
   * pinctrl_request_gpio() - request a single pin to be used as GPIO
   * @gpio: the GPIO pin number from the GPIO subsystem number space
-@@ -580,28 +544,49 @@ int pinctrl_get_group_selector(struct pinctrl_dev *pctldev,
+@@ -740,28 +704,53 @@ int pinctrl_get_group_selector(struct pinctrl_dev *pctldev,
   * as part of their gpio_request() semantics, platforms and individual drivers
   * shall *NOT* request GPIO pins to be muxed in.
   */
@@ -227,16 +195,15 @@ index fb38e20..d3a0f8b 100644
 -	struct pinctrl_gpio_range *range;
 -	int ret;
 -	int pin;
--
++	struct gpio_desc *desc;
++	int dir;
++	int ret = -EPROBE_DEFER;
+ 
 -	ret = pinctrl_get_device_gpio_range(gpio, &pctldev, &range);
 -	if (ret) {
 -		if (pinctrl_ready_for_gpio_range(gpio))
 -			ret = 0;
 -		return ret;
-+	struct gpio_desc *desc;
-+	int dir;
-+	int ret = -EPROBE_DEFER;
-+
 +	desc = gpio_to_desc(gpio);
 +	if (!desc) {
 +		pr_err("gpio_to_desc(%d) returned NULL", gpio);
@@ -252,11 +219,15 @@ index fb38e20..d3a0f8b 100644
  
 -	ret = pinmux_request_gpio(pctldev, range, pin, gpio);
 +	/*
-+	 * FIXME UP-specific
-+	 * The two pin controllers (SoC, FPGA) share the GPIO line. Avoid
-+	 * getting into a situation where both are momentarily trying to drive
-+	 * the line (i.e. SoC as output and FPGA as HAT-to-SoC input) by walking
-+	 * the list in opposite directions for the input and output cases.
++	 * NOTE: this code suppose that if we have multiple pinctrl declared for
++	 * the same gpio those are configured in series.
++	 * In this situation we need to avoid the case were momentarely
++	 * multiple pinctrl try do drive the same line to a different logic value
++	 *
++	 * (1st pinctrl) 1>-----<0 (2nd pinctrl)
++	 *
++	 * To obtain that we need to mind the order in which the multiple pinctrl
++	 * are configured depending of the desired gpio direction (input, output)
 +	 */
 +	if (dir == 1) {
 +		list_for_each_entry(pctldev, &pinctrldev_list, node) {
@@ -281,7 +252,7 @@ index fb38e20..d3a0f8b 100644
  
  	return ret;
  }
-@@ -615,47 +600,64 @@ int pinctrl_request_gpio(unsigned gpio)
+@@ -775,47 +764,64 @@ EXPORT_SYMBOL_GPL(pinctrl_request_gpio);
   * as part of their gpio_free() semantics, platforms and individual drivers
   * shall *NOT* request GPIO pins to be muxed out.
   */
@@ -338,18 +309,18 @@ index fb38e20..d3a0f8b 100644
 -	mutex_lock(&pctldev->mutex);
 +	return ret;
 +}
-+
+ 
+-	/* Convert to the pin controllers number space */
+-	pin = gpio_to_pin(range, gpio);
+-	ret = pinmux_gpio_direction(pctldev, range, pin, input);
 +static int pinctrl_gpio_direction(unsigned int gpio, bool input)
 +{
 +	struct pinctrl_dev *pctldev;
 +	int ret = -EPROBE_DEFER;
  
--	/* Convert to the pin controllers number space */
--	pin = gpio_to_pin(range, gpio);
--	ret = pinmux_gpio_direction(pctldev, range, pin, input);
-+	mutex_lock(&pinctrldev_list_mutex);
- 
 -	mutex_unlock(&pctldev->mutex);
++	mutex_lock(&pinctrldev_list_mutex);
++
 +	/*
 +	 * FIXME UP-specific
 +	 * The two pin controllers (SoC, FPGA) share the GPIO line. Avoid
@@ -376,5 +347,5 @@ index fb38e20..d3a0f8b 100644
  	return ret;
  }
 -- 
-1.9.1
+2.7.4
 

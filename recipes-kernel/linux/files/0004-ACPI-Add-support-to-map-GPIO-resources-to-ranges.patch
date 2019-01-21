@@ -1,26 +1,20 @@
-From a82495d0ad4fdba88db316aed5a6ff4847eb6a0a Mon Sep 17 00:00:00 2001
-From: Dan O'Donovan <dan@emutex.com>
-Date: Tue, 28 Mar 2017 10:03:00 +0100
-Subject: [PATCH 04/10] ACPI: Add support to map GPIO resources to ranges
+From 62667ce22ed105eab24953d3085142a10e221a33 Mon Sep 17 00:00:00 2001
+From: Carlos Calderon <carlos@emutex.com>
+Date: Fri, 4 Jan 2019 10:41:55 +0000
+Subject: [PATCH 04/19] ACPI: Add support to map GPIO resources to ranges
 
 Add a function to gpiolib to facilitate registering a pin controller for
 a range of GPIO pins, but using ACPI resource references and without
 claiming the GPIO resource.
-
-Nicola Lunghi: fixed a typo in include/linux/acpi.h
-
-Signed-off-by: Dan O'Donovan <dan@emutex.com>
-Signed-off-by: Nicola Lunghi <nicola.lunghi@emutex.com>
 ---
- drivers/gpio/gpiolib-acpi.c | 89 ++++++++++++++++++++++++++++++++++++---------
- include/linux/acpi.h        | 14 +++++++
- 2 files changed, 86 insertions(+), 17 deletions(-)
+ drivers/gpio/gpiolib-acpi.c | 88 ++++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 71 insertions(+), 17 deletions(-)
 
 diff --git a/drivers/gpio/gpiolib-acpi.c b/drivers/gpio/gpiolib-acpi.c
-index 4dde2cf..3213ed3 100644
+index 33d4bd5..899c18d 100644
 --- a/drivers/gpio/gpiolib-acpi.c
 +++ b/drivers/gpio/gpiolib-acpi.c
-@@ -950,6 +950,32 @@ static int acpi_find_gpio_count(struct acpi_resource *ares, void *data)
+@@ -1182,6 +1182,32 @@ static int acpi_find_gpio_count(struct acpi_resource *ares, void *data)
  	return 1;
  }
  
@@ -53,19 +47,18 @@ index 4dde2cf..3213ed3 100644
  /**
   * acpi_gpio_count - return the number of GPIOs associated with a
   *		device / function or -ENOENT if no GPIO has been
-@@ -960,10 +986,8 @@ static int acpi_find_gpio_count(struct acpi_resource *ares, void *data)
+@@ -1192,10 +1218,7 @@ static int acpi_find_gpio_count(struct acpi_resource *ares, void *data)
  int acpi_gpio_count(struct device *dev, const char *con_id)
  {
  	struct acpi_device *adev = ACPI_COMPANION(dev);
 -	const union acpi_object *obj;
 -	const struct acpi_gpio_mapping *gm;
  	int count = -ENOENT;
--	int ret, err_type;
-+	int err_type;
+-	int ret;
  	char propname[32];
  	unsigned int i;
  
-@@ -980,20 +1004,7 @@ int acpi_gpio_count(struct device *dev, const char *con_id)
+@@ -1208,20 +1231,7 @@ int acpi_gpio_count(struct device *dev, const char *con_id)
  			snprintf(propname, sizeof(propname), "%s",
  				 gpio_suffixes[i]);
  
@@ -84,14 +77,13 @@ index 4dde2cf..3213ed3 100644
 -				}
 -		}
 +		count = acpi_gpio_count_from_property(adev, propname);
- 		if (count >= 0)
+ 		if (count > 0)
  			break;
  	}
-@@ -1057,3 +1068,47 @@ bool acpi_can_fallback_to_crs(struct acpi_device *adev, const char *con_id)
- 		 (lookup->con_id && con_id &&
- 		  strcmp(lookup->con_id, con_id) == 0));
+@@ -1253,6 +1263,50 @@ bool acpi_can_fallback_to_crs(struct acpi_device *adev, const char *con_id)
+ 	return con_id == NULL;
  }
-+
+ 
 +/**
 + * acpi_node_add_pin_mapping - add a pin mapping for named GPIO resources
 + * @fwnode: pointer to an ACPI firmware node to get the GPIO information from
@@ -135,38 +127,10 @@ index 4dde2cf..3213ed3 100644
 +	return 0;
 +}
 +EXPORT_SYMBOL_GPL(acpi_node_add_pin_mapping);
-diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index 61a3d90..0935397 100644
---- a/include/linux/acpi.h
-+++ b/include/linux/acpi.h
-@@ -922,6 +922,11 @@ static inline void acpi_dev_remove_driver_gpios(struct acpi_device *adev)
- }
- 
- int acpi_dev_gpio_irq_get(struct acpi_device *adev, int index);
-+int acpi_node_add_pin_mapping(struct fwnode_handle *fwnode,
-+			      const char *propname,
-+			      const char *pinctl_name,
-+			      unsigned int pin_offset,
-+			      unsigned int npins);
- #else
- static inline int acpi_dev_add_driver_gpios(struct acpi_device *adev,
- 			      const struct acpi_gpio_mapping *gpios)
-@@ -934,6 +939,15 @@ static inline int acpi_dev_gpio_irq_get(struct acpi_device *adev, int index)
- {
- 	return -ENXIO;
- }
 +
-+static inline int acpi_node_add_pin_mapping(struct fwnode_handle *fwnode,
-+					    const char *propname,
-+					    const char *pinctl_name,
-+					    unsigned int pin_offset,
-+					    unsigned int npins)
-+{
-+	return -ENXIO;
-+}
- #endif
- 
- /* Device properties */
+ /* Run deferred acpi_gpiochip_request_interrupts() */
+ static int acpi_gpio_handle_deferred_request_interrupts(void)
+ {
 -- 
-1.9.1
+2.7.4
 

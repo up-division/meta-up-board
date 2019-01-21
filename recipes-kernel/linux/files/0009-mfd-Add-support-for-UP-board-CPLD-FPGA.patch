@@ -1,7 +1,7 @@
-From fa948eb0544857b32dfd93c739211a5de6f2900c Mon Sep 17 00:00:00 2001
-From: Javier Arteaga <javier@emutex.com>
-Date: Fri, 7 Jul 2017 11:33:22 +0100
-Subject: [PATCH 08/10] mfd: Add support for UP board CPLD/FPGA
+From 974fd6345a9e8be274e567fbf9bf78692e1e3b38 Mon Sep 17 00:00:00 2001
+From: Carlos Calderon <carlos@emutex.com>
+Date: Thu, 4 Oct 2018 10:40:49 +0100
+Subject: [PATCH 09/19] mfd: Add support for UP board CPLD/FPGA
 
 The UP Squared board <http://www.upboard.com> implements certain
 features (pin control, onboard LEDs or CEC) through an on-board FPGA.
@@ -27,25 +27,25 @@ Signed-off-by: Nicola Lunghi <nicola.lunghi@emutex.com>
  drivers/leds/Makefile             |   1 +
  drivers/leds/leds-upboard.c       |  88 +++++
  drivers/mfd/Kconfig               |   6 +
- drivers/mfd/Makefile              |   2 +
+ drivers/mfd/Makefile              |   1 +
  drivers/mfd/upboard-fpga.c        | 411 ++++++++++++++++++++
  drivers/pinctrl/Kconfig           |  12 +
  drivers/pinctrl/Makefile          |   1 +
  drivers/pinctrl/pinctrl-upboard.c | 797 ++++++++++++++++++++++++++++++++++++++
  include/linux/mfd/upboard-fpga.h  |  52 +++
- 10 files changed, 1377 insertions(+)
+ 10 files changed, 1376 insertions(+)
  create mode 100644 drivers/leds/leds-upboard.c
  create mode 100644 drivers/mfd/upboard-fpga.c
  create mode 100644 drivers/pinctrl/pinctrl-upboard.c
  create mode 100644 include/linux/mfd/upboard-fpga.h
 
 diff --git a/drivers/leds/Kconfig b/drivers/leds/Kconfig
-index 7a628c6..da8e460 100644
+index 52ea34e..891e746 100644
 --- a/drivers/leds/Kconfig
 +++ b/drivers/leds/Kconfig
-@@ -659,6 +659,13 @@ config LEDS_MLXCPLD
- 	  This option enabled support for the LEDs on the Mellanox
- 	  boards. Say Y to enabled these.
+@@ -696,6 +696,13 @@ config LEDS_NIC78BX
+ 	  To compile this driver as a module, choose M here: the module
+ 	  will be called leds-nic78bx.
  
 +config LEDS_UPBOARD
 +	tristate "LED support for the UP board"
@@ -58,20 +58,20 @@ index 7a628c6..da8e460 100644
  source "drivers/leds/trigger/Kconfig"
  
 diff --git a/drivers/leds/Makefile b/drivers/leds/Makefile
-index 3965070..655a3bf 100644
+index 3598045..c8b8ee8 100644
 --- a/drivers/leds/Makefile
 +++ b/drivers/leds/Makefile
-@@ -71,6 +71,7 @@ obj-$(CONFIG_LEDS_IS31FL319X)		+= leds-is31fl319x.o
- obj-$(CONFIG_LEDS_IS31FL32XX)		+= leds-is31fl32xx.o
- obj-$(CONFIG_LEDS_PM8058)		+= leds-pm8058.o
+@@ -73,6 +73,7 @@ obj-$(CONFIG_LEDS_PM8058)		+= leds-pm8058.o
  obj-$(CONFIG_LEDS_MLXCPLD)		+= leds-mlxcpld.o
+ obj-$(CONFIG_LEDS_NIC78BX)		+= leds-nic78bx.o
+ obj-$(CONFIG_LEDS_MT6323)		+= leds-mt6323.o
 +obj-$(CONFIG_LEDS_UPBOARD)		+= leds-upboard.o
  
  # LED SPI Drivers
  obj-$(CONFIG_LEDS_DAC124S085)		+= leds-dac124s085.o
 diff --git a/drivers/leds/leds-upboard.c b/drivers/leds/leds-upboard.c
 new file mode 100644
-index 0000000..96d1dd1
+index 0000000..16bd1b7
 --- /dev/null
 +++ b/drivers/leds/leds-upboard.c
 @@ -0,0 +1,88 @@
@@ -163,13 +163,14 @@ index 0000000..96d1dd1
 +MODULE_DESCRIPTION("UP Board LED driver");
 +MODULE_LICENSE("GPL v2");
 +MODULE_ALIAS("platform:upboard-led");
+\ No newline at end of file
 diff --git a/drivers/mfd/Kconfig b/drivers/mfd/Kconfig
-index c6df644..f9e1439 100644
+index fc5e4fe..2d2b73e 100644
 --- a/drivers/mfd/Kconfig
 +++ b/drivers/mfd/Kconfig
-@@ -1607,6 +1607,12 @@ config MFD_STW481X
- 	  in various ST Microelectronics and ST-Ericsson embedded
- 	  Nomadik series.
+@@ -1781,6 +1781,12 @@ config MFD_STM32_TIMERS
+ 	  for PWM and IIO Timer. This driver allow to share the
+ 	  registers between the others drivers.
  
 +config MFD_UPBOARD_FPGA
 +	tristate "Support for the UP board FPGA"
@@ -181,18 +182,20 @@ index c6df644..f9e1439 100644
  	depends on ARCH_SA1100
  
 diff --git a/drivers/mfd/Makefile b/drivers/mfd/Makefile
-index 9834e66..e5385bc 100644
+index 8703ff1..7c8859f 100644
 --- a/drivers/mfd/Makefile
 +++ b/drivers/mfd/Makefile
-@@ -211,3 +211,5 @@ obj-$(CONFIG_INTEL_SOC_PMIC)	+= intel-soc-pmic.o
- obj-$(CONFIG_MFD_MT6397)	+= mt6397-core.o
+@@ -223,6 +223,7 @@ obj-$(CONFIG_MFD_MT6397)	+= mt6397-core.o
  
  obj-$(CONFIG_MFD_ALTERA_A10SR)	+= altera-a10sr.o
-+
+ obj-$(CONFIG_MFD_SUN4I_GPADC)	+= sun4i-gpadc.o
 +obj-$(CONFIG_MFD_UPBOARD_FPGA)  += upboard-fpga.o
+ 
+ obj-$(CONFIG_MFD_STM32_LPTIMER)	+= stm32-lptimer.o
+ obj-$(CONFIG_MFD_STM32_TIMERS) 	+= stm32-timers.o
 diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
 new file mode 100644
-index 0000000..8bc26a6
+index 0000000..9f444f8
 --- /dev/null
 +++ b/drivers/mfd/upboard-fpga.c
 @@ -0,0 +1,411 @@
@@ -607,13 +610,14 @@ index 0000000..8bc26a6
 +MODULE_AUTHOR("Javier Arteaga <javier@emutex.com>");
 +MODULE_DESCRIPTION("UP Board FPGA driver");
 +MODULE_LICENSE("GPL v2");
+\ No newline at end of file
 diff --git a/drivers/pinctrl/Kconfig b/drivers/pinctrl/Kconfig
-index 0e75d94..04feebe 100644
+index a73c794..5697684 100644
 --- a/drivers/pinctrl/Kconfig
 +++ b/drivers/pinctrl/Kconfig
-@@ -254,6 +254,18 @@ config PINCTRL_ZYNQ
+@@ -349,6 +349,18 @@ config PINCTRL_RK805
  	help
- 	  This selects the pinctrl driver for Xilinx Zynq.
+ 	  This selects the pinctrl driver for RK805.
  
 +config PINCTRL_UPBOARD
 +	tristate "UP board FPGA pin controller"
@@ -631,20 +635,20 @@ index 0e75d94..04feebe 100644
  source "drivers/pinctrl/bcm/Kconfig"
  source "drivers/pinctrl/berlin/Kconfig"
 diff --git a/drivers/pinctrl/Makefile b/drivers/pinctrl/Makefile
-index 11bad37..3535448 100644
+index d0d4844..dcee3190 100644
 --- a/drivers/pinctrl/Makefile
 +++ b/drivers/pinctrl/Makefile
-@@ -36,6 +36,7 @@ obj-$(CONFIG_PINCTRL_LPC18XX)	+= pinctrl-lpc18xx.o
- obj-$(CONFIG_PINCTRL_TB10X)	+= pinctrl-tb10x.o
- obj-$(CONFIG_PINCTRL_ST) 	+= pinctrl-st.o
+@@ -45,6 +45,7 @@ obj-$(CONFIG_PINCTRL_ST) 	+= pinctrl-st.o
  obj-$(CONFIG_PINCTRL_ZYNQ)	+= pinctrl-zynq.o
+ obj-$(CONFIG_PINCTRL_INGENIC)	+= pinctrl-ingenic.o
+ obj-$(CONFIG_PINCTRL_RK805)	+= pinctrl-rk805.o
 +obj-$(CONFIG_PINCTRL_UPBOARD)	+= pinctrl-upboard.o
  
  obj-$(CONFIG_ARCH_ASPEED)	+= aspeed/
  obj-y				+= bcm/
 diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
 new file mode 100644
-index 0000000..e1eee81
+index 0000000..64899e9
 --- /dev/null
 +++ b/drivers/pinctrl/pinctrl-upboard.c
 @@ -0,0 +1,797 @@
@@ -1445,9 +1449,10 @@ index 0000000..e1eee81
 +MODULE_DESCRIPTION("UP Board HAT pin controller driver");
 +MODULE_LICENSE("GPL v2");
 +MODULE_ALIAS("platform:upboard-pinctrl");
+\ No newline at end of file
 diff --git a/include/linux/mfd/upboard-fpga.h b/include/linux/mfd/upboard-fpga.h
 new file mode 100644
-index 0000000..d9153ba
+index 0000000..cd7fb81
 --- /dev/null
 +++ b/include/linux/mfd/upboard-fpga.h
 @@ -0,0 +1,52 @@
@@ -1503,6 +1508,7 @@ index 0000000..d9153ba
 +};
 +
 +#endif /*  __LINUX_MFD_UPBOARD_FPGA_H */
+\ No newline at end of file
 -- 
-1.9.1
+2.7.4
 

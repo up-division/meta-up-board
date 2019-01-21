@@ -1,7 +1,7 @@
-From 225cc4cad1442a9d02807afa1d5460e7fdf80921 Mon Sep 17 00:00:00 2001
-From: Bogdan Pricop <bogdan.pricop@emutex.com>
-Date: Wed, 19 Jul 2017 11:57:41 +0100
-Subject: [PATCH 09/10] up: pinctrl: Bring in legacy fpga and pinctrl driver
+From 438f9fdd3e41c9af362d81cba7542b51c7d8f1b0 Mon Sep 17 00:00:00 2001
+From: Carlos Calderon <carlos@emutex.com>
+Date: Thu, 4 Oct 2018 10:44:53 +0100
+Subject: [PATCH 10/19] up: pinctrl: Bring in legacy fpga and pinctrl driver
 
 This commits just copies the legacy UP board platform driver and the
 pinctrl/fpga one from ubilinux-3 branch.
@@ -15,26 +15,23 @@ information via ACPI to the kernel, therefore the new MFD FPGA driver
 will not be loaded; instead this legacy platform driver will always be
 loaded and based on the platform detected will load or not the pinctrl
 one.
-
-Signed-off-by: Bogdan Pricop <bogdan.pricop@emutex.com>
 ---
- drivers/platform/x86/Kconfig            |  17 +
+ drivers/platform/x86/Kconfig            |  15 +
  drivers/platform/x86/Makefile           |   1 +
  drivers/platform/x86/up_board.c         | 242 ++++++++
  drivers/platform/x86/up_board_pinctrl.c | 989 ++++++++++++++++++++++++++++++++
- 4 files changed, 1249 insertions(+)
+ 4 files changed, 1247 insertions(+)
  create mode 100644 drivers/platform/x86/up_board.c
  create mode 100644 drivers/platform/x86/up_board_pinctrl.c
 
 diff --git a/drivers/platform/x86/Kconfig b/drivers/platform/x86/Kconfig
-index b8a21d7..2b99bbf 100644
+index 80b8795..0ca3c82 100644
 --- a/drivers/platform/x86/Kconfig
 +++ b/drivers/platform/x86/Kconfig
-@@ -1027,4 +1027,21 @@ config INTEL_TELEMETRY
- 	  used to get various SoC events and parameters
- 	  directly via debugfs files. Various tools may use
- 	  this interface for SoC state monitoring.
-+
+@@ -1139,6 +1139,21 @@ config SILEAD_DMI
+ 	  with the OS-image for the device. This option supplies the missing
+ 	  information. Enable this for x86 tablets with Silead touchscreens.
+ 
 +config UPBOARD_LEGACY
 +	bool "UP Board platform extras"
 +	depends on ACPI && PINCTRL_CHERRYVIEW
@@ -50,20 +47,21 @@ index b8a21d7..2b99bbf 100644
 +	platform driver are numbered to emulate the Raspberry Pi 2 pin header
 +	layout to aid application portability.
 +
-+
  endif # X86_PLATFORM_DEVICES
+ 
+ config PMC_ATOM
 diff --git a/drivers/platform/x86/Makefile b/drivers/platform/x86/Makefile
-index 2efa86d..d1aa568 100644
+index f9e3ae6..793a3c2 100644
 --- a/drivers/platform/x86/Makefile
 +++ b/drivers/platform/x86/Makefile
-@@ -71,3 +71,4 @@ obj-$(CONFIG_INTEL_TELEMETRY)	+= intel_telemetry_core.o \
- 				   intel_telemetry_pltdrv.o \
- 				   intel_telemetry_debugfs.o
- obj-$(CONFIG_INTEL_PMC_CORE)    += intel_pmc_core.o
+@@ -84,3 +84,4 @@ obj-$(CONFIG_PMC_ATOM)		+= pmc_atom.o
+ obj-$(CONFIG_MLX_PLATFORM)	+= mlx-platform.o
+ obj-$(CONFIG_MLX_CPLD_PLATFORM)	+= mlxcpld-hotplug.o
+ obj-$(CONFIG_INTEL_TURBO_MAX_3) += intel_turbo_max_3.o
 +obj-$(CONFIG_UPBOARD_LEGACY)	+= up_board.o up_board_pinctrl.o
 diff --git a/drivers/platform/x86/up_board.c b/drivers/platform/x86/up_board.c
 new file mode 100644
-index 0000000..7c177c3
+index 0000000..3acbed7
 --- /dev/null
 +++ b/drivers/platform/x86/up_board.c
 @@ -0,0 +1,242 @@
@@ -309,9 +307,10 @@ index 0000000..7c177c3
 +MODULE_DESCRIPTION("Platform driver for UP Board");
 +MODULE_LICENSE("GPL v2");
 +MODULE_ALIAS("dmi:*:svnAAEON*:rnUP-CHT01:*");
+\ No newline at end of file
 diff --git a/drivers/platform/x86/up_board_pinctrl.c b/drivers/platform/x86/up_board_pinctrl.c
 new file mode 100644
-index 0000000..6256d29
+index 0000000..e6c9de4
 --- /dev/null
 +++ b/drivers/platform/x86/up_board_pinctrl.c
 @@ -0,0 +1,989 @@
@@ -497,7 +496,7 @@ index 0000000..6256d29
 +#define GPIO_PINRANGE(start, end)		\
 +	{					\
 +		.base = (start),		\
-+		.npins = (end) - (start) + 1,	\
++		.npins = (end) - (start) $ 1,	\
 +	}
 +
 +#define N_GPIO 28
@@ -1304,6 +1303,7 @@ index 0000000..6256d29
 +MODULE_DESCRIPTION("Pin Control driver for UP Board I/O pin header");
 +MODULE_LICENSE("GPL v2");
 +MODULE_ALIAS("platform:up-pinctrl");
+\ No newline at end of file
 -- 
-1.9.1
+2.7.4
 

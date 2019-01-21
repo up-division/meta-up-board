@@ -1,7 +1,7 @@
-From d5d9e551d95d585189f92d497336df306e18309d Mon Sep 17 00:00:00 2001
+From 59be0324275683118358d77f57d31e9588ba8412 Mon Sep 17 00:00:00 2001
 From: Dan O'Donovan <dan@emutex.com>
 Date: Wed, 15 Mar 2017 14:13:48 +0000
-Subject: [PATCH 02/10] disable RTS override on LPSS UART with Auto Flow
+Subject: [PATCH 02/19] disable RTS override on LPSS UART with Auto Flow
  Control
 
 Currently, Auto Flow Control is not working correctly on the Atom
@@ -24,10 +24,10 @@ Reviewed-by: Heikki Krogerus <heikki.krogerus@linux.intel.com>
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/acpi/acpi_lpss.c b/drivers/acpi/acpi_lpss.c
-index 373657f..45f15a6 100644
+index 8c93466..d21c8d5 100644
 --- a/drivers/acpi/acpi_lpss.c
 +++ b/drivers/acpi/acpi_lpss.c
-@@ -45,7 +45,7 @@
+@@ -46,7 +46,7 @@ ACPI_MODULE_NAME("acpi_lpss");
  #define LPSS_RESETS_RESET_APB		BIT(1)
  #define LPSS_GENERAL			0x08
  #define LPSS_GENERAL_LTR_MODE_SW	BIT(2)
@@ -36,7 +36,7 @@ index 373657f..45f15a6 100644
  #define LPSS_SW_LTR			0x10
  #define LPSS_AUTO_LTR			0x14
  #define LPSS_LTR_SNOOP_REQ		BIT(15)
-@@ -123,10 +123,10 @@ static void lpss_uart_setup(struct lpss_private_data *pdata)
+@@ -129,10 +129,10 @@ static void lpss_uart_setup(struct lpss_private_data *pdata)
  	writel(val | LPSS_TX_INT_MASK, pdata->mmio_base + offset);
  
  	val = readl(pdata->mmio_base + LPSS_UART_CPR);
@@ -50,5 +50,5 @@ index 373657f..45f15a6 100644
  	}
  }
 -- 
-1.9.1
+2.7.4
 

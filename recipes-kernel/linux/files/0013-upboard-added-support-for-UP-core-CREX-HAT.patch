@@ -1,7 +1,7 @@
-From c47cd6049d6e962bcaf7273a88bd9eb800cf79dd Mon Sep 17 00:00:00 2001
+From 9053e8902aa382c02753747f73d3e055729b1ed4 Mon Sep 17 00:00:00 2001
 From: Nicola Lunghi <nicola.lunghi@emutex.com>
 Date: Thu, 24 Aug 2017 11:15:24 +0100
-Subject: [PATCH 10/10] upboard: added support for UP core + CREX HAT
+Subject: [PATCH 13/19] upboard: added support for UP core + CREX HAT
 
 Signed-off-by: Nicola Lunghi <nicola.lunghi@emutex.com>
 [Javier: minor style consistency tweaks]
@@ -12,7 +12,7 @@ Signed-off-by: Javier Arteaga <javier@emutex.com>
  2 files changed, 120 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
-index 8bc26a6..8d534ba 100644
+index 9f444f8..3ce27e2 100644
 --- a/drivers/mfd/upboard-fpga.c
 +++ b/drivers/mfd/upboard-fpga.c
 @@ -290,8 +290,9 @@ static int __init upboard_fpga_detect_firmware(struct upboard_fpga *fpga)
@@ -28,7 +28,7 @@ index 8bc26a6..8d534ba 100644
  };
  MODULE_DEVICE_TABLE(acpi, upboard_fpga_acpi_match);
 diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
-index e1eee81..d8937bf 100644
+index 64899e9..65ac489 100644
 --- a/drivers/pinctrl/pinctrl-upboard.c
 +++ b/drivers/pinctrl/pinctrl-upboard.c
 @@ -5,6 +5,7 @@
@@ -39,7 +39,7 @@ index e1eee81..d8937bf 100644
   *
   * This program is free software; you can redistribute it and/or modify
   * it under the terms of the GNU General Public License version 2 as
-@@ -430,6 +431,110 @@ enum upboard_up2_reg2_fpgabit {
+@@ -430,6 +431,110 @@ static const struct upboard_bios upboard_up2_bios_info_v0_3 __initconst = {
  	.npatches = ARRAY_SIZE(upboard_up2_reg_patches),
  };
  
@@ -150,7 +150,7 @@ index e1eee81..d8937bf 100644
  static int upboard_set_mux(struct pinctrl_dev *pctldev, unsigned int function,
  			   unsigned int group)
  {
-@@ -539,6 +644,14 @@ static const char *upboard_get_group_name(struct pinctrl_dev *pctldev,
+@@ -539,6 +644,14 @@ static struct pinctrl_desc upboard_up2_pinctrl_desc = {
  	.owner = THIS_MODULE,
  };
  
@@ -175,7 +175,7 @@ index e1eee81..d8937bf 100644
  	} else
  		return -ENODEV;
  
-@@ -792,6 +908,7 @@ static int __init upboard_pinctrl_probe(struct platform_device *pdev)
+@@ -792,6 +908,7 @@ module_platform_driver_probe(upboard_pinctrl_driver, upboard_pinctrl_probe);
  
  MODULE_AUTHOR("Javier Arteaga <javier@emutex.com>");
  MODULE_AUTHOR("Dan O'Donovan <dan@emutex.com>");
@@ -183,6 +183,7 @@ index e1eee81..d8937bf 100644
  MODULE_DESCRIPTION("UP Board HAT pin controller driver");
  MODULE_LICENSE("GPL v2");
  MODULE_ALIAS("platform:upboard-pinctrl");
+\ No newline at end of file
 -- 
-1.9.1
+2.7.4
 
