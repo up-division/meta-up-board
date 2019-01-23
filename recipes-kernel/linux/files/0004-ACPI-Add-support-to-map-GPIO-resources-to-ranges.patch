@@ -1,7 +1,7 @@
-From 62667ce22ed105eab24953d3085142a10e221a33 Mon Sep 17 00:00:00 2001
+From 5aa7c5c8b8745767d8a9b2f518e75f0cb8c42d77 Mon Sep 17 00:00:00 2001
 From: Carlos Calderon <carlos@emutex.com>
-Date: Fri, 4 Jan 2019 10:41:55 +0000
-Subject: [PATCH 04/19] ACPI: Add support to map GPIO resources to ranges
+Date: Tue, 22 Jan 2019 16:11:26 +0000
+Subject: [PATCH] ACPI: Add support to map GPIO resources to ranges
 
 Add a function to gpiolib to facilitate registering a pin controller for
 a range of GPIO pins, but using ACPI resource references and without
@@ -11,10 +11,10 @@ claiming the GPIO resource.
  1 file changed, 71 insertions(+), 17 deletions(-)
 
 diff --git a/drivers/gpio/gpiolib-acpi.c b/drivers/gpio/gpiolib-acpi.c
-index 33d4bd5..899c18d 100644
+index 70b3c55..66caeac 100644
 --- a/drivers/gpio/gpiolib-acpi.c
 +++ b/drivers/gpio/gpiolib-acpi.c
-@@ -1182,6 +1182,32 @@ static int acpi_find_gpio_count(struct acpi_resource *ares, void *data)
+@@ -1176,6 +1176,32 @@ static int acpi_find_gpio_count(struct acpi_resource *ares, void *data)
  	return 1;
  }
  
@@ -47,7 +47,7 @@ index 33d4bd5..899c18d 100644
  /**
   * acpi_gpio_count - return the number of GPIOs associated with a
   *		device / function or -ENOENT if no GPIO has been
-@@ -1192,10 +1218,7 @@ static int acpi_find_gpio_count(struct acpi_resource *ares, void *data)
+@@ -1186,10 +1212,7 @@ static int acpi_find_gpio_count(struct acpi_resource *ares, void *data)
  int acpi_gpio_count(struct device *dev, const char *con_id)
  {
  	struct acpi_device *adev = ACPI_COMPANION(dev);
@@ -58,7 +58,7 @@ index 33d4bd5..899c18d 100644
  	char propname[32];
  	unsigned int i;
  
-@@ -1208,20 +1231,7 @@ int acpi_gpio_count(struct device *dev, const char *con_id)
+@@ -1202,20 +1225,7 @@ int acpi_gpio_count(struct device *dev, const char *con_id)
  			snprintf(propname, sizeof(propname), "%s",
  				 gpio_suffixes[i]);
  
@@ -80,7 +80,7 @@ index 33d4bd5..899c18d 100644
  		if (count > 0)
  			break;
  	}
-@@ -1253,6 +1263,50 @@ bool acpi_can_fallback_to_crs(struct acpi_device *adev, const char *con_id)
+@@ -1247,6 +1257,50 @@ bool acpi_can_fallback_to_crs(struct acpi_device *adev, const char *con_id)
  	return con_id == NULL;
  }
  
@@ -128,8 +128,8 @@ index 33d4bd5..899c18d 100644
 +}
 +EXPORT_SYMBOL_GPL(acpi_node_add_pin_mapping);
 +
- /* Run deferred acpi_gpiochip_request_interrupts() */
- static int acpi_gpio_handle_deferred_request_interrupts(void)
+ /* Sync the initial state of handlers after all builtin drivers have probed */
+ static int acpi_gpio_initial_sync(void)
  {
 -- 
 2.7.4
