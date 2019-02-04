@@ -40,6 +40,7 @@ Prerequisites
 Supported Yocto versions
 ------------------------
 * Yocto 2.3 (Pyro)
+* Yocto 2.5 (Sumo)
 
 Supported hardware versions
 ---------------------------
@@ -51,25 +52,25 @@ Supported hardware versions
 Building the meta-up-board BSP layer
 ========================================
 
-Download the latest Pyro release and enter the poky directory:
+Download the latest Sumo release and enter the poky directory:
 ```
-git clone -b pyro git://git.yoctoproject.org/poky.git
+git clone -b sumo git://git.yoctoproject.org/poky.git
 cd poky
 ```
-Download the latest Intel BSP layer version for Pyro:
+Download the latest Intel BSP layer version for Sumo:
 
 ```
-git clone -b pyro git://git.yoctoproject.org/meta-intel.git
+git clone -b sumo git://git.yoctoproject.org/meta-intel.git
 ```
 
-Download the latest collection of layers for OE-core universe for Pyro:
+Download the latest collection of layers for OE-core universe for Sumo:
 ```
-git clone -b pyro git://git.openembedded.org/meta-openembedded 
+git clone -b sumo git://git.openembedded.org/meta-openembedded 
 ```
 
-Download this UP Board BSP layer for Pyro:
+Download this UP Board BSP layer for Sumo:
 ```
-git clone -b pyro https://github.com/emutex/meta-up-board
+git clone -b sumo https://github.com/emutex/meta-up-board
 ```
 
 From the poky directory, you can build an up-board image as such:
