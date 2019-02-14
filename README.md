@@ -30,8 +30,9 @@ Table of Contents
 1. Prerequisites
 2. Building the meta-up-board BSP layer
 3. Booting the live USB image
-4. Device Notes
-5. Additional Resources
+4. Connecitvity firmware
+5. Device Notes
+6. Additional Resources
 
 
 Prerequisites
@@ -124,6 +125,37 @@ characters), try doing this first:
 
 ```
 dd if=/dev/zero of=/dev/sdf bs=1M count=512
+```
+Connectivity firmware
+======================
+Ampak connectivity firmware is included to enable WiFi and Bluetooth
+for UPCorePlus boards.
+
+Firmware will be included by defaults for building your image. If you
+don't want to include it, just edit conf/machine/up-board.conf file
+and disable "Ampak-firmware, SystemD and network tools" parameters.
+
+a. WiFi
+--------
+Scan your available WiFi networks:
+
+```
+iwlist wlan0 scan
+```
+You will see all the WiFi interfaces in your area.
+
+a. Bluetooth
+-------------
+Check your Bluetooth devices in your area:
+
+```
+systemctl restart firmware-ampak-ap6355.service
+
+rfkill unblock bluetooth
+
+hciconfig hci0
+
+hcitool scan
 ```
 
 Device Notes
