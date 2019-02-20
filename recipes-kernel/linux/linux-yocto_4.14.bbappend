@@ -12,3 +12,6 @@ SRC_URI += "file://up-board-standard.scc \
 # the appropriate changes committed to the upstream linux-yocto repo
 SRCREV_machine_pn-linux-yocto_up-board ?= "${AUTOREV}"
 SRCREV_meta_pn-linux-yocto_up-board ?= "${AUTOREV}"
+
+#Remove the following line once AUTOREV is locked to a certain SRCREV
+KERNEL_VERSION_SANITY_SKIP = "1"
