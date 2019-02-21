@@ -12,7 +12,9 @@ patch 0011-pinctrl-rework-for-core.c.patch
 patch 0012-acpi-acpi_node_add_pin_mapping-added-to-header-file.patch
 patch 0013-upboard-added-support-for-UP-core-CREX-HAT.patch
 patch 0014-upboard-Add-support-for-UP-CRST02.patch
-patch 0015-up-pinctrl-change-SoC-gpio-references-to-use-h-w-pin.patch
+
+##patch 0015-up-pinctrl-change-SoC-gpio-references-to-use-h-w-pin.patch
+
 patch 0016-pinctrl-upboard-add-regmap-patches-for-CREX-and-CRST.patch
 patch 0017-pinctrl-upboard-add-separate-regmap-patches-for-CREX.patch
 patch 0018-correct-the-number-of-GPIOs-for-CREX-and-CRST02-boar.patch
