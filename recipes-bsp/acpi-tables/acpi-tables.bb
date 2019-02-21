@@ -13,8 +13,13 @@ DEPENDS = "acpica-native"
 inherit deploy
 
 # Including ACPI tables for UP2 board
-ACPI_TABLES ?= "spidev1.0.asl spidev1.1.asl"
+# ACPI_TABLES ?= "up2_spidev1.0.asl up2_spidev1.1.asl"
+# ACPI_TABLES[doc] = "List of ACPI tables to include with the initrd"
+
+# Including ACPI tables for UPCore board
+ACPI_TABLES ?= "upcore_spidev1.0.asl upcore_spidev1.1.asl"
 ACPI_TABLES[doc] = "List of ACPI tables to include with the initrd"
+
 
 do_compile() {
 	# Always clean up the existing tables
