@@ -80,7 +80,19 @@ From the poky directory, you can build an up-board image as such:
 TEMPLATECONF=meta-up-board/conf source oe-init-build-env
 bitbake upboard-image-sato
 ```
+NOTE: UP board machine is set as default machine.
+If you want to build the layer using other machine (UP2, UPCore or UPCorePlus)
+you must set the MACHINE environment variable before launch the build command:
 
+```
+MACHINE=up-core bitbake upboard-image-sato
+```
+Or
+
+```
+export MACHINE=up-core-plus
+bitbake upboard-image-sato
+```
 At the end of a successful build, you should have a live image that
 you can boot from a USB flash drive (see instructions on how to do
 that below, in the section 'Booting the live USB image').
