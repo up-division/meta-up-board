@@ -5,9 +5,27 @@ PR := "${PR}.1"
 COMPATIBLE_MACHINE_up-squared = "up-squared"
 COMPATIBLE_MACHINE_up-core-plus = "up-core-plus"
 
-SRC_URI += "file://up-board-standard.scc \
-            file://up-board-user-linux-intel-patches.scc \
-           "
+SRC_URI += " \
+	file://up-board.cfg \
+	file://up-board-user-config.cfg \
+        file://0000-ACPI-Add-support-to-map-GPIO-resources-to-ranges.patch \
+	file://0001-i2c-designware-platdrv-add-module-parameter-to-overr.patch \
+	file://0002-disable-RTS-override-on-LPSS-UART-with-Auto-Flow-Con.patch \
+	file://0003-iio-adc128s052-allow-driver-to-be-matched-using-ACPI.patch \
+	file://0005-pinctrl-intel-Add-intel_gpio_get_direction.patch \
+	file://0006-pinctrl-allow-multiple-pin-controllers-for-a-GPIO.patch \
+	file://0007-regmap-Expose-regmap_writable-function-to-check-if-a.patch \
+	file://0008-iio-adc128s052-allow-device-to-be-matched-using-acpi.patch \
+	file://0009-mfd-Add-support-for-UP-board-CPLD-FPGA.patch \
+	file://0010-up-pinctrl-Bring-in-legacy-fpga-and-pinctrl-driver.patch \
+	file://0011-pinctrl-rework-for-core.c.patch \
+	file://0012-acpi-acpi_node_add_pin_mapping-added-to-header-file.patch \
+	file://0013-upboard-added-support-for-UP-core-CREX-HAT.patch \
+	file://0014-upboard-Add-support-for-UP-CRST02.patch \
+	file://0016-pinctrl-upboard-add-regmap-patches-for-CREX-and-CRST.patch \
+	file://0017-pinctrl-upboard-add-separate-regmap-patches-for-CREX.patch \
+	file://0018-correct-the-number-of-GPIOs-for-CREX-and-CRST02-boar.patch \
+"
 
 # replace these SRCREVs with the real commit ids once you've had
 # the appropriate changes committed to the upstream linux-yocto repo
