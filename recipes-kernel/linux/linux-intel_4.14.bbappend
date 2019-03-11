@@ -2,7 +2,8 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 PR := "${PR}.1"
 
-COMPATIBLE_MACHINE_up-board = "up-board"
+COMPATIBLE_MACHINE_up-squared = "up-squared"
+COMPATIBLE_MACHINE_up-core-plus = "up-core-plus"
 
 SRC_URI += "file://up-board-standard.scc \
             file://up-board-user-linux-intel-patches.scc \
