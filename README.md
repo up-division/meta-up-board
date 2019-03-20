@@ -23,9 +23,7 @@ Prerequisites
 
 Supported hardware versions for Yocto 2.5 (sumo)
 ------------------------------------------------
-* UP Board
 * UP Squared
-* UP Core
 * UP Core Plus
 
 Downloading the meta-up-board BSP layer
@@ -49,27 +47,12 @@ git clone -b sumo git://git.openembedded.org/meta-openembedded
 
 Download this UP Board BSP layer for Sumo:
 ```
-git clone -b sumo https://github.com/emutex/meta-up-board
+git clone -b sumo_mr4 https://github.com/emutex/meta-up-board
 ```
 
 Building your Yocto image for each UP machine
 ==========================================
 
-UP Board:
----------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-board bitbake upboard-image-sato
-```
-Or
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-export MACHINE=up-board
-bitbake upboard-image-sato
-```
 UP Squared Board:
 -----------------
 From the poky directory:
@@ -83,22 +66,6 @@ Or
 ```
 TEMPLATECONF=meta-up-board/conf source oe-init-build-env
 export MACHINE=up-squared
-bitbake upboard-image-sato
-```
-
-UP Core Board:
------------------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-core bitbake upboard-image-sato
-```
-Or
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-export MACHINE=up-core
 bitbake upboard-image-sato
 ```
 
@@ -178,6 +145,7 @@ a. WiFi
 Scan your available WiFi networks:
 
 ```
+rfkill unblock wlan
 iwlist wlan0 scan
 ```
 You will see all the WiFi interfaces in your area.
