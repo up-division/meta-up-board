@@ -12,4 +12,8 @@ BBLAYERS ?= " \
   ##OEROOT##/meta-intel \
   ##OEROOT##/meta-up-board \
   ##OEROOT##/meta-openembedded/meta-oe \
+  ##OEROOT##/meta-openembedded/meta-python \
+  ##OEROOT##/meta-openembedded/meta-networking \
+  ##OEROOT##/meta-openembedded/meta-filesystems \
+  ##OEROOT##/meta-virtualization \
   "

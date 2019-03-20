@@ -220,3 +220,7 @@ CONF_VERSION = "1"
 DISTRO_FEATURES_append = " systemd"
 VIRTUAL-RUNTIME_init_manager = "systemd"
 VIRTUAL-RUNTIME_initscripts = "systemd-compat-units"
+
+# Added "virtualization" layer to support for building Xen, KVM, Libvirt, and associated
+# packages necessary for constructing OE-based virtualized solutions.
+DISTRO_FEATURES_append = " virtualization"
