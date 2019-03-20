@@ -5,7 +5,7 @@ PR := "${PR}.1"
 COMPATIBLE_MACHINE_up-board = "up-board"
 
 SRC_URI += "file://up-board-standard.scc \
-            file://up-board-user-linux-intel-patches.scc \
+            file://up-board-user-patches.scc \
            "
 
 # replace these SRCREVs with the real commit ids once you've had
