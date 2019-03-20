@@ -1,7 +1,7 @@
-patch 0000-ACPI-Add-support-to-map-GPIO-resources-to-ranges.patch
 patch 0001-i2c-designware-platdrv-add-module-parameter-to-overr.patch
 patch 0002-disable-RTS-override-on-LPSS-UART-with-Auto-Flow-Con.patch
 patch 0003-iio-adc128s052-allow-driver-to-be-matched-using-ACPI.patch
+patch 0004-ACPI-Add-support-to-map-GPIO-resources-to-ranges.patch
 patch 0005-pinctrl-intel-Add-intel_gpio_get_direction.patch
 patch 0006-pinctrl-allow-multiple-pin-controllers-for-a-GPIO.patch
 patch 0007-regmap-Expose-regmap_writable-function-to-check-if-a.patch
