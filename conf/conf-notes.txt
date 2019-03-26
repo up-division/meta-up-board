@@ -8,5 +8,6 @@ Common targets are:
 
 UP specific targets:
     upboard-image-sato
+    upboard-image-base
 
 You can also run generated qemu images with a command like 'runqemu qemux86'
