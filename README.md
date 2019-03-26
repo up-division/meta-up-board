@@ -11,8 +11,8 @@ Table of Contents
 =================
 
 1. Prerequisites
-2. Downloading the meta-up-board BSP layer
-3. Building your Yocto image for each UP machine
+2. Downloading the Intel Yocto BSP MR4 repository
+3. Building your Intel Yocto image for each UP machine
 4. Booting the live USB image
 5. Connecitvity firmware
 7. Additional Resources
@@ -21,68 +21,76 @@ Table of Contents
 Prerequisites
 ================
 
-Supported hardware versions for Yocto 2.5 (sumo)
-------------------------------------------------
+Supported hardware versions for Yocto 2.5 (sumo_mr4)
+----------------------------------------------------
 * UP Squared
 * UP Core Plus
 
 Downloading the meta-up-board BSP layer
 ========================================
 
-Download the latest Sumo release and enter the poky directory:
-```
-git clone -b sumo git://git.yoctoproject.org/poky.git
-cd poky
-```
-Download the latest Intel BSP layer version for Sumo:
+Download the latest Intel Yocto BSP MR4 repository following the official instructions:
+
+https://github.com/intel/iotg-yocto-bsp-public/tree/E3900-MR4#getting-started-with-yocto-bsp-for-intel-atom-e3900-soc
+
+Now, we need to edit the layer configuration file to add our meta-up-board layer to be included during compilation:
 
 ```
-git clone -b sumo git://git.yoctoproject.org/meta-intel.git
+sudo nano iotg-yocto-bsp-public/setup/combolayer.conf
 ```
 
-Download the latest collection of layers for OE-core universe for Sumo:
+Add the next lines:
 ```
-git clone -b sumo git://git.openembedded.org/meta-openembedded 
+[meta-up-board]
+
+src_uri = git://github.com/emutex/meta-up-board
+
+local_repo_dir = repo-ext/meta-up-board
+
+dest_dir = meta-up-board
+
+branch = sumo_mr4
+
+last_revision = fd55044103c763f7f03fe5fd27c79af3c8ef258e
 ```
 
-Download this UP Board BSP layer for Sumo:
+Also, we have to edit the bblayer file to add our layer in the setup:
 ```
-git clone -b sumo_mr4 https://github.com/emutex/meta-up-board
+sudo nano iotg-yocto-bsp-public/setup/bsp-conf/bblayers.conf.sample
+```
+Add our layer:
+```
+##OEROOT##/meta-up-board \
 ```
 
-Building your Yocto image for each UP machine
-==========================================
+After execute the setup.sh script, you would find a new directory called yocto_build.
+
+There you will find the meta layers integrated.
+
+Building your Intel Yocto image for each UP machine
+===================================================
 
 UP Squared Board:
 -----------------
-From the poky directory:
-
+From the yocto_build directory:
 ```
 TEMPLATECONF=meta-up-board/conf source oe-init-build-env
+```
+And again from yocto_build dir, for your specific machine:
+```
 MACHINE=up-squared bitbake upboard-image-sato
 ```
-Or
 
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-export MACHINE=up-squared
-bitbake upboard-image-sato
-```
 
 UP Core  Plus Board:
------------------
-From the poky directory:
-
+--------------------
+From the yocto_build directory:
 ```
 TEMPLATECONF=meta-up-board/conf source oe-init-build-env
+```
+And again from yocto_build dir, for your specific machine:
+```
 MACHINE=up-core-plus bitbake upboard-image-sato
-```
-Or
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-export MACHINE=up-core-plus
-bitbake upboard-image-sato
 ```
 
 At the end of a successfull build, you should have a live image that
