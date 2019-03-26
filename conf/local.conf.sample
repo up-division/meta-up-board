@@ -238,3 +238,5 @@ NOISO="1"
 # Added Docker container to the image
 IMAGE_INSTALL_append = "  docker docker-contrib connman connman-client \
 "
+
+PREFERRED_PROVIDER_iasl-native = "iasl-native"
