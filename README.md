@@ -70,6 +70,16 @@ There you will find the meta layers integrated.
 Building your Intel Yocto image for each UP machine
 ===================================================
 
+To include Docker containers into your Yocto image, you have to download
+meta-virtualization and openembedded-core in yocto_build directory:
+```
+git clone -b sumo git://git.yoctoproject.org/meta-virtualization
+```
+
+```
+git clone -b sumo git://git.openembedded.org/openembedded-core
+```
+
 UP Squared Board:
 -----------------
 From the yocto_build directory:
