@@ -226,9 +226,6 @@ DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
 # packages necessary for constructing OE-based virtualized solutions.
 DISTRO_FEATURES_append = " virtualization"
 
-# Save space for docker building and avoid HDD and ISO compilations.
-IMAGE_ROOTFS_EXTRA_SPACE = "10000000"
-NOHDD="1"
-NOISO="1"
+IMAGE_INSTALL_append = "  docker docker-contrib"
 
 PREFERRED_PROVIDER_iasl-native = "iasl-native"
