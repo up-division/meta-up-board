@@ -46,6 +46,14 @@ Download the latest collection of layers for OE-core universe for Sumo:
 ```
 git clone -b sumo git://git.openembedded.org/meta-openembedded 
 ```
+Download meta-virtualization and openembedded-core for Docker containers:
+```
+git clone -b sumo git://git.yoctoproject.org/meta-virtualization
+```
+
+```
+git clone -b sumo git://git.openembedded.org/openembedded-core
+```
 
 Download this UP Board BSP layer for Sumo:
 
@@ -58,14 +66,14 @@ For UP board and UP Core (Cherry Trail SoCs):
 ---------------------------------------------
 
 ```
-git clone -b meta-up-board-yocto-2.5-linux-yocto https://github.com/emutex/meta-up-board
+git clone -b sumo_linux-yocto https://github.com/emutex/meta-up-board
 ```
 
 For UP Squared and UP Core Plus (Apollo Lake SoCs):
 ---------------------------------------------------
 
 ```
-git clone -b meta-up-board-yocto-2.5-linux-intel https://github.com/emutex/meta-up-board
+git clone -b sumo_linux-intel https://github.com/emutex/meta-up-board
 ```
 
 Building your Yocto image for each UP machine
