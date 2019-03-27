@@ -219,7 +219,6 @@ PACKAGECONFIG_append_pn-nativesdk-qemu = " sdl"
 # this doesn't mean anything to you.
 CONF_VERSION = "1"
 
-
 # Include SystemD and SystemCTL
 DISTRO_FEATURES_append = " systemd"
 VIRTUAL-RUNTIME_init_manager = "systemd"
@@ -230,13 +229,7 @@ DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
 # packages necessary for constructing OE-based virtualized solutions.
 DISTRO_FEATURES_append = " virtualization"
 
-# Save space for docker building and avoid HDD and ISO compilations.
-IMAGE_ROOTFS_EXTRA_SPACE = "10000000"
-NOHDD="1"
-NOISO="1"
-
 # Added Docker container to the image
-IMAGE_INSTALL_append = "  docker docker-contrib connman connman-client \
-"
+IMAGE_INSTALL_append = "  docker docker-contrib"
 
 PREFERRED_PROVIDER_iasl-native = "iasl-native"
