@@ -230,3 +230,5 @@ DISTRO_FEATURES_append = " virtualization"
 IMAGE_ROOTFS_EXTRA_SPACE = "10000000"
 NOHDD="1"
 NOISO="1"
+
+PREFERRED_PROVIDER_iasl-native = "iasl-native"
