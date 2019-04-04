@@ -51,7 +51,7 @@ dest_dir = meta-up-board
 
 branch = sumo_mr4
 
-last_revision = fd55044103c763f7f03fe5fd27c79af3c8ef258e
+last_revision = 7fcfb95ee366a8fc949fca845ef45ecb5c4420c7
 ```
 
 Also, we have to edit the bblayer file to add our layer in the setup:
@@ -66,6 +66,8 @@ Add our layer:
 After execute the setup.sh script, you would find a new directory called yocto_build.
 
 There you will find the meta layers integrated.
+
+Before building your own image for meta-up-board layer, It is recommended to remove the build/ directory.
 
 Building your Intel Yocto image for each UP machine
 ===================================================
