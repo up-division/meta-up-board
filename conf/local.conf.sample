@@ -232,4 +232,4 @@ DISTRO_FEATURES_append = " virtualization"
 # Added Docker container to the image
 IMAGE_INSTALL_append = "  docker docker-contrib"
 
-PREFERRED_PROVIDER_iasl-native = "iasl-native"
+PREFERRED_PROVIDER_iasl-native = "acpica-native"
