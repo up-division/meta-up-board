@@ -230,6 +230,6 @@ DISTRO_FEATURES_BACKFILL_CONSIDERED = "sysvinit"
 DISTRO_FEATURES_append = " virtualization"
 
 # Added Docker container to the image
-IMAGE_INSTALL_append = "  docker docker-contrib"
+IMAGE_INSTALL_append = "  docker docker-contrib python3-docker-compose"
 
 PREFERRED_PROVIDER_iasl-native = "acpica-native"

@@ -12,3 +12,6 @@ IMAGE_INSTALL += "file"
 IMAGE_INSTALL += "dosfstools"
 IMAGE_INSTALL += "picocom"
 
+DISTRO_FEATURES_append = " bluez5 bluetooth wifi"
+IMAGE_INSTALL_append += " bluez5 systemd"
+IMAGE_INSTALL_append += " hostapd wireless-tools dhcp-client iw wpa-supplicant"
