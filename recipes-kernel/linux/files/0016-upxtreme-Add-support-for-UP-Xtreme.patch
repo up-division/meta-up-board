@@ -1,0 +1,83 @@
+From 832fd6cbf25f281953e29d06e2dffe1a7980a69d Mon Sep 17 00:00:00 2001
+From: Michael Campion <michael.campion@emutex.com>
+Date: Tue, 9 Jul 2019 09:05:00 +0100
+Subject: [PATCH 1/1] upxtreme: Add support for UP Xtreme
+
+Add UP Xtreme dmi match patterns to UP board fpga and pinctrl
+---
+ drivers/mfd/upboard-fpga.c        | 11 ++++++++++-
+ drivers/pinctrl/pinctrl-upboard.c | 12 ++++++++++--
+ 2 files changed, 20 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
+index 0e81929..42e6f24 100644
+--- a/drivers/mfd/upboard-fpga.c
++++ b/drivers/mfd/upboard-fpga.c
+@@ -308,6 +308,7 @@ static const struct acpi_device_id upboard_fpga_acpi_match[] = {
+ 	{ "AANT0F01", (kernel_ulong_t)&upboard_up2_fpga_data },
+ 	{ "AANT0F02", (kernel_ulong_t)&upboard_upcore_crex_fpga_data },
+ 	{ "AANT0F03", (kernel_ulong_t)&upboard_upcore_crst02_fpga_data },
++	{ "AANT0F04", (kernel_ulong_t)&upboard_up_fpga_data },
+ 	{ }
+ };
+ MODULE_DEVICE_TABLE(acpi, upboard_fpga_acpi_match);
+@@ -341,6 +342,14 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
+ 		},
+ 		.driver_data = (void *)UPFPGA_QUIRK_HRV1_IS_PROTO2,
+ 	},
++	{
++		.matches = { /* UP Xtreme */
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "AAEON"),
++			DMI_EXACT_MATCH(DMI_BOARD_NAME, "UP-WHL01"),
++			DMI_EXACT_MATCH(DMI_BOARD_VERSION, "V0.1"),
++		},
++		.driver_data = (void *)UPFPGA_QUIRK_UNINITIALISED,
++	},
+ 	{ },
+ };
+ 
+@@ -424,4 +433,4 @@ module_platform_driver_probe(upboard_fpga_driver, upboard_fpga_probe);
+ 
+ MODULE_AUTHOR("Javier Arteaga <javier@emutex.com>");
+ MODULE_DESCRIPTION("UP Board FPGA driver");
+-MODULE_LICENSE("GPL v2");
+\ No newline at end of file
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
+index e4af343..229496b 100644
+--- a/drivers/pinctrl/pinctrl-upboard.c
++++ b/drivers/pinctrl/pinctrl-upboard.c
+@@ -840,6 +840,14 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
+ 		},
+ 		.driver_data = (void *)&upboard_up2_bios_info_v0_3,
+ 	},
++	{
++		.matches = { /* UP Xtreme */
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "AAEON"),
++			DMI_EXACT_MATCH(DMI_BOARD_NAME, "UP-WHL01"),
++			DMI_EXACT_MATCH(DMI_BOARD_VERSION, "V0.1"),
++		},
++		.driver_data = (void *)&upboard_up_bios_info_dvt,
++	},
+ 	{ },
+ };
+ 
+@@ -865,7 +873,7 @@ static int __init upboard_pinctrl_probe(struct platform_device *pdev)
+ 		return -ENODEV;
+ 
+ 	hid = acpi_device_hid(adev);
+-	if (!strcmp(hid, "AANT0F00")) {
++	if (!strcmp(hid, "AANT0F00") || !strcmp(hid, "AANT0F04")) {
+ 		pctldesc = &upboard_up_pinctrl_desc;
+ 		rpi_mapping = upboard_up_rpi_mapping;
+ 		ngpio  = ARRAY_SIZE(upboard_up_rpi_mapping);
+@@ -1004,4 +1012,4 @@ MODULE_AUTHOR("Dan O'Donovan <dan@emutex.com>");
+ MODULE_AUTHOR("Nicola Lunghi <nicolal@emutex.com>");
+ MODULE_DESCRIPTION("UP Board HAT pin controller driver");
+ MODULE_LICENSE("GPL v2");
+-MODULE_ALIAS("platform:upboard-pinctrl");
+\ No newline at end of file
++MODULE_ALIAS("platform:upboard-pinctrl");
+-- 
+2.7.4
+

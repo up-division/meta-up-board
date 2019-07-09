@@ -13,11 +13,7 @@
 
 #
 # Machine Selection
-MACHINE ?= "up-board"
-#MACHINE ?= "up-squared"
-#MACHINE ?= "up-core"
-#MACHINE ?= "up-core-plus"
-#MACHINE ?= "intel-corei7-64"
+MACHINE ?= "up-xtreme"
 
 #
 # Where to place downloads

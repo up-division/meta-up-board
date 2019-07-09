@@ -1,0 +1,27 @@
+From 83edd14b87d2a8453f48f8efc7d042d148f9a918 Mon Sep 17 00:00:00 2001
+From: Michael Campion <michael.campion@emutex.com>
+Date: Wed, 10 Apr 2019 11:44:06 +0100
+Subject: [PATCH 18/19] pinctrl-upboard: Dont initialise UART1 RTS as input
+
+In the case where the BIOS does initialise pin directions,
+pinctrl-upboard was setting the RTS line as in input. GPIO17
+is removed from the initialize as input list.
+---
+ drivers/pinctrl/pinctrl-upboard.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
+index 397c8ac..65e46fd 100644
+--- a/drivers/pinctrl/pinctrl-upboard.c
++++ b/drivers/pinctrl/pinctrl-upboard.c
+@@ -203,7 +203,6 @@ static const struct reg_sequence upboard_up_reg_patches[] __initconst = {
+ 		BIT(UPFPGA_UP_I2C1_SDA)	    |
+ 		BIT(UPFPGA_UP_I2C1_SCL)	    |
+ 		BIT(UPFPGA_UP_ADC0)	    |
+-		BIT(UPFPGA_UP_GPIO17)	    |
+ 		BIT(UPFPGA_UP_GPIO27)	    |
+ 		BIT(UPFPGA_UP_GPIO22)	    |
+ 		BIT(UPFPGA_UP_SPI_MISO)	    |
+-- 
+2.7.4
+

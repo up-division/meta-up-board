@@ -1,0 +1,49 @@
+From 5c014fd59dfd8972f44529abb11e0faaeafef7ba Mon Sep 17 00:00:00 2001
+From: Dan O'Donovan <dan@emutex.com>
+Date: Thu, 9 May 2019 12:59:40 +0100
+Subject: [PATCH] platform/x86: upboard: fix gpio/pinctrl API references
+
+Changes in the signatures of some gpio and pinctrl subsystem API
+functions and data-structures, added in v4.15, need to be reflected
+in this UP-board legacy pinctrl driver (which was ported from a v4.14
+kernel)
+
+Signed-off-by: Dan O'Donovan <dan@emutex.com>
+---
+ drivers/platform/x86/up_board_pinctrl.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/platform/x86/up_board_pinctrl.c b/drivers/platform/x86/up_board_pinctrl.c
+index e6c9de4..bcc23ea 100644
+--- a/drivers/platform/x86/up_board_pinctrl.c
++++ b/drivers/platform/x86/up_board_pinctrl.c
+@@ -622,7 +622,7 @@ static int up_gpio_request(struct gpio_chip *gc, unsigned offset)
+ 	struct up_pin_info *pin = &up_pctrl->board->pins[offset];
+ 	struct gpio_desc *desc = pin->soc_gpio.desc;
+ 
+-	pinctrl_request_gpio(gc->base + offset);
++	pinctrl_gpio_request(gc->base + offset);
+ 	return gpio_request(desc_to_gpio(desc), gc->label);
+ }
+ 
+@@ -632,7 +632,7 @@ static void up_gpio_free(struct gpio_chip *gc, unsigned offset)
+ 	struct up_pin_info *pin = &up_pctrl->board->pins[offset];
+ 	struct gpio_desc *desc = pin->soc_gpio.desc;
+ 
+-	pinctrl_free_gpio(gc->base + offset);
++	pinctrl_gpio_free(gc->base + offset);
+ 	gpio_free(desc_to_gpio(desc));
+ }
+ 
+@@ -908,7 +908,7 @@ static int up_pinctrl_probe(struct platform_device *pdev)
+ 		struct up_pin_info *pin = &board->pins[offset];
+ 		struct irq_data *irq_data;
+ 
+-		pin->irq = irq_find_mapping(up_pctrl->chip.irqdomain, offset);
++		pin->irq = irq_find_mapping(up_pctrl->chip.irq.domain, offset);
+ 		pin->soc_gpio.irq = gpiod_to_irq(pin->soc_gpio.desc);
+ 		irq_set_parent(pin->irq, pin->soc_gpio.irq);
+ 		irq_data = irq_get_irq_data(pin->irq);
+-- 
+2.7.4
+

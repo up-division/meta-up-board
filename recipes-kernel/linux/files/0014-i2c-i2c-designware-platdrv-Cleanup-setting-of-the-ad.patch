@@ -1,0 +1,78 @@
+From 3d5d2b86002295c4859c84f4971f0d1cd70b459f Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Tue, 12 Mar 2019 15:55:53 +0100
+Subject: [PATCH 15/19] i2c: i2c-designware-platdrv: Cleanup setting of the
+ adapter number
+
+i2c-designware-platdrv assumes that if the pdev has an apci-companion
+it should use a dynamic adapter-nr and otherwise it will use pdev->id
+as adapter-nr.
+
+Before this commit the setting of the adapter.nr was somewhat convoluted,
+in the acpi_companion case it was set from dw_i2c_acpi_configure, in the
+non acpi_companion case it was set from dw_i2c_set_fifo_size based on
+tx_fifo_depth not being set yet indicating that dw_i2c_acpi_configure was
+not executed.
+
+This cleans this up, directly setting the adapter-nr from
+dw_i2c_plat_probe for both cases.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Acked-by: Jarkko Nikula <jarkko.nikula@linux.intel.com>
+Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+---
+ drivers/i2c/busses/i2c-designware-platdrv.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/i2c/busses/i2c-designware-platdrv.c b/drivers/i2c/busses/i2c-designware-platdrv.c
+index b5750fd..593dc72 100644
+--- a/drivers/i2c/busses/i2c-designware-platdrv.c
++++ b/drivers/i2c/busses/i2c-designware-platdrv.c
+@@ -90,7 +90,6 @@ static int dw_i2c_acpi_configure(struct platform_device *pdev)
+ 	struct acpi_device *adev;
+ 	const char *uid;
+ 
+-	dev->adapter.nr = -1;
+ 	dev->tx_fifo_depth = 32;
+ 	dev->rx_fifo_depth = 32;
+ 
+@@ -194,7 +193,7 @@ static void i2c_dw_configure_slave(struct dw_i2c_dev *dev)
+ 	dev->mode = DW_IC_SLAVE;
+ }
+ 
+-static void dw_i2c_set_fifo_size(struct dw_i2c_dev *dev, int id)
++static void dw_i2c_set_fifo_size(struct dw_i2c_dev *dev)
+ {
+ 	u32 param, tx_fifo_depth, rx_fifo_depth;
+ 
+@@ -208,7 +207,6 @@ static void dw_i2c_set_fifo_size(struct dw_i2c_dev *dev, int id)
+ 	if (!dev->tx_fifo_depth) {
+ 		dev->tx_fifo_depth = tx_fifo_depth;
+ 		dev->rx_fifo_depth = rx_fifo_depth;
+-		dev->adapter.nr = id;
+ 	} else if (tx_fifo_depth >= 2) {
+ 		dev->tx_fifo_depth = min_t(u32, dev->tx_fifo_depth,
+ 				tx_fifo_depth);
+@@ -328,13 +326,17 @@ static int dw_i2c_plat_probe(struct platform_device *pdev)
+ 				div_u64(clk_khz * t->sda_hold_ns + 500000, 1000000);
+ 	}
+ 
+-	dw_i2c_set_fifo_size(dev, pdev->id);
++	dw_i2c_set_fifo_size(dev);
+ 
+ 	adap = &dev->adapter;
+ 	adap->owner = THIS_MODULE;
+ 	adap->class = I2C_CLASS_DEPRECATED;
+ 	ACPI_COMPANION_SET(&adap->dev, ACPI_COMPANION(&pdev->dev));
+ 	adap->dev.of_node = pdev->dev.of_node;
++	if (has_acpi_companion(&pdev->dev))
++		adap->nr = -1;
++	else
++		adap->nr = pdev->id;
+ 
+ 	dev_pm_set_driver_flags(&pdev->dev,
+ 				DPM_FLAG_SMART_PREPARE |
+-- 
+2.7.4
+

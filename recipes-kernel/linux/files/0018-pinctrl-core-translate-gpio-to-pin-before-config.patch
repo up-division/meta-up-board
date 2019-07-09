@@ -1,0 +1,74 @@
+From 60e200a67bdae20dcf5e5c64719730f7658fcde4 Mon Sep 17 00:00:00 2001
+From: Michael Campion <michael.campion@emutex.com>
+Date: Thu, 2 May 2019 15:00:35 +0100
+Subject: [PATCH] pinctrl:core: translate gpio to pin before config
+
+Ticket #: 2568
+
+pinconf_set_config needs the pin gpio translated to pin number
+before configuring the pin. The translation was not done in
+pinctrl_gpio_set_config. This is fixed here.
+---
+ drivers/pinctrl/core.c | 29 ++++++++++++++++++++++++++---
+ 1 file changed, 26 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/pinctrl/core.c b/drivers/pinctrl/core.c
+index 07eb1e1..bfd7d1c 100644
+--- a/drivers/pinctrl/core.c
++++ b/drivers/pinctrl/core.c
+@@ -854,6 +854,26 @@ int pinctrl_gpio_direction_output(unsigned gpio)
+ }
+ EXPORT_SYMBOL_GPL(pinctrl_gpio_direction_output);
+ 
++static int pinctrl_set_config_if_match(struct pinctrl_dev *pctldev,
++					unsigned int gpio, unsigned long config)
++{
++	struct pinctrl_gpio_range *range;
++	int ret = 0;
++
++	range = pinctrl_match_gpio_range(pctldev, gpio);
++
++	if (range != NULL) {
++		int pin;
++
++		mutex_lock(&pctldev->mutex);
++		pin = gpio_to_pin(range, gpio);
++		ret = pinconf_set_config(pctldev, pin, &config, 1);
++		mutex_unlock(&pctldev->mutex);
++	}
++
++	return ret;
++}
++
+ /**
+  * pinctrl_gpio_set_config() - Apply config to given GPIO pin
+  * @gpio: the GPIO pin number from the GPIO subsystem number space
+@@ -865,7 +885,6 @@ EXPORT_SYMBOL_GPL(pinctrl_gpio_direction_output);
+  */
+ int pinctrl_gpio_set_config(unsigned gpio, unsigned long config)
+ {
+-	unsigned long configs[] = { config };
+ 	struct pinctrl_dev *pctldev;
+ 	struct gpio_desc *desc;
+ 	int dir;
+@@ -894,11 +913,15 @@ int pinctrl_gpio_set_config(unsigned gpio, unsigned long config)
+ 	 */
+ 	if (dir == 1) {
+ 		list_for_each_entry(pctldev, &pinctrldev_list, node) {
+-			ret = pinconf_set_config(pctldev, gpio, configs, ARRAY_SIZE(configs));
++			ret = pinctrl_set_config_if_match(pctldev, gpio, config);
++			if (ret)
++				break;
+ 		}
+ 	} else {
+ 		list_for_each_entry_reverse(pctldev, &pinctrldev_list, node) {
+-			ret = pinconf_set_config(pctldev, gpio, configs, ARRAY_SIZE(configs));
++			ret = pinctrl_set_config_if_match(pctldev, gpio, config);
++			if (ret)
++				break;
+ 		}
+ 	}
+ 
+-- 
+2.7.4
+

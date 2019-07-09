@@ -21,78 +21,48 @@ Table of Contents
 Prerequisites
 ================
 
-Supported hardware versions for Yocto 2.5 (sumo)
+Supported hardware versions for Yocto 2.7 (Warrior)
 ------------------------------------------------
-* UP Board
-* UP Squared
-* UP Core
-* UP Core Plus
+* up Xtreme
 
 Downloading the meta-up-board BSP layer
 ========================================
 
-Download the latest Sumo release and enter the poky directory:
+Download the latest Warrior release and enter the poky directory:
 ```
-git clone -b sumo git://git.yoctoproject.org/poky.git
+git clone -b warrior git://git.yoctoproject.org/poky.git
 cd poky
 ```
-Download the latest Intel BSP layer version for Sumo:
+Download the latest Intel BSP layer version for Warrior:
 
 ```
-git clone -b sumo git://git.yoctoproject.org/meta-intel.git
+git clone -b warrior git://git.yoctoproject.org/meta-intel.git
 ```
 
-Download the latest collection of layers for OE-core universe for Sumo:
+Download the latest collection of layers for OE-core universe for Warrior:
 ```
-git clone -b sumo git://git.openembedded.org/meta-openembedded 
+git clone -b warrior git://git.openembedded.org/meta-openembedded 
 ```
 Download meta-virtualization and openembedded-core for Docker containers:
 ```
-git clone -b sumo git://git.yoctoproject.org/meta-virtualization
+git clone -b warrior git://git.yoctoproject.org/meta-virtualization
 ```
 
 ```
-git clone -b sumo git://git.openembedded.org/openembedded-core
+git clone -b warrior git://git.openembedded.org/openembedded-core
 ```
 
-Download this UP Board BSP layer for Sumo:
+Download this UP Board BSP layer for Warrior:
 
 ```
-git clone -b sumo https://github.com/emutex/meta-up-board
+git clone -b warrior https://github.com/emutex/meta-up-board
 ```
 
 
 Building your Yocto image for each UP machine
 =============================================
 
-UP Board:
----------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-board bitbake upboard-image-sato
-```
-
-UP Squared Board:
------------------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-squared bitbake upboard-image-sato
-```
-
-UP Core Board:
---------------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-core bitbake upboard-image-sato
-```
-
-UP Core  Plus Board:
+UP Xtreme:
 --------------------
 From the poky directory:
 
@@ -145,38 +115,6 @@ characters), try doing this first:
 
 ```
 dd if=/dev/zero of=/dev/sdf bs=1M count=512
-```
-
-Connectivity firmware
-======================
-Ampak connectivity firmware is included to enable WiFi and Bluetooth
-for UPCorePlus boards.
-
-Firmware will be included by defaults for building your image. If you
-don't want to include it, just edit conf/machine/up-board.conf file
-and disable "Ampak-firmware, SystemD and network tools" parameters.
-
-a. WiFi
---------
-Scan your available WiFi networks:
-
-```
-iwlist wlan0 scan
-```
-You will see all the WiFi interfaces in your area.
-
-a. Bluetooth
--------------
-Check your Bluetooth devices in your area:
-
-```
-systemctl restart firmware-ampak-ap6355.service
-
-rfkill unblock bluetooth
-
-hciconfig hci0
-
-hcitool scan
 ```
 
 Additional Resources

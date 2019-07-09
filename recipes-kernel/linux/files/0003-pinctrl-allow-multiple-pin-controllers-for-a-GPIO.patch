@@ -1,7 +1,7 @@
-From b7bf5492189bbc4885adee091ef234499d150b8a Mon Sep 17 00:00:00 2001
+From d2c815ce2e614eef2025c23dedf765b64047b0b0 Mon Sep 17 00:00:00 2001
 From: Carlos Calderon <carlos@emutex.com>
 Date: Fri, 4 Jan 2019 10:58:24 +0000
-Subject: [PATCH 06/19] pinctrl: allow multiple pin controllers for a GPIO
+Subject: [PATCH 04/19] pinctrl: allow multiple pin controllers for a GPIO
 
 Add support for chaining pinctrl drivers controlling the same GPIO line.
 This allows for hardware configurations where multiple controllers must
@@ -16,14 +16,14 @@ configuration, this FPGA implements a pin controller for FPGA-connected
 pins. This setup requires coordination between the SoC GPIO controller
 and the FPGA-based controller, hence this patch.
 ---
- drivers/pinctrl/core.c | 268 +++++++++++++++++++++++++------------------------
- 1 file changed, 137 insertions(+), 131 deletions(-)
+ drivers/pinctrl/core.c | 309 +++++++++++++++++++++++++++----------------------
+ 1 file changed, 170 insertions(+), 139 deletions(-)
 
 diff --git a/drivers/pinctrl/core.c b/drivers/pinctrl/core.c
-index c555173..f1c46d2 100644
+index a3dd777..aad7a67 100644
 --- a/drivers/pinctrl/core.c
 +++ b/drivers/pinctrl/core.c
-@@ -289,8 +289,7 @@ static int pinctrl_register_pins(struct pinctrl_dev *pctldev,
+@@ -288,8 +288,7 @@ static int pinctrl_register_pins(struct pinctrl_dev *pctldev,
   * and pin list based GPIO ranges is managed correctly by this function.
   *
   * This function assumes the gpio is part of the specified GPIO range, use
@@ -33,7 +33,7 @@ index c555173..f1c46d2 100644
   */
  static inline int gpio_to_pin(struct pinctrl_gpio_range *range,
  				unsigned int gpio)
-@@ -330,92 +329,6 @@ pinctrl_match_gpio_range(struct pinctrl_dev *pctldev, unsigned gpio)
+@@ -329,92 +328,6 @@ pinctrl_match_gpio_range(struct pinctrl_dev *pctldev, unsigned gpio)
  }
  
  /**
@@ -126,9 +126,9 @@ index c555173..f1c46d2 100644
   * pinctrl_add_gpio_range() - register a GPIO range for a controller
   * @pctldev: pin controller device to add the range to
   * @range: the GPIO range to add
-@@ -732,6 +645,57 @@ int pinctrl_get_group_selector(struct pinctrl_dev *pctldev,
- 	return -EINVAL;
+@@ -728,6 +641,57 @@ static inline void pinctrl_generic_free_groups(struct pinctrl_dev *pctldev)
  }
+ #endif /* CONFIG_GENERIC_PINCTRL_GROUPS */
  
 +void pinctrl_free_gpio_locked(unsigned int gpio)
 +{
@@ -182,14 +182,14 @@ index c555173..f1c46d2 100644
 +}
 +
  /**
-  * pinctrl_request_gpio() - request a single pin to be used as GPIO
-  * @gpio: the GPIO pin number from the GPIO subsystem number space
-@@ -740,28 +704,53 @@ int pinctrl_get_group_selector(struct pinctrl_dev *pctldev,
+  * pinctrl_get_group_selector() - returns the group selector for a group
+  * @pctldev: the pin controller handling the group
+@@ -768,28 +732,53 @@ int pinctrl_get_group_selector(struct pinctrl_dev *pctldev,
   * as part of their gpio_request() semantics, platforms and individual drivers
   * shall *NOT* request GPIO pins to be muxed in.
   */
--int pinctrl_request_gpio(unsigned gpio)
-+int pinctrl_request_gpio(unsigned int gpio)
+-int pinctrl_gpio_request(unsigned gpio)
++int pinctrl_gpio_request(unsigned int gpio)
  {
  	struct pinctrl_dev *pctldev;
 -	struct pinctrl_gpio_range *range;
@@ -252,75 +252,73 @@ index c555173..f1c46d2 100644
  
  	return ret;
  }
-@@ -775,47 +764,64 @@ EXPORT_SYMBOL_GPL(pinctrl_request_gpio);
+@@ -803,47 +792,64 @@ EXPORT_SYMBOL_GPL(pinctrl_gpio_request);
   * as part of their gpio_free() semantics, platforms and individual drivers
   * shall *NOT* request GPIO pins to be muxed out.
   */
--void pinctrl_free_gpio(unsigned gpio)
-+void pinctrl_free_gpio(unsigned int gpio)
+-void pinctrl_gpio_free(unsigned gpio)
++void pinctrl_gpio_free(unsigned int gpio)
  {
 -	struct pinctrl_dev *pctldev;
 -	struct pinctrl_gpio_range *range;
 -	int ret;
 -	int pin;
--
++	mutex_lock(&pinctrldev_list_mutex);
+ 
 -	ret = pinctrl_get_device_gpio_range(gpio, &pctldev, &range);
 -	if (ret) {
 -		return;
 -	}
 -	mutex_lock(&pctldev->mutex);
--
++	pinctrl_free_gpio_locked(gpio);
++
++	mutex_unlock(&pinctrldev_list_mutex);
++}
++EXPORT_SYMBOL_GPL(pinctrl_gpio_free);
+ 
 -	/* Convert to the pin controllers number space */
 -	pin = gpio_to_pin(range, gpio);
-+	mutex_lock(&pinctrldev_list_mutex);
- 
--	pinmux_free_gpio(pctldev, pin, range);
-+	pinctrl_free_gpio_locked(gpio);
- 
--	mutex_unlock(&pctldev->mutex);
-+	mutex_unlock(&pinctrldev_list_mutex);
- }
- EXPORT_SYMBOL_GPL(pinctrl_free_gpio);
- 
--static int pinctrl_gpio_direction(unsigned gpio, bool input)
 +static int pinctrl_set_dir_if_match(struct pinctrl_dev *pctldev,
 +				    unsigned int gpio, bool input)
- {
--	struct pinctrl_dev *pctldev;
--	struct pinctrl_gpio_range *range;
--	int ret;
--	int pin;
++{
 +	struct pinctrl_gpio_range *range =
 +		pinctrl_match_gpio_range(pctldev, gpio);
 +	int ret = 0;
  
--	ret = pinctrl_get_device_gpio_range(gpio, &pctldev, &range);
--	if (ret) {
--		return ret;
+-	pinmux_free_gpio(pctldev, pin, range);
 +	if (range != NULL) {
 +		int pin;
-+
+ 
+-	mutex_unlock(&pctldev->mutex);
 +		mutex_lock(&pctldev->mutex);
 +		pin = gpio_to_pin(range, gpio);
 +		ret = pinmux_gpio_direction(pctldev, range, pin, input);
 +		mutex_unlock(&pctldev->mutex);
- 	}
- 
--	mutex_lock(&pctldev->mutex);
++	}
++
 +	return ret;
-+}
+ }
+-EXPORT_SYMBOL_GPL(pinctrl_gpio_free);
+ 
+ static int pinctrl_gpio_direction(unsigned gpio, bool input)
+ {
+ 	struct pinctrl_dev *pctldev;
+-	struct pinctrl_gpio_range *range;
+-	int ret;
+-	int pin;
++	int ret = -EPROBE_DEFER;
+ 
+-	ret = pinctrl_get_device_gpio_range(gpio, &pctldev, &range);
+-	if (ret) {
+-		return ret;
+-	}
+-
+-	mutex_lock(&pctldev->mutex);
++	mutex_lock(&pinctrldev_list_mutex);
  
 -	/* Convert to the pin controllers number space */
 -	pin = gpio_to_pin(range, gpio);
 -	ret = pinmux_gpio_direction(pctldev, range, pin, input);
-+static int pinctrl_gpio_direction(unsigned int gpio, bool input)
-+{
-+	struct pinctrl_dev *pctldev;
-+	int ret = -EPROBE_DEFER;
- 
--	mutex_unlock(&pctldev->mutex);
-+	mutex_lock(&pinctrldev_list_mutex);
-+
 +	/*
 +	 * FIXME UP-specific
 +	 * The two pin controllers (SoC, FPGA) share the GPIO line. Avoid
@@ -339,6 +337,60 @@ index c555173..f1c46d2 100644
 +			ret = pinctrl_set_dir_if_match(pctldev, gpio, input);
 +			if (ret)
 +				break;
++		}
++	}
+ 
+-	mutex_unlock(&pctldev->mutex);
++	mutex_unlock(&pinctrldev_list_mutex);
+ 
+ 	return ret;
+ }
+@@ -888,18 +894,43 @@ EXPORT_SYMBOL_GPL(pinctrl_gpio_direction_output);
+ int pinctrl_gpio_set_config(unsigned gpio, unsigned long config)
+ {
+ 	unsigned long configs[] = { config };
+-	struct pinctrl_gpio_range *range;
+ 	struct pinctrl_dev *pctldev;
+-	int ret, pin;
++	struct gpio_desc *desc;
++	int dir;
++	int ret = -EPROBE_DEFER;
+ 
+-	ret = pinctrl_get_device_gpio_range(gpio, &pctldev, &range);
+-	if (ret)
+-		return ret;
++	desc = gpio_to_desc(gpio);
++	if (!desc) {
++		pr_err("gpio_to_desc(%d) returned NULL", gpio);
++		return -ENODEV;
++	}
+ 
+-	mutex_lock(&pctldev->mutex);
+-	pin = gpio_to_pin(range, gpio);
+-	ret = pinconf_set_config(pctldev, pin, configs, ARRAY_SIZE(configs));
+-	mutex_unlock(&pctldev->mutex);
++	dir = gpiod_get_direction(desc);
++
++	mutex_lock(&pinctrldev_list_mutex);
++
++	/*
++	 * NOTE: this code suppose that if we have multiple pinctrl declared for
++	 * the same gpio those are configured in series.
++	 * In this situation we need to avoid the case were momentarely
++	 * multiple pinctrl try do drive the same line to a different logic value
++	 *
++	 * (1st pinctrl) 1>-----<0 (2nd pinctrl)
++	 *
++	 * To obtain that we need to mind the order in which the multiple pinctrl
++	 * are configured depending of the desired gpio direction (input, output)
++	 */
++	if (dir == 1) {
++		list_for_each_entry(pctldev, &pinctrldev_list, node) {
++			ret = pinconf_set_config(pctldev, gpio, configs, ARRAY_SIZE(configs));
++		}
++	} else {
++		list_for_each_entry_reverse(pctldev, &pinctrldev_list, node) {
++			ret = pinconf_set_config(pctldev, gpio, configs, ARRAY_SIZE(configs));
 +		}
 +	}
 +
