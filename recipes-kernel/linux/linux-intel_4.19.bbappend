@@ -28,6 +28,7 @@ SRC_URI += " \
 	file://0018-pinctrl-core-translate-gpio-to-pin-before-config.patch \
 	file://0019-serial-8250_dw-add-quirk-to-disable-DMA-on-Cherry-Tr.patch \
 	file://0020-platform-x86-upboard-fix-gpio-pinctrl-API-references.patch \
+	file://0021-upboard-pinctrl-drop-regmap-patches-for-UP-Xtreme.patch \
 "
 # replace these SRCREVs with the real commit ids once you've had
 # the appropriate changes committed to the upstream linux-yocto repo
