@@ -1,5 +1,7 @@
-Yocto BSP meta layer for the UP Board
+Yocto BSP meta layer for the UP Xtreme
 ======================================
+
+**NOTE: This repository currently supports UP Xtreme only**
 
 This README file contains information on building the meta-up-board BSP
 layer.  Please see the corresponding sections below for details.
@@ -12,10 +14,9 @@ Table of Contents
 
 1. Prerequisites
 2. Downloading the meta-up-board BSP layer
-3. Building your Yocto image for each UP machine
+3. Building your Yocto image for UP Xtreme
 4. Booting the live USB image
-5. Connecitvity firmware
-7. Additional Resources
+5. Additional Resources
 
 
 Prerequisites
@@ -23,7 +24,7 @@ Prerequisites
 
 Supported hardware versions for Yocto 2.7 (Warrior)
 ------------------------------------------------
-* up Xtreme
+* UP Xtreme
 
 Downloading the meta-up-board BSP layer
 ========================================
@@ -82,14 +83,14 @@ Booting the live USB image
 This BSP creates bootable live images, which can be used to directly
 boot Yocto off of a USB flash drive.  Upon completion of a successful
 build, described in the previous section, the images are created in
-a sub-folder named ./tmp/deploy/images/up-board/
+a sub-folder named ./tmp/deploy/images/up-xtreme/
 
 Under Linux, insert a USB flash drive.  Assuming the USB flash drive
 takes device /dev/sdf, use dd to copy the live image to it.  For
 example:
 
 ```
-dd if=core-image-sato-up-board.hddimg of=/dev/sdf
+dd if=upboard-image-sato-up-xtreme.hddimg of=/dev/sdf
 sync
 eject /dev/sdf
 ```
