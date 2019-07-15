@@ -1,7 +1,8 @@
 Yocto BSP meta layer for the UP Xtreme
 ======================================
 
-**NOTE: This repository currently supports UP Xtreme only**
+**Note: This branch for Yocto 'warrior' currently supports UP Xtreme only. For
+all other UP products, please refer to the 'sumo' branch in this repository.**
 
 This README file contains information on building the meta-up-board BSP
 layer.  Please see the corresponding sections below for details.
