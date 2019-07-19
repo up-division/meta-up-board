@@ -11,6 +11,7 @@ IMAGE_INSTALL += "i2c-tools git vim"
 IMAGE_INSTALL += "file"
 IMAGE_INSTALL += "dosfstools"
 IMAGE_INSTALL += "picocom"
+IMAGE_INSTALL += "connman connman-client"
 
 DISTRO_FEATURES_append = " bluez5 bluetooth wifi"
 IMAGE_INSTALL_append += " bluez5 systemd"
