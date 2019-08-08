@@ -70,7 +70,7 @@ From the poky directory:
 
 ```
 TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-core-plus bitbake upboard-image-sato
+MACHINE=up-xtreme bitbake upboard-image-sato
 ```
 
 At the end of a successfull build, you should have a live image that
