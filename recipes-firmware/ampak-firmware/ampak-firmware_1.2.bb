@@ -7,7 +7,7 @@ S = "${WORKDIR}"
 
 PACKAGE_ARCH = "all"
 
-inherit systemd
+inherit allarch
 
 FILES_${PN} += " ${base_libdir}/modprobe.d/* ${base_libdir}/firmware/ampak/brcm/* ${sysconfdir}/firmware/ampak/* ${systemd_system_unitdir}/* "
 
