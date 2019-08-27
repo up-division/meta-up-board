@@ -8,7 +8,7 @@ DESCRIPTION = "This will generate an initrd including ACPI tables\
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/BSD;md5=3775480a712fc46a69647678acb234cb"
 
-DEPENDS = "acpica-native"
+DEPENDS = "intel-microcode acpica-native"
 
 inherit deploy
 
@@ -39,5 +39,7 @@ do_compile() {
 do_deploy() {
 	cd ${WORKDIR}/acpi-tables
 	find kernel | cpio -H newc -o > ${DEPLOYDIR}/acpi-tables.cpio
+
+	cat ${DEPLOYDIR}/acpi-tables.cpio ${DEPLOY_DIR_IMAGE}/microcode.cpio > ${DEPLOYDIR}/wic-initrd
 }
 addtask deploy before do_build after do_compile
