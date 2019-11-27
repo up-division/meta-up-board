@@ -28,6 +28,9 @@ SRC_URI += " \
 	file://0019-spi-pxa2xx-Set-dir-and-value-when-requesting-cs-gpio.patch \
 	file://0020-platform-x86-upboard-Add-gpio-chip-select-for-UP-Boa.patch \
 	file://0021-i2c-designware-platdrv-Use-ACPI-method-FREQ-to-get-i.patch \
+	file://0022-PM-i2c-designware-platdrv-Clean-up-PM-handling-in-pr.patch \
+	file://0023-PM-mfd-intel-lpss-Push-system-sleep-callbacks-to-lat.patch \
+	file://0024-PM-i2c-designware-platdrv-Suspend-resume-at-the-late.patch \
 "
 
 # replace these SRCREVs with the real commit ids once you've had
