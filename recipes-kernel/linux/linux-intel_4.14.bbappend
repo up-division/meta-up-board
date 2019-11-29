@@ -25,6 +25,9 @@ SRC_URI += " \
 	file://0016-pinctrl-upboard-add-regmap-patches-for-CREX-and-CRST.patch \
 	file://0017-pinctrl-upboard-add-separate-regmap-patches-for-CREX.patch \
 	file://0018-correct-the-number-of-GPIOs-for-CREX-and-CRST02-boar.patch \
+	file://0019-spi-pxa2xx-Set-dir-and-value-when-requesting-cs-gpio.patch \
+	file://0020-platform-x86-upboard-Add-gpio-chip-select-for-UP-Boa.patch \
+	file://0021-i2c-designware-platdrv-Use-ACPI-method-FREQ-to-get-i.patch \
 "
 
 # replace these SRCREVs with the real commit ids once you've had
