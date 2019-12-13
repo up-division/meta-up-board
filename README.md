@@ -15,7 +15,8 @@ Table of Contents
 3. Building your Yocto image for each UP machine
 4. Booting the live USB image
 5. Connecitvity firmware
-7. Additional Resources
+7. Enabling Secure Boot
+8. Additional Resources
 
 
 Prerequisites
@@ -44,7 +45,7 @@ git clone -b sumo git://git.yoctoproject.org/meta-intel.git
 
 Download the latest collection of layers for OE-core universe for Sumo:
 ```
-git clone -b sumo git://git.openembedded.org/meta-openembedded 
+git clone -b sumo git://git.openembedded.org/meta-openembedded
 ```
 Download meta-virtualization and openembedded-core for Docker containers:
 ```
@@ -178,6 +179,93 @@ hciconfig hci0
 
 hcitool scan
 ```
+
+Enabling Secure Boot
+====================
+From the poky directory:
+
+```
+TEMPLATECONF=meta-up-board/conf source oe-init-build-env
+```
+
+Edit build/conf/local.conf file to enable Secure Boot
+
+```
+UP_SECURE_BOOT = "1"
+```
+
+Before building the image, signing keys need to be available so that the
+image can be signed. To generate the signing key material, execute the
+following commands on a PC running Ubuntu 16.04 or similar:
+
+```
+openssl req -new -x509 -newkey rsa:2048 -subj "/CN=UP-BOARD Platform Key/" -keyout PK.key -out PK.crt -days 3650 -nodes -sha256
+openssl req -new -x509 -newkey rsa:2048 -subj "/CN=UP-BOARD Key-Exchange Key/" -keyout KEK.key -out KEK.crt -days 3650 -nodes -sha256
+openssl req -new -x509 -newkey rsa:2048 -subj "/CN=UP-BOARD Kernel-Signing Key/" -keyout DB.key -out DB.crt -days 3650 -nodes -sha256
+
+chmod -v 400 DB.key KEK.key PK.key
+```
+
+The key files are the private keys and should be kept secret. They will be
+used internally for signing different components. In the build folder create
+a new directory called **secure-boot-keys**. You should now have:
+
+```
+poky/build/secure-boot-keys
+```
+
+Copy the DB.key and DB.crt to the **secure-boot-keys** folder. The signed image
+can now be built using the standard bitbake commands in **Building your Yocto image
+for each UP machine**. Copy the signed image to a USB pen drive.
+
+Under Linux, insert a USB flash drive.  Assuming the USB flash drive
+takes device /dev/sdf, use dd to copy the live image to it.  For
+example:
+
+```
+dd if=core-image-sato-up-board.wic of=/dev/sdf
+sync
+eject /dev/sdf
+```
+
+Before booting the signed image a few steps are required to configure the BIOS
+for secure booting. The UP BIOS reads the certificates in a .DER format, the
+.crt files created above need to be converted to this format.
+
+```
+openssl x509 -outform DER -in PK.crt -out PK.cer
+openssl x509 -outform DER -in KEK.crt -out KEK.cer
+openssl x509 -outform DER -in DB.crt -out DB.cer
+```
+
+Copy PK.cer KEK.cer and DB.cer to a FAT formatted USB pen drive. Plug this pen
+drive into an UP Board and boot into the BIOS menu. Navigate to the Secure Boot
+Menu.
+
+Highlight **Secure Boot** and select **Enable**. Then select **Key Management**
+and press **enter**. This menu provides a method to load the certificates from
+the pen drive onto the BIOS. The 3 entries we are concerned with are:
+
+--Platform Key (PK)
+--Key Exchange (KEK)
+--Authorised Signatures
+
+The 3 certificate files correspond to each entry as follows:
+--PK.cer for Platform Key (PK)
+--KEK.cer for Key Exchange Key (KEK)
+--DB.cer for Authroised Signatures
+
+Remove any existing keys from here. To delete a key, select the entry and press
+**enter**. Highlight **Delete Key** press enter and enter again to confirm.
+
+To add a new key, select the entry and press **enter**. Highight **Set new
+Key**, select **No** (to load key from pen drive) and press enter. In the
+navigation window locate your files on the pen drive. Highlight the file
+appropriate to the entry you are updating. Press **enter**  and **enter** again
+to confirm **Public Key Certificate**. **Save and Reset**.
+
+Insert the USB pen drive that contains the signed image and power up the UP
+board. The board should now boot the signed image.
 
 Additional Resources
 =======================

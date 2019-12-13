@@ -233,3 +233,8 @@ DISTRO_FEATURES_append = " virtualization"
 IMAGE_INSTALL_append = "  docker docker-contrib python3-docker-compose"
 
 PREFERRED_PROVIDER_iasl-native = "acpica-native"
+
+#
+## Enable UP security features
+##
+UP_SECURE_BOOT = "0"
