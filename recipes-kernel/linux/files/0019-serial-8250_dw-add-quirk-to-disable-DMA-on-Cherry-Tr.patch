@@ -1,8 +1,7 @@
-From 93b210995790fa569e42970e946f17aafc3dcfc5 Mon Sep 17 00:00:00 2001
+From 245e16c812444da01cecb17524178217a92fedcb Mon Sep 17 00:00:00 2001
 From: Carlos Calderon <carlos@emutex.com>
 Date: Wed, 3 Oct 2018 13:09:36 +0100
-Subject: [PATCH 2/3] serial: 8250_dw: add quirk to disable DMA on Cherry Trail
- SoC
+Subject: [PATCH] serial: 8250_dw: add quirk to disable DMA on Cherry Trail SoC
 
 Using DMA with the HS-UART on the Atom X5-8350 "Cherry Trail" SoC
 results in data loss/corruption on UART transfers and the following
@@ -16,7 +15,7 @@ HS-UARTs on Cherry Trail (matching ACPI device ID "8086228A").
  1 file changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/tty/serial/8250/8250_dw.c b/drivers/tty/serial/8250/8250_dw.c
-index d31b975..bb7d66d 100644
+index 284e8d0..70db76b 100644
 --- a/drivers/tty/serial/8250/8250_dw.c
 +++ b/drivers/tty/serial/8250/8250_dw.c
 @@ -67,6 +67,7 @@ struct dw8250_data {
@@ -35,7 +34,7 @@ index d31b975..bb7d66d 100644
 +		data->skip_dma = true;
  	}
  
- 	/* Platforms with iDMA */
+ 	/* Platforms with iDMA 64-bit */
 -	if (platform_get_resource_byname(to_platform_device(p->dev),
 +	if (!data->skip_dma &&
 +	    platform_get_resource_byname(to_platform_device(p->dev),
