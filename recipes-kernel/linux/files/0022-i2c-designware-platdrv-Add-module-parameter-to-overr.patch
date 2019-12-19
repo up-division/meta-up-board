@@ -1,0 +1,46 @@
+From 593a991da9309ac934215d36375fc96cec606c55 Mon Sep 17 00:00:00 2001
+From: Michael Campion <michael.campion@emutex.com>
+Date: Thu, 19 Dec 2019 20:08:32 +0000
+Subject: [PATCH] i2c: designware-platdrv: Add module parameter to override i2c
+ speed
+
+This commit adds a module parameter to i2c-designware-platdrv.c to allow the
+user to override the i2c bus speed set by the acpi.
+---
+ drivers/i2c/busses/i2c-designware-platdrv.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/drivers/i2c/busses/i2c-designware-platdrv.c b/drivers/i2c/busses/i2c-designware-platdrv.c
+index b38f338..e6271f8 100644
+--- a/drivers/i2c/busses/i2c-designware-platdrv.c
++++ b/drivers/i2c/busses/i2c-designware-platdrv.c
+@@ -33,6 +33,10 @@
+ 
+ #include "i2c-designware-core.h"
+ 
++static unsigned int i2c_freq;
++module_param(i2c_freq, uint, S_IRUGO);
++MODULE_PARM_DESC(i2c_freq, "I2C clock frequency");
++
+ static u32 i2c_dw_get_clk_rate_khz(struct dw_i2c_dev *dev)
+ {
+ 	return clk_get_rate(dev->clk)/1000;
+@@ -267,6 +271,15 @@ static int dw_i2c_plat_probe(struct platform_device *pdev)
+ 	else
+ 		i2c_parse_fw_timings(&pdev->dev, t, false);
+ 
++	if (i2c_freq) {
++		dev_warn(&pdev->dev,
++			"I2C Frequency override by module parameter:"
++			"old frequency=%u new frequency=%u\n",
++			t->bus_freq_hz,
++			i2c_freq);
++		t->bus_freq_hz = i2c_freq;
++	}
++
+ 	acpi_speed = i2c_acpi_find_bus_speed(&pdev->dev);
+ 	/*
+ 	 * Some DSTDs use a non standard speed, round down to the lowest
+-- 
+2.7.4
+

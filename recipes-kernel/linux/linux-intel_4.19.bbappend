@@ -2,8 +2,6 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 PR := "${PR}.1"
 
-COMPATIBLE_MACHINE_up-xtreme = "up-xtreme"
-
 SRC_URI += " \
 	file://up-board.cfg \
 	file://up-board-user-config.cfg \
@@ -29,6 +27,11 @@ SRC_URI += " \
 	file://0019-serial-8250_dw-add-quirk-to-disable-DMA-on-Cherry-Tr.patch \
 	file://0020-platform-x86-upboard-fix-gpio-pinctrl-API-references.patch \
 	file://0021-upboard-pinctrl-drop-regmap-patches-for-UP-Xtreme.patch \
+	file://0022-i2c-designware-platdrv-Add-module-parameter-to-overr.patch \
+	file://0023-i2c-designware-platdrv-Use-ACPI-method-FREQ-to-get-i.patch \
+	file://0024-spi-pxa2xx-Set-dir-and-value-when-requesting-cs-gpio.patch \
+	file://0025-platform-x86-upboard-Add-gpio-chip-select-for-UP-Boa.patch \
+	file://0026-up-pinctrl-change-SoC-gpio-references-to-use-h-w-pin.patch \
 "
 # replace these SRCREVs with the real commit ids once you've had
 # the appropriate changes committed to the upstream linux-yocto repo
