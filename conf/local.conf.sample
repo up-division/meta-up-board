@@ -13,6 +13,7 @@
 
 #
 # Machine Selection
+# MACHINE ?= "up-board"
 MACHINE ?= "up-xtreme"
 
 #
