@@ -15,6 +15,7 @@
 # Machine Selection
 # MACHINE ?= "up-board"
 # MACHINE ?= "up-squared"
+# MACHINE ?= "up-core"
 MACHINE ?= "up-xtreme"
 
 #
