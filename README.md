@@ -28,6 +28,18 @@ Supported hardware versions for Yocto 2.5 (sumo)
 * UP Core
 * UP Core Plus
 
+Supported hardware versions for Yocto 2.7 (warrior)
+------------------------------------------------
+* UP Xtreme
+
+DEVELOPMENT: Supported hardware versions for Yocto 2.7 (warrior-dev) currenlty under development/testing
+------------------------------------------------
+* UP Board
+* UP Squared
+* UP Core
+* UP Core Plus
+* UP Xtreme
+
 Downloading the meta-up-board BSP layer
 ========================================
 
