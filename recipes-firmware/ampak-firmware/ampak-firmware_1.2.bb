@@ -9,7 +9,7 @@ PACKAGE_ARCH = "all"
 
 inherit allarch
 
-FILES_${PN} += " ${base_libdir}/modprobe.d/* ${base_libdir}/firmware/ampak/brcm/* ${systemd_system_unitdir}/* "
+FILES_${PN} += " ${base_libdir}/modprobe.d/* ${base_libdir}/firmware/ampak/brcm/* ${base_libdir}/firmware/brcm/* ${systemd_system_unitdir}/* "
 
 INHIBIT_PACKAGE_STRIP = "1"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
