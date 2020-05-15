@@ -34,9 +34,9 @@ do_install () {
    install -m 755 ${WORKDIR}/brcmfmac43455-sdio.bin ${D}${base_libdir}/firmware/ampak/brcm/
    install -m 755 ${WORKDIR}/brcmfmac43455-sdio.txt ${D}${base_libdir}/firmware/ampak/brcm/
 
-   install -d ${D}${base_libdir}/firmware/brcm
-   install -m 755 ${WORKDIR}/BCM43430A1.hcd ${D}${base_libdir}/firmware/brcm/
-   install -m 755 ${WORKDIR}/BCM4345C0.hcd ${D}${base_libdir}/firmware/brcm/
+   install -d ${D}${sysconfdir}/firmware/
+   install -m 755 ${WORKDIR}/BCM43430A1.hcd ${D}${sysconfdir}/firmware/
+   install -m 755 ${WORKDIR}/BCM4345C0.hcd ${D}${sysconfdir}/firmware/
 }
 
 NATIVE_SYSTEMD_SUPPORT = "1"
