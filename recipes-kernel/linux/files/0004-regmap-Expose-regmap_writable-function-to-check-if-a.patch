@@ -1,7 +1,7 @@
-From b0ec896e741f330df18785e931537be1862ff4c8 Mon Sep 17 00:00:00 2001
+From 22225c99efb7e8037a3c81b3baae2d8a8df098e9 Mon Sep 17 00:00:00 2001
 From: Nicola Lunghi <nicola.lunghi@emutex.com>
 Date: Thu, 27 Jul 2017 17:55:34 +0100
-Subject: [PATCH 05/19] regmap: Expose regmap_writable function to check if a
+Subject: [PATCH 04/30] regmap: Expose regmap_writable function to check if a
  register is writable
 
 Signed-off-by: Nicola Lunghi <nicola.lunghi@emutex.com>
@@ -12,10 +12,10 @@ Signed-off-by: Nicola Lunghi <nicola.lunghi@emutex.com>
  3 files changed, 11 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/base/regmap/internal.h b/drivers/base/regmap/internal.h
-index a6bf34d63..de951a1 100644
+index 3d80c4b43f72..4d2fa740f354 100644
 --- a/drivers/base/regmap/internal.h
 +++ b/drivers/base/regmap/internal.h
-@@ -178,11 +178,6 @@ struct regcache_ops {
+@@ -177,11 +177,6 @@ struct regcache_ops {
  	int (*drop)(struct regmap *map, unsigned int min, unsigned int max);
  };
  
@@ -24,14 +24,14 @@ index a6bf34d63..de951a1 100644
 -bool regmap_readable(struct regmap *map, unsigned int reg);
 -bool regmap_volatile(struct regmap *map, unsigned int reg);
 -bool regmap_precious(struct regmap *map, unsigned int reg);
+ bool regmap_writeable_noinc(struct regmap *map, unsigned int reg);
  bool regmap_readable_noinc(struct regmap *map, unsigned int reg);
  
- int _regmap_write(struct regmap *map, unsigned int reg,
 diff --git a/drivers/base/regmap/regmap.c b/drivers/base/regmap/regmap.c
-index 0360a90..f61a24c 100644
+index 927ebde1607b..6062e6effc0c 100644
 --- a/drivers/base/regmap/regmap.c
 +++ b/drivers/base/regmap/regmap.c
-@@ -93,6 +93,7 @@ bool regmap_writeable(struct regmap *map, unsigned int reg)
+@@ -100,6 +100,7 @@ bool regmap_writeable(struct regmap *map, unsigned int reg)
  
  	return true;
  }
@@ -39,7 +39,7 @@ index 0360a90..f61a24c 100644
  
  bool regmap_cached(struct regmap *map, unsigned int reg)
  {
-@@ -116,6 +117,7 @@ bool regmap_cached(struct regmap *map, unsigned int reg)
+@@ -123,6 +124,7 @@ bool regmap_cached(struct regmap *map, unsigned int reg)
  
  	return true;
  }
@@ -47,7 +47,7 @@ index 0360a90..f61a24c 100644
  
  bool regmap_readable(struct regmap *map, unsigned int reg)
  {
-@@ -136,6 +138,7 @@ bool regmap_readable(struct regmap *map, unsigned int reg)
+@@ -143,6 +145,7 @@ bool regmap_readable(struct regmap *map, unsigned int reg)
  
  	return true;
  }
@@ -55,7 +55,7 @@ index 0360a90..f61a24c 100644
  
  bool regmap_volatile(struct regmap *map, unsigned int reg)
  {
-@@ -153,6 +156,7 @@ bool regmap_volatile(struct regmap *map, unsigned int reg)
+@@ -160,6 +163,7 @@ bool regmap_volatile(struct regmap *map, unsigned int reg)
  	else
  		return true;
  }
@@ -63,19 +63,19 @@ index 0360a90..f61a24c 100644
  
  bool regmap_precious(struct regmap *map, unsigned int reg)
  {
-@@ -167,6 +171,7 @@ bool regmap_precious(struct regmap *map, unsigned int reg)
+@@ -174,6 +178,7 @@ bool regmap_precious(struct regmap *map, unsigned int reg)
  
  	return false;
  }
 +EXPORT_SYMBOL_GPL(regmap_precious);
  
- bool regmap_readable_noinc(struct regmap *map, unsigned int reg)
+ bool regmap_writeable_noinc(struct regmap *map, unsigned int reg)
  {
 diff --git a/include/linux/regmap.h b/include/linux/regmap.h
-index 035129b..36bc898 100644
+index dfe493ac692d..7ec57ab64252 100644
 --- a/include/linux/regmap.h
 +++ b/include/linux/regmap.h
-@@ -1025,6 +1025,12 @@ void regcache_mark_dirty(struct regmap *map);
+@@ -1051,6 +1051,12 @@ void regcache_mark_dirty(struct regmap *map);
  bool regmap_check_range_table(struct regmap *map, unsigned int reg,
  			      const struct regmap_access_table *table);
  
@@ -89,5 +89,5 @@ index 035129b..36bc898 100644
  			  int num_regs);
  int regmap_parse_val(struct regmap *map, const void *buf,
 -- 
-2.7.4
+2.17.1
 

@@ -1,7 +1,7 @@
-From fea05825c9d5d6c717c69c1e26b95f643a5a31cd Mon Sep 17 00:00:00 2001
+From 1467072523e24fde7d37227ffa575d36f7463484 Mon Sep 17 00:00:00 2001
 From: Dan O'Donovan <dan@emutex.com>
 Date: Thu, 22 Nov 2018 18:13:19 +0000
-Subject: [PATCH 16/19] pinctrl-upboard: add regmap patches for CREX and CRST02
+Subject: [PATCH 11/30] pinctrl-upboard: add regmap patches for CREX and CRST02
  UP Core carrier boards
 
 The initial pinctrl configuration on the CPLD on CREX and CRST02 boards isn't
@@ -14,17 +14,18 @@ update the configuration if they are later exported as GPIO pins.
 
 Signed-off-by: Dan O'Donovan <dan@emutex.com>
 ---
- drivers/pinctrl/pinctrl-upboard.c | 54 ++++++++++++++++++++++++++++++++++++---
+ drivers/pinctrl/pinctrl-upboard.c | 54 ++++++++++++++++++++++++++++---
  1 file changed, 50 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
-index ed1d9bd..5dae769 100644
+index ed1d9bdb529c..5dae76942f6e 100644
 --- a/drivers/pinctrl/pinctrl-upboard.c
 +++ b/drivers/pinctrl/pinctrl-upboard.c
-@@ -536,11 +536,53 @@ static unsigned int upboard_upcore_crex_rpi_mapping[] = {
+@@ -535,12 +535,54 @@ static unsigned int upboard_upcore_crex_rpi_mapping[] = {
+ 	UPBOARD_UPCORE_CREX_BIT_TO_PIN(1, I2S2_TX),
  };
  
- /*
++/*
 + * Init patches applied to the registers until the BIOS sets proper defaults
 + */
 +static const struct reg_sequence upboard_upcore_crex_reg_patches[] __initconst = {
@@ -65,7 +66,7 @@ index ed1d9bd..5dae769 100644
 +	.npatches = ARRAY_SIZE(upboard_upcore_crex_reg_patches),
 +};
 +
-+/*
+ /*
   * UP Core board + CRST02 carrier board data
   */
  
@@ -105,5 +106,5 @@ index ed1d9bd..5dae769 100644
  	if (bios_info && bios_info->patches) {
  		ret = regmap_register_patch(pctrl->regmap,
 -- 
-2.7.4
+2.17.1
 

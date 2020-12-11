@@ -1,0 +1,44 @@
+From c12793379586f10b253c61e8b7d448df2561956a Mon Sep 17 00:00:00 2001
+From: Michael Campion <michael.campion@emutex.com>
+Date: Wed, 29 May 2019 20:18:50 +0100
+Subject: [PATCH 19/30] pinctrl:fpga:up: Update DMI data match
+
+Offical board name and release have been made available in the DMI data.
+upboard_fpga.c and pinctrl_upboard.c DMI matches have been update to
+use board name and version.
+---
+ drivers/mfd/upboard-fpga.c        | 3 ++-
+ drivers/pinctrl/pinctrl-upboard.c | 3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
+index 64d9dafb7f53..42e6f242e92a 100644
+--- a/drivers/mfd/upboard-fpga.c
++++ b/drivers/mfd/upboard-fpga.c
+@@ -345,7 +345,8 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
+ 	{
+ 		.matches = { /* UP Xtreme */
+ 			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "AAEON"),
+-			DMI_EXACT_MATCH(DMI_BIOS_DATE, "04/11/2019"),
++			DMI_EXACT_MATCH(DMI_BOARD_NAME, "UP-WHL01"),
++			DMI_EXACT_MATCH(DMI_BOARD_VERSION, "V0.1"),
+ 		},
+ 		.driver_data = (void *)UPFPGA_QUIRK_UNINITIALISED,
+ 	},
+diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
+index 10cc9aaf0d02..f9bd3d157503 100644
+--- a/drivers/pinctrl/pinctrl-upboard.c
++++ b/drivers/pinctrl/pinctrl-upboard.c
+@@ -842,7 +842,8 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
+ 	{
+ 		.matches = { /* UP Xtreme */
+ 			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "AAEON"),
+-			DMI_EXACT_MATCH(DMI_BIOS_DATE, "04/11/2019"),
++			DMI_EXACT_MATCH(DMI_BOARD_NAME, "UP-WHL01"),
++			DMI_EXACT_MATCH(DMI_BOARD_VERSION, "V0.1"),
+ 		},
+ 		.driver_data = (void *)&upboard_up_bios_info_dvt,
+ 	},
+-- 
+2.17.1
+

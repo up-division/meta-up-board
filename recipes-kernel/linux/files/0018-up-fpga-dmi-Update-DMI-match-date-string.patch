@@ -1,0 +1,40 @@
+From 6ac7279135f6df7315c3e164d3672beb5f74e4df Mon Sep 17 00:00:00 2001
+From: Michael Campion <michael.campion@emutex.com>
+Date: Thu, 2 May 2019 17:13:12 +0100
+Subject: [PATCH 18/30] up-fpga:dmi: Update DMI match date string
+
+This matches the DMI DATE DATA for UP3 BIOS name UPW1AM0B(04/11/2019)
+---
+ drivers/mfd/upboard-fpga.c        | 2 +-
+ drivers/pinctrl/pinctrl-upboard.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
+index b55e1b642cf5..64d9dafb7f53 100644
+--- a/drivers/mfd/upboard-fpga.c
++++ b/drivers/mfd/upboard-fpga.c
+@@ -345,7 +345,7 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
+ 	{
+ 		.matches = { /* UP Xtreme */
+ 			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "AAEON"),
+-			DMI_EXACT_MATCH(DMI_BIOS_DATE, "03/18/2019"),
++			DMI_EXACT_MATCH(DMI_BIOS_DATE, "04/11/2019"),
+ 		},
+ 		.driver_data = (void *)UPFPGA_QUIRK_UNINITIALISED,
+ 	},
+diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
+index 65e46fdb5632..10cc9aaf0d02 100644
+--- a/drivers/pinctrl/pinctrl-upboard.c
++++ b/drivers/pinctrl/pinctrl-upboard.c
+@@ -842,7 +842,7 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
+ 	{
+ 		.matches = { /* UP Xtreme */
+ 			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "AAEON"),
+-			DMI_EXACT_MATCH(DMI_BIOS_DATE, "03/18/2019"),
++			DMI_EXACT_MATCH(DMI_BIOS_DATE, "04/11/2019"),
+ 		},
+ 		.driver_data = (void *)&upboard_up_bios_info_dvt,
+ 	},
+-- 
+2.17.1
+

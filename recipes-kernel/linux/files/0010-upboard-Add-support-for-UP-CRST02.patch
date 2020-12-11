@@ -1,7 +1,7 @@
-From fca09160bc84c101d921fab8b45e6b2f0a4bb14d Mon Sep 17 00:00:00 2001
+From cfdec01d13572f63f4e0455a99059cd0e074a492 Mon Sep 17 00:00:00 2001
 From: Carlos Calderon <carlos@emuex.com>
 Date: Thu, 13 Sep 2018 16:23:45 +0100
-Subject: [PATCH 14/19] upboard: Add support for UP-CRST02
+Subject: [PATCH 10/30] upboard: Add support for UP-CRST02
 
 UP-CRST02 uses
 * ACPI ID AANT0F03
@@ -15,7 +15,7 @@ Add support to MFD and pinctrl.
  2 files changed, 38 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
-index 3ce27e2..0e81929 100644
+index 3ce27e23f9a2..0e8192902c35 100644
 --- a/drivers/mfd/upboard-fpga.c
 +++ b/drivers/mfd/upboard-fpga.c
 @@ -149,6 +149,20 @@ static const struct upboard_fpga_data upboard_up2_fpga_data = {
@@ -56,7 +56,7 @@ index 3ce27e2..0e81929 100644
  MODULE_DEVICE_TABLE(acpi, upboard_fpga_acpi_match);
  
 diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
-index 65ac489..ed1d9bd 100644
+index 65ac489d41a6..ed1d9bdb529c 100644
 --- a/drivers/pinctrl/pinctrl-upboard.c
 +++ b/drivers/pinctrl/pinctrl-upboard.c
 @@ -535,6 +535,13 @@ static unsigned int upboard_upcore_crex_rpi_mapping[] = {
@@ -100,5 +100,5 @@ index 65ac489..ed1d9bd 100644
  		return -ENODEV;
  
 -- 
-2.7.4
+2.17.1
 

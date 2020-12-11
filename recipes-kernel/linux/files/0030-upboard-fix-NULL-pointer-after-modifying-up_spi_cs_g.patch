@@ -1,0 +1,29 @@
+From 3c62cf5c017dd2dfcb2f63f4ac54ce3bf80cbe27 Mon Sep 17 00:00:00 2001
+From: frank2_hsieh <frank2_hsieh@asus.com>
+Date: Mon, 12 Oct 2020 21:24:34 +0800
+Subject: [PATCH 30/30] upboard: fix NULL pointer after modifying
+ up_spi_cs_gpiod_table
+
+spi-pxa2xx-platform driver happens NULL pointer issue when searching
+cs from gpiod_lookup_table.
+GPIO lookup tables are supposed to be zero terminated. Let's do that
+and avoid accidentally walking off the end.
+---
+ drivers/platform/x86/up_board.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/platform/x86/up_board.c b/drivers/platform/x86/up_board.c
+index a83ca94ad924..b3b395124efb 100644
+--- a/drivers/platform/x86/up_board.c
++++ b/drivers/platform/x86/up_board.c
+@@ -121,6 +121,7 @@ static struct gpiod_lookup_table up_spi_cs_gpiod_table = {
+ 	.table		= {
+ 		GPIO_LOOKUP_IDX("up-pinctrl",
+ 				SPI_CS1_DEFAULT_GPIO, "cs", 1, GPIO_ACTIVE_HIGH),
++	{}
+ 	},
+ };
+ 
+-- 
+2.17.1
+

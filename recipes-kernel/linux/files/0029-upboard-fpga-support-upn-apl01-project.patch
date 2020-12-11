@@ -1,0 +1,33 @@
+From 66d308019830e3e4ab3073cf7e752d6a9c7d3cc2 Mon Sep 17 00:00:00 2001
+From: frank2_hsieh <frank2_hsieh@asus.com>
+Date: Mon, 24 Aug 2020 12:15:42 +0800
+Subject: [PATCH 29/30] upboard-fpga: support upn-apl01 project
+
+Product Name is UPN-APL01
+Board Version is V1.0
+---
+ drivers/mfd/upboard-fpga.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
+index 532b58f0aed4..c7b36e839173 100644
+--- a/drivers/mfd/upboard-fpga.c
++++ b/drivers/mfd/upboard-fpga.c
+@@ -334,6 +334,14 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
+ 		.driver_data = (void *)(UPFPGA_QUIRK_UNINITIALISED |
+ 			UPFPGA_QUIRK_HRV1_IS_PROTO2),
+ 	},
++	{
++		.matches = { /* UP2 Pro*/
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "AAEON"),
++			DMI_EXACT_MATCH(DMI_BOARD_NAME, "UPN-APL01"),
++			DMI_EXACT_MATCH(DMI_BOARD_VERSION, "V1.0"),
++		},
++		.driver_data = (void *)UPFPGA_QUIRK_HRV1_IS_PROTO2,
++	},
+ 	{
+ 		.matches = { /* UP2 */
+ 			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "AAEON"),
+-- 
+2.17.1
+

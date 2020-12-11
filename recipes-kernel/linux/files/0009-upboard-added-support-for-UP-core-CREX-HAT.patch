@@ -1,18 +1,18 @@
-From 9053e8902aa382c02753747f73d3e055729b1ed4 Mon Sep 17 00:00:00 2001
+From d4faeef2f24c64939ba16c2856e8d6473d692bd7 Mon Sep 17 00:00:00 2001
 From: Nicola Lunghi <nicola.lunghi@emutex.com>
 Date: Thu, 24 Aug 2017 11:15:24 +0100
-Subject: [PATCH 13/19] upboard: added support for UP core + CREX HAT
+Subject: [PATCH 09/30] upboard: added support for UP core + CREX HAT
 
 Signed-off-by: Nicola Lunghi <nicola.lunghi@emutex.com>
 [Javier: minor style consistency tweaks]
 Signed-off-by: Javier Arteaga <javier@emutex.com>
 ---
  drivers/mfd/upboard-fpga.c        |   5 +-
- drivers/pinctrl/pinctrl-upboard.c | 117 ++++++++++++++++++++++++++++++++++++++
+ drivers/pinctrl/pinctrl-upboard.c | 117 ++++++++++++++++++++++++++++++
  2 files changed, 120 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
-index 9f444f8..3ce27e2 100644
+index 9f444f876af1..3ce27e23f9a2 100644
 --- a/drivers/mfd/upboard-fpga.c
 +++ b/drivers/mfd/upboard-fpga.c
 @@ -290,8 +290,9 @@ static int __init upboard_fpga_detect_firmware(struct upboard_fpga *fpga)
@@ -28,7 +28,7 @@ index 9f444f8..3ce27e2 100644
  };
  MODULE_DEVICE_TABLE(acpi, upboard_fpga_acpi_match);
 diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
-index 64899e9..65ac489 100644
+index 64899e988bb5..65ac489d41a6 100644
 --- a/drivers/pinctrl/pinctrl-upboard.c
 +++ b/drivers/pinctrl/pinctrl-upboard.c
 @@ -5,6 +5,7 @@
@@ -185,5 +185,5 @@ index 64899e9..65ac489 100644
  MODULE_ALIAS("platform:upboard-pinctrl");
 \ No newline at end of file
 -- 
-2.7.4
+2.17.1
 

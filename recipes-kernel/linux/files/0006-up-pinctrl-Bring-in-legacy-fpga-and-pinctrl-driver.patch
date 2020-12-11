@@ -1,7 +1,7 @@
-From 438f9fdd3e41c9af362d81cba7542b51c7d8f1b0 Mon Sep 17 00:00:00 2001
+From ae0495f7eeab27c30e1e8cdc13dab2bcc9a30db5 Mon Sep 17 00:00:00 2001
 From: Carlos Calderon <carlos@emutex.com>
 Date: Thu, 4 Oct 2018 10:44:53 +0100
-Subject: [PATCH 10/19] up: pinctrl: Bring in legacy fpga and pinctrl driver
+Subject: [PATCH 06/30] up: pinctrl: Bring in legacy fpga and pinctrl driver
 
 This commits just copies the legacy UP board platform driver and the
 pinctrl/fpga one from ubilinux-3 branch.
@@ -18,19 +18,19 @@ one.
 ---
  drivers/platform/x86/Kconfig            |  15 +
  drivers/platform/x86/Makefile           |   1 +
- drivers/platform/x86/up_board.c         | 242 ++++++++
- drivers/platform/x86/up_board_pinctrl.c | 989 ++++++++++++++++++++++++++++++++
+ drivers/platform/x86/up_board.c         | 242 ++++++
+ drivers/platform/x86/up_board_pinctrl.c | 989 ++++++++++++++++++++++++
  4 files changed, 1247 insertions(+)
  create mode 100644 drivers/platform/x86/up_board.c
  create mode 100644 drivers/platform/x86/up_board_pinctrl.c
 
 diff --git a/drivers/platform/x86/Kconfig b/drivers/platform/x86/Kconfig
-index 80b8795..0ca3c82 100644
+index 0659ef82446f..eb99cf3cb45c 100644
 --- a/drivers/platform/x86/Kconfig
 +++ b/drivers/platform/x86/Kconfig
-@@ -1139,6 +1139,21 @@ config SILEAD_DMI
- 	  with the OS-image for the device. This option supplies the missing
- 	  information. Enable this for x86 tablets with Silead touchscreens.
+@@ -1365,6 +1365,21 @@ config INTEL_SAFETY_ISLAND
+ 
+ source "drivers/platform/x86/intel_speed_select_if/Kconfig"
  
 +config UPBOARD_LEGACY
 +	bool "UP Board platform extras"
@@ -51,17 +51,20 @@ index 80b8795..0ca3c82 100644
  
  config PMC_ATOM
 diff --git a/drivers/platform/x86/Makefile b/drivers/platform/x86/Makefile
-index f9e3ae6..793a3c2 100644
+index 882582fd43d0..bd86f7a7859b 100644
 --- a/drivers/platform/x86/Makefile
 +++ b/drivers/platform/x86/Makefile
-@@ -84,3 +84,4 @@ obj-$(CONFIG_PMC_ATOM)		+= pmc_atom.o
+@@ -96,6 +96,7 @@ obj-$(CONFIG_INTEL_PMC_CORE)    += intel_pmc_core.o intel_pmc_core_pltdrv.o
+ obj-$(CONFIG_PMC_ATOM)		+= pmc_atom.o
  obj-$(CONFIG_MLX_PLATFORM)	+= mlx-platform.o
- obj-$(CONFIG_MLX_CPLD_PLATFORM)	+= mlxcpld-hotplug.o
  obj-$(CONFIG_INTEL_TURBO_MAX_3) += intel_turbo_max_3.o
 +obj-$(CONFIG_UPBOARD_LEGACY)	+= up_board.o up_board_pinctrl.o
+ obj-$(CONFIG_INTEL_CHTDC_TI_PWRBTN)	+= intel_chtdc_ti_pwrbtn.o
+ obj-$(CONFIG_INTEL_MRFLD_PWRBTN)	+= intel_mrfld_pwrbtn.o
+ obj-$(CONFIG_I2C_MULTI_INSTANTIATE)	+= i2c-multi-instantiate.o
 diff --git a/drivers/platform/x86/up_board.c b/drivers/platform/x86/up_board.c
 new file mode 100644
-index 0000000..3acbed7
+index 000000000000..3acbed72dbf6
 --- /dev/null
 +++ b/drivers/platform/x86/up_board.c
 @@ -0,0 +1,242 @@
@@ -310,7 +313,7 @@ index 0000000..3acbed7
 \ No newline at end of file
 diff --git a/drivers/platform/x86/up_board_pinctrl.c b/drivers/platform/x86/up_board_pinctrl.c
 new file mode 100644
-index 0000000..e6c9de4
+index 000000000000..e6c9de4bcfbc
 --- /dev/null
 +++ b/drivers/platform/x86/up_board_pinctrl.c
 @@ -0,0 +1,989 @@
@@ -1305,5 +1308,5 @@ index 0000000..e6c9de4
 +MODULE_ALIAS("platform:up-pinctrl");
 \ No newline at end of file
 -- 
-2.7.4
+2.17.1
 

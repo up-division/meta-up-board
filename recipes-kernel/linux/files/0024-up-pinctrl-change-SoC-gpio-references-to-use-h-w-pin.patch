@@ -1,7 +1,7 @@
-From e77179bdcab5c0b10523ab6cc65a799eba0a8d8d Mon Sep 17 00:00:00 2001
+From 4721db5b614e7e6b3c20d16a226af67425f06b44 Mon Sep 17 00:00:00 2001
 From: Dan O'Donovan <dan@emutex.com>
 Date: Thu, 15 Nov 2018 21:33:12 +0000
-Subject: [PATCH] up: pinctrl: change SoC gpio references to use h/w pin
+Subject: [PATCH 24/30] up: pinctrl: change SoC gpio references to use h/w pin
  offsets
 
 Commit 03c4749dd6c7 "gpio / ACPI: Drop unnecessary ACPI GPIO to
@@ -14,11 +14,11 @@ of the contiguous numbering that was previously used.
 
 Signed-off-by: Dan O'Donovan <dan@emutex.com>
 ---
- drivers/platform/x86/up_board_pinctrl.c | 70 ++++++++++++++++-----------------
+ drivers/platform/x86/up_board_pinctrl.c | 70 ++++++++++++-------------
  1 file changed, 35 insertions(+), 35 deletions(-)
 
 diff --git a/drivers/platform/x86/up_board_pinctrl.c b/drivers/platform/x86/up_board_pinctrl.c
-index bcc23ea..c318046 100644
+index bcc23ea472aa..c31804602dad 100644
 --- a/drivers/platform/x86/up_board_pinctrl.c
 +++ b/drivers/platform/x86/up_board_pinctrl.c
 @@ -180,7 +180,7 @@ static struct up_soc_gpiochip_info chip_cht_SE = { .name = "INT33FF:03" };
@@ -118,5 +118,5 @@ index bcc23ea..c318046 100644
 \ No newline at end of file
 +MODULE_ALIAS("platform:up-pinctrl");
 -- 
-2.7.4
+2.17.1
 

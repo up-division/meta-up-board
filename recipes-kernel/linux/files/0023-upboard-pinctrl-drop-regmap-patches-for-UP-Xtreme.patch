@@ -1,7 +1,7 @@
-From 45931854e169ccbe804a9705a0fd9cfcb4e3e3ff Mon Sep 17 00:00:00 2001
+From 02be7bf52341d0bd73ff1c3fde9f47167a37fa76 Mon Sep 17 00:00:00 2001
 From: Michael Campion <michael.campion@emutex.com>
 Date: Thu, 11 Jul 2019 14:58:04 +0000
-Subject: [PATCH 1/1] upboard pinctrl: drop regmap patches for UP Xtreme
+Subject: [PATCH 23/30] upboard pinctrl: drop regmap patches for UP Xtreme
 
 Since BIOS release UPW1AM0N (07/05/2019) for UP Xtreme, the FPGA pinctrl
 configuration registers are intialised by the BIOS and regmap patches to set
@@ -12,7 +12,7 @@ default values can now be removed.
  2 files changed, 9 deletions(-)
 
 diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
-index 42e6f24..532b58f 100644
+index 42e6f242e92a..532b58f0aed4 100644
 --- a/drivers/mfd/upboard-fpga.c
 +++ b/drivers/mfd/upboard-fpga.c
 @@ -348,7 +348,6 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
@@ -24,7 +24,7 @@ index 42e6f24..532b58f 100644
  	{ },
  };
 diff --git a/drivers/pinctrl/pinctrl-upboard.c b/drivers/pinctrl/pinctrl-upboard.c
-index f9bd3d1..2ee1085 100644
+index f9bd3d157503..2ee1085e60db 100644
 --- a/drivers/pinctrl/pinctrl-upboard.c
 +++ b/drivers/pinctrl/pinctrl-upboard.c
 @@ -839,14 +839,6 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
@@ -43,5 +43,5 @@ index f9bd3d1..2ee1085 100644
  };
  
 -- 
-2.7.4
+2.17.1
 

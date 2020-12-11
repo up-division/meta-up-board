@@ -1,0 +1,275 @@
+From fd27e2704991515090edfcdd1b99c0fad9a45efc Mon Sep 17 00:00:00 2001
+From: Carlos Calderon <carlos@emutex.com>
+Date: Wed, 3 Oct 2018 16:18:05 +0100
+Subject: [PATCH 20/30] ASoC: Intel: new Baytrail/Cherrytrail+PCM512x machine
+ driver
+
+Basic machine driver to set SSP2 in I2S 2ch 24-bit mode.
+
+Signed-off-by: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
+---
+ sound/soc/intel/Kconfig                 |  12 ++
+ sound/soc/intel/boards/Makefile         |   2 +
+ sound/soc/intel/boards/bytcht_pcm512x.c | 208 ++++++++++++++++++++++++
+ 3 files changed, 222 insertions(+)
+ create mode 100644 sound/soc/intel/boards/bytcht_pcm512x.c
+
+diff --git a/sound/soc/intel/Kconfig b/sound/soc/intel/Kconfig
+index 9c9287a0aa7d..fe0f5d528f51 100644
+--- a/sound/soc/intel/Kconfig
++++ b/sound/soc/intel/Kconfig
+@@ -246,5 +246,17 @@ config SND_SOC_INTEL_KEEMBAY
+ 	  If you have a Intel Keembay platform then enable this option
+ 	  by saying Y or m.
+ 
++config SND_SOC_INTEL_BYT_CHT_PCM512x_MACH
++	tristate "ASoC Audio driver for Intel Baytrail & Cherrytrail with TI PCM512x codec"
++	depends on X86_INTEL_LPSS && I2C && ACPI
++	select SND_SOC_PCM512x_I2C
++	select SND_SST_ATOM_HIFI2_PLATFORM
++	select SND_SST_IPC_ACPI
++	select SND_SOC_INTEL_SST_MATCH if ACPI
++	help
++	  This adds support for ASoC machine driver for Intel(R) Baytrail and Cherrytrail
++	  platforms with PCM512X audio codec.
++	  If unsure select "N".
++
+ # ASoC codec drivers
+ source "sound/soc/intel/boards/Kconfig"
+diff --git a/sound/soc/intel/boards/Makefile b/sound/soc/intel/boards/Makefile
+index f04239441aac..da68cbe4be35 100644
+--- a/sound/soc/intel/boards/Makefile
++++ b/sound/soc/intel/boards/Makefile
+@@ -15,6 +15,7 @@ snd-soc-sst-cht-bsw-max98090_ti-objs := cht_bsw_max98090_ti.o
+ snd-soc-sst-cht-bsw-nau8824-objs := cht_bsw_nau8824.o
+ snd-soc-sst-byt-cht-cx2072x-objs := bytcht_cx2072x.o
+ snd-soc-sst-byt-cht-da7213-objs := bytcht_da7213.o
++snd-soc-sst-byt-cht-pcm512x-objs := bytcht_pcm512x.o
+ snd-soc-sst-byt-cht-es8316-objs := bytcht_es8316.o
+ snd-soc-sst-byt-cht-nocodec-objs := bytcht_nocodec.o
+ snd-soc-sof_rt5682-objs := sof_rt5682.o
+@@ -47,6 +48,7 @@ obj-$(CONFIG_SND_SOC_INTEL_CHT_BSW_MAX98090_TI_MACH) += snd-soc-sst-cht-bsw-max9
+ obj-$(CONFIG_SND_SOC_INTEL_CHT_BSW_NAU8824_MACH) += snd-soc-sst-cht-bsw-nau8824.o
+ obj-$(CONFIG_SND_SOC_INTEL_BYT_CHT_CX2072X_MACH) += snd-soc-sst-byt-cht-cx2072x.o
+ obj-$(CONFIG_SND_SOC_INTEL_BYT_CHT_DA7213_MACH) += snd-soc-sst-byt-cht-da7213.o
++obj-$(CONFIG_SND_SOC_INTEL_BYT_CHT_PCM512x_MACH) += snd-soc-sst-byt-cht-pcm512x.o
+ obj-$(CONFIG_SND_SOC_INTEL_BYT_CHT_ES8316_MACH) += snd-soc-sst-byt-cht-es8316.o
+ obj-$(CONFIG_SND_SOC_INTEL_BYT_CHT_NOCODEC_MACH) += snd-soc-sst-byt-cht-nocodec.o
+ obj-$(CONFIG_SND_SOC_INTEL_KBL_DA7219_MAX98357A_MACH) += snd-soc-kbl_da7219_max98357a.o
+diff --git a/sound/soc/intel/boards/bytcht_pcm512x.c b/sound/soc/intel/boards/bytcht_pcm512x.c
+new file mode 100644
+index 000000000000..b2a71b27da9d
+--- /dev/null
++++ b/sound/soc/intel/boards/bytcht_pcm512x.c
+@@ -0,0 +1,208 @@
++/*
++ *  bytcht-pcm512x.c - ASoc Machine driver for Intel Baytrail and
++ *             Cherrytrail-based platforms, with TI PCM512x codec
++ *
++ *  Copyright (C) 2016 Intel Corporation
++ *  Author: Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>
++ *
++ *  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; version 2 of the License.
++ *
++ *  This program is distributed in the hope that it will be useful, but
++ *  WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ *  General Public License for more details.
++ *
++ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++ */
++
++#include <linux/module.h>
++#include <linux/acpi.h>
++#include <linux/platform_device.h>
++#include <linux/slab.h>
++#include <asm/platform_sst_audio.h>
++#include <sound/pcm.h>
++#include <sound/pcm_params.h>
++#include <sound/soc.h>
++#include <sound/soc-acpi.h>
++#include "../../codecs/pcm512x.h"
++#include "../atom/sst-atom-controls.h"
++
++static const struct snd_soc_dapm_widget dapm_widgets[] = {
++	SND_SOC_DAPM_SPK("Ext Spk", NULL),
++};
++
++static const struct snd_soc_dapm_route audio_map[] = {
++	{"Playback", NULL, "ssp2 Tx"},
++	{"ssp2 Tx", NULL, "codec_out0"},
++	{"ssp2 Tx", NULL, "codec_out1"},
++};
++
++static const struct snd_kcontrol_new controls[] = {
++	SOC_DAPM_PIN_SWITCH("Ext Spk"),
++};
++
++static int codec_fixup(struct snd_soc_pcm_runtime *rtd,
++		       struct snd_pcm_hw_params *params)
++{
++	int ret;
++	struct snd_interval *rate = hw_param_interval(params,
++			SNDRV_PCM_HW_PARAM_RATE);
++	struct snd_interval *channels = hw_param_interval(params,
++						SNDRV_PCM_HW_PARAM_CHANNELS);
++
++	/* The DSP will covert the FE rate to 48k, stereo, 24bits */
++	rate->min = rate->max = 48000;
++	channels->min = channels->max = 2;
++
++	/* set SSP2 to 24-bit */
++	params_set_format(params, SNDRV_PCM_FORMAT_S24_LE);
++
++	/*
++	 * Default mode for SSP configuration is TDM 4 slot, override config
++	 * with explicit setting to I2S 2ch 24-bit. The word length is set with
++	 * dai_set_tdm_slot() since there is no other API exposed
++	 */
++	ret = snd_soc_dai_set_fmt(rtd->cpu_dai,
++				  SND_SOC_DAIFMT_I2S     |
++				  SND_SOC_DAIFMT_NB_NF   |
++				  SND_SOC_DAIFMT_CBS_CFS
++				  );
++	if (ret < 0) {
++		dev_err(rtd->dev, "can't set format to I2S, err %d\n", ret);
++		return ret;
++	}
++
++	ret = snd_soc_dai_set_tdm_slot(rtd->cpu_dai, 0x3, 0x3, 2, 24);
++	if (ret < 0) {
++		dev_err(rtd->dev, "can't set I2S config, err %d\n", ret);
++		return ret;
++	}
++
++	return 0;
++}
++
++static int aif1_startup(struct snd_pcm_substream *substream)
++{
++	return snd_pcm_hw_constraint_single(substream->runtime,
++			SNDRV_PCM_HW_PARAM_RATE, 48000);
++}
++
++static const struct snd_soc_ops aif1_ops = {
++	.startup = aif1_startup,
++};
++
++static struct snd_soc_dai_link dailink[] = {
++	[MERR_DPCM_AUDIO] = {
++		.name = "Audio Port",
++		.stream_name = "Audio",
++		.cpu_dai_name = "media-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++		.nonatomic = true,
++		.dynamic = 1,
++		.dpcm_playback = 1,
++		.dpcm_capture = 1,
++		.ops = &aif1_ops,
++	},
++	[MERR_DPCM_DEEP_BUFFER] = {
++		.name = "Deep-Buffer Audio Port",
++		.stream_name = "Deep-Buffer Audio",
++		.cpu_dai_name = "deepbuffer-cpu-dai",
++		.codec_dai_name = "snd-soc-dummy-dai",
++		.codec_name = "snd-soc-dummy",
++		.platform_name = "sst-mfld-platform",
++		.nonatomic = true,
++		.dynamic = 1,
++		.dpcm_playback = 1,
++		.ops = &aif1_ops,
++	},
++	/* CODEC<->CODEC link */
++	/* back ends */
++	{
++		.name = "SSP2-Codec",
++		.id = 0,
++		.cpu_dai_name = "ssp2-port",
++		.platform_name = "sst-mfld-platform",
++		.no_pcm = 1,
++		.codec_dai_name = "pcm512x-hifi",
++		.codec_name = "i2c-10EC512x:00",
++		.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF
++						| SND_SOC_DAIFMT_CBS_CFS,
++		.be_hw_params_fixup = codec_fixup,
++		.nonatomic = true,
++		.dpcm_playback = 1,
++	},
++};
++
++/* SoC card */
++static struct snd_soc_card bytcht_pcm512x_card = {
++	.name = "bytcht-pcm512x",
++	.owner = THIS_MODULE,
++	.dai_link = dailink,
++	.num_links = ARRAY_SIZE(dailink),
++	.dapm_widgets = dapm_widgets,
++	.num_dapm_widgets = ARRAY_SIZE(dapm_widgets),
++	.dapm_routes = audio_map,
++	.num_dapm_routes = ARRAY_SIZE(audio_map),
++	.controls = controls,
++	.num_controls = ARRAY_SIZE(controls),
++};
++
++static char codec_name[SND_ACPI_I2C_ID_LEN];
++
++static int bytcht_pcm512x_probe(struct platform_device *pdev)
++{
++	int ret_val = 0;
++	int i;
++	struct snd_soc_card *card;
++	struct snd_soc_acpi_mach *mach;
++	const char *i2c_name = NULL;
++	int dai_index = 0;
++
++	mach = (&pdev->dev)->platform_data;
++	card = &bytcht_pcm512x_card;
++	card->dev = &pdev->dev;
++
++	/* fix index of codec dai */
++	for (i = 0; i < ARRAY_SIZE(dailink); i++) {
++		if (!strcmp(dailink[i].codec_name, "i2c-104C512x:00")) {
++			dai_index = i;
++			break;
++		}
++	}
++
++	/* fixup codec name based on HID */
++	i2c_name = acpi_dev_get_first_match_name(mach->id, NULL, -1);
++	if (i2c_name != NULL) {
++		snprintf(codec_name, sizeof(codec_name),
++			"%s%s", "i2c-", i2c_name);
++		dailink[dai_index].codec_name = codec_name;
++	}
++
++	ret_val = devm_snd_soc_register_card(&pdev->dev, card);
++	if (ret_val) {
++		dev_err(&pdev->dev,
++			"snd_soc_register_card failed %d\n", ret_val);
++		return ret_val;
++	}
++	platform_set_drvdata(pdev, card);
++	return ret_val;
++}
++
++static struct platform_driver bytcht_pcm521x_driver = {
++	.driver = {
++		.name = "bytcht-pcm512x",
++	},
++	.probe = bytcht_pcm512x_probe,
++};
++module_platform_driver(bytcht_pcm521x_driver);
++
++MODULE_DESCRIPTION("ASoC Intel(R) Baytrail/Cherrytrail + PCM512x Machine driver");
++MODULE_AUTHOR("Pierre-Louis Bossart");
++MODULE_LICENSE("GPL v2");
++MODULE_ALIAS("platform:bytcht-pcm512x");
+-- 
+2.17.1
+

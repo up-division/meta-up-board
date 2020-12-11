@@ -1,0 +1,54 @@
+From 3374d9f7dcbb59d8300707051a79325b3b08dd20 Mon Sep 17 00:00:00 2001
+From: Michael Campion <michael.campion@emutex.com>
+Date: Tue, 16 Apr 2019 15:20:46 +0100
+Subject: [PATCH 16/30] pinctrl-core: translate gpio to pin before set config
+
+Ticket #: 2568
+
+pinconf_set_config needs the pin gpio translated to pin number
+before configuring the pin. The translation was not done in
+pinctrl_gpio_set_config. This is fixed here.
+---
+ drivers/pinctrl/core.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/pinctrl/core.c b/drivers/pinctrl/core.c
+index 96250717637a..245e628046fe 100755
+--- a/drivers/pinctrl/core.c
++++ b/drivers/pinctrl/core.c
+@@ -984,8 +984,10 @@ EXPORT_SYMBOL_GPL(pinctrl_gpio_direction_output);
+ int pinctrl_gpio_set_config(unsigned gpio, unsigned long config)
+ {
+ 	unsigned long configs[] = { config };
++	struct pinctrl_gpio_range *range = NULL;
+ 	struct pinctrl_dev *pctldev;
+ 	struct gpio_desc *desc;
++	int pin;
+ 	int dir;
+ 	int ret = -EPROBE_DEFER;
+ 
+@@ -1012,11 +1014,19 @@ int pinctrl_gpio_set_config(unsigned gpio, unsigned long config)
+ 	 */
+ 	if (dir == 1) {
+ 		list_for_each_entry(pctldev, &pinctrldev_list, node) {
+-			ret = pinconf_set_config(pctldev, gpio, configs, ARRAY_SIZE(configs));
++			range = pinctrl_match_gpio_range(pctldev, gpio);
++			if (range == NULL)
++				continue;
++			pin = gpio_to_pin(range, gpio);
++			ret = pinconf_set_config(pctldev, pin, configs, ARRAY_SIZE(configs));
+ 		}
+ 	} else {
+ 		list_for_each_entry_reverse(pctldev, &pinctrldev_list, node) {
+-			ret = pinconf_set_config(pctldev, gpio, configs, ARRAY_SIZE(configs));
++			range = pinctrl_match_gpio_range(pctldev, gpio);
++			if (range == NULL)
++				continue;
++			pin = gpio_to_pin(range, gpio);
++			ret = pinconf_set_config(pctldev, pin, configs, ARRAY_SIZE(configs));
+ 		}
+ 	}
+ 
+-- 
+2.17.1
+
