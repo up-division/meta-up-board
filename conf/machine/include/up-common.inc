@@ -15,5 +15,7 @@ GLIBC_ADDONS = "nptl"
 
 SERIAL_CONSOLES="115200;ttyS0"
 
+IMAGE_FSTYPES += " hddimg"
+
 WKS_FILE = "${@bb.utils.contains_any("EFI_PROVIDER", "systemd-boot rmc-boot", "systemd-bootdisk-initrd.wks", "grub-bootdisk-initrd.wks", d)}"
 WKS_FILE_DEPENDS_append += " acpi-tables"
