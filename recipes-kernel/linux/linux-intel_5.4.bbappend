@@ -35,6 +35,7 @@ SRC_URI += " \
        file://0028-pinctrl-core-no-need-to-check-mux-usage-on-upboard.patch \
        file://0029-upboard-fpga-support-upn-apl01-project.patch \
        file://0030-upboard-fix-NULL-pointer-after-modifying-up_spi_cs_g.patch \
+       file://intel/gfx-5.4.scc \
 "
 # replace these SRCREVs with the real commit ids once you've had
 # the appropriate changes committed to the upstream linux-yocto repo
