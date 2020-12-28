@@ -1,7 +1,7 @@
-Yocto BSP meta layer for the UP Xtreme
+Yocto BSP meta layer
 ======================================
-**Note: This branch warrior-dev for Yocto 'warrior' is for development purposes
-only. Please refer to 'warrior' branch in this repository for non-experimental
+**Note: This branch dunfell-dev for Yocto 'dunfell' is for development purposes
+only. Please refer to 'dunfell' branch in this repository for non-experimental
 purposes.**
 
 This README file contains information on building the meta-up-board BSP
@@ -25,10 +25,10 @@ Table of Contents
 Prerequisites
 ================
 
-Supported hardware versions for Yocto 2.7 (Warrior)
+Supported hardware versions for Yocto 3.1 (dunfell)
 ------------------------------------------------
 * UP Board
-* UP Squared
+* UP Squared/UP Squared Pro
 * UP Core
 * UP Core Plus
 * UP Xtreme
@@ -36,34 +36,44 @@ Supported hardware versions for Yocto 2.7 (Warrior)
 Downloading the meta-up-board BSP layer
 ========================================
 
-Download the latest Warrior release and enter the poky directory:
+[Yocto 3.1.3]
+
+Commit ID:
+Poky : 012ad10a89a889c21e67c27dc37d22520212548f
+meta-intel : d7134e86574172784f90117c03a012e0048d8bcb
+
+Download the Dunfell release and enter the poky directory:
 ```
-git clone -b warrior git://git.yoctoproject.org/poky.git
+git clone -b dunfell git://git.yoctoproject.org/poky.git
 cd poky
+git checkout $[Commit ID]
 ```
-Download the latest Intel BSP layer version for Warrior:
+Download the Intel BSP layer version for Dunfell:
 
 ```
-git clone -b warrior git://git.yoctoproject.org/meta-intel.git
+git clone -b dunfell git://git.yoctoproject.org/meta-intel.git
+cd meta-intel
+git checkout $[Commit ID]
+cd ..
 ```
 
-Download the latest collection of layers for OE-core universe for Warrior:
+Download the latest collection of layers for OE-core universe for Dunfell:
 ```
-git clone -b warrior git://git.openembedded.org/meta-openembedded
+git clone -b dunfell git://git.openembedded.org/meta-openembedded
 ```
 Download meta-virtualization and openembedded-core for Docker containers:
 ```
-git clone -b warrior git://git.yoctoproject.org/meta-virtualization
+git clone -b dunfell git://git.yoctoproject.org/meta-virtualization
 ```
 
 ```
-git clone -b warrior git://git.openembedded.org/openembedded-core
+git clone -b dunfell git://git.openembedded.org/openembedded-core
 ```
 
-Download this UP Board BSP layer for Warrior:
+Download this UP Board BSP layer for Dunfell:
 
 ```
-git clone -b warrior https://github.com/emutex/meta-up-board
+git clone -b dunfell-dev https://github.com/AaeonCM/meta-up-board.git
 ```
 
 
