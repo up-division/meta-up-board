@@ -41,6 +41,7 @@ Downloading the meta-up-board BSP layer
 Commit ID:
 
 Poky : 012ad10a89a889c21e67c27dc37d22520212548f
+
 meta-intel : d7134e86574172784f90117c03a012e0048d8bcb
 
 Download the Dunfell release and enter the poky directory:
