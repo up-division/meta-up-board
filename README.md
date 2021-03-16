@@ -1,6 +1,6 @@
 Yocto BSP meta layer
 ======================================
-**Note: This branch dunfell-dev for Yocto 'dunfell' is for development purposes
+**Note: This branch dunfell for Yocto 'dunfell' is for development purposes
 only. Please refer to 'dunfell' branch in this repository for non-experimental
 purposes.**
 
