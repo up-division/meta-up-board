@@ -17,3 +17,11 @@ IMAGE_INSTALL_append += " bluez5 systemd"
 IMAGE_INSTALL_append += " hostapd dhcp-client iw wpa-supplicant"
 IMAGE_INSTALL_append += " minicom"
 IMAGE_INSTALL_append += " f81534-mode"
+IMAGE_INSTALL_append += " xserver-xorg xserver-xf86-config xserver-nodm-config"
+
+LICENSE_FLAGS_WHITELIST = "commercial"
+
+# early preinit-env handler
+IMAGE_INSTALL_append = " preinit-env"
+APPEND_append = " init=/sbin/preinit-env"
+
