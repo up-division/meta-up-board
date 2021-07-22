@@ -36,6 +36,21 @@ Supported hardware versions for Yocto 3.1 (dunfell)
 Downloading the meta-up-board BSP layer
 ========================================
 
+[Yocto 3.1.6]
+
+Commit ID:
+
+Poky : a13bda44fcda4e79e9aed39ca1495eabecb6a7b7
+
+meta-intel : 4922e10c7b8169585ff9322b0d913dadc525c68e
+
+meta-openembedded : f2d02cb71eaff8eb285a1997b30be52486c160ae
+
+meta-virtualization : 92cd3467502bd27b98a76862ca6525ce425a8479
+
+openembedded-core : 72431ee8de5e3a53d259cebf420a7713ac9e1f14
+
+
 [Yocto 3.1.3]
 
 Commit ID:
@@ -124,6 +139,15 @@ From the poky directory:
 ```
 TEMPLATECONF=meta-up-board/conf source oe-init-build-env
 MACHINE=up-xtreme bitbake upboard-image-sato
+```
+
+UP Xtreme i11:
+--------------------
+From the poky directory:
+
+```
+TEMPLATECONF=meta-up-board/conf source oe-init-build-env
+MACHINE=up-xtreme-i11 bitbake upboard-image-sato
 ```
 
 At the end of a successfull build, you should have a live image that
