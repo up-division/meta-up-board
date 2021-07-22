@@ -32,6 +32,7 @@ Supported hardware versions for Yocto 3.1 (dunfell)
 * UP Core
 * UP Core Plus
 * UP Xtreme
+* UP Xtreme i11
 
 Downloading the meta-up-board BSP layer
 ========================================
