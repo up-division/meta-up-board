@@ -1,0 +1,30 @@
+From 1f4455ecb5f365053014c0f163dcca72179b99d2 Mon Sep 17 00:00:00 2001
+From: AaeonCM <aaeon_cm@aaeon.com>
+Date: Fri, 5 Feb 2021 18:42:56 +0800
+Subject: [PATCH] support upx-tgl01 project
+
+---
+ drivers/mfd/upboard-fpga.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
+index c7b36e8..60792d8 100644
+--- a/drivers/mfd/upboard-fpga.c
++++ b/drivers/mfd/upboard-fpga.c
+@@ -357,6 +357,13 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
+ 			DMI_EXACT_MATCH(DMI_BOARD_VERSION, "V0.1"),
+ 		},
+ 	},
++	{
++		.matches = { /* UP Xtreme i11 */
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "AAEON"),
++			DMI_EXACT_MATCH(DMI_BOARD_NAME, "UPX-TGL01"),
++			DMI_EXACT_MATCH(DMI_BOARD_VERSION, "V1.0"),
++		},
++	},
+ 	{ },
+ };
+ 
+-- 
+2.7.4
+

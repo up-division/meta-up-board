@@ -5,6 +5,7 @@ PR := "${PR}.1"
 SRC_URI += " \
        file://up-board.cfg \
        file://up-board-user-config.cfg \
+       file://intel/linux-config/bsp/x86/intel-dev.scc \ 
        file://0001-ACPI-Add-support-to-map-GPIO-resources-to-ranges.patch \
        file://0002-disable-RTS-override-on-LPSS-UART-with-Auto-Flow-Con.patch \
        file://0003-pinctrl-allow-multiple-pin-controllers-for-a-GPIO.patch \
@@ -35,6 +36,9 @@ SRC_URI += " \
        file://0028-pinctrl-core-no-need-to-check-mux-usage-on-upboard.patch \
        file://0029-upboard-fpga-support-upn-apl01-project.patch \
        file://0030-upboard-fix-NULL-pointer-after-modifying-up_spi_cs_g.patch \
+       file://0001-support-upx-tgl01-project.patch \   
+       file://intel/ishtp-5.4.scc \
+       file://intel/io-5.4.scc \
        file://intel/gfx-5.4.scc \
 "
 # replace these SRCREVs with the real commit ids once you've had
