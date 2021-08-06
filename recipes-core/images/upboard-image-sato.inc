@@ -18,6 +18,7 @@ IMAGE_INSTALL_append += " hostapd dhcp-client iw wpa-supplicant"
 IMAGE_INSTALL_append += " minicom"
 IMAGE_INSTALL_append += " f81534-mode"
 IMAGE_INSTALL_append += " xserver-xorg xserver-xf86-config xserver-nodm-config"
+IMAGE_INSTALL_append += " can-utils"
 
 LICENSE_FLAGS_WHITELIST = "commercial"
 
