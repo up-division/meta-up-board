@@ -18,7 +18,8 @@
 # MACHINE ?= "up-core"
 # MACHINE ?= "up-core-plus"
 # MACHINE ?= "up-xtreme"
-MACHINE ?= "up-xtreme-i11"
+# MACHINE ?= "up-xtreme-i11"
+MACHINE ?= "up-squared-6000"
 
 #
 # Where to place downloads
