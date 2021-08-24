@@ -1,0 +1,29 @@
+From b131d4eca4e8842eff64fd4a7af688c60b36ef60 Mon Sep 17 00:00:00 2001
+From: Kunyang_Fan <kunyang_fan@asus.com>
+Date: Wed, 18 Aug 2021 18:25:36 +0800
+Subject: [PATCH] ADC: Add the workaround to read all ADC values
+
+For ADC124S101 controller, shift one bit to read all ADC
+pins values
+
+Signed-off-by: Kunyang_Fan <kunyang_fan@asus.com>
+---
+ drivers/iio/adc/ti-adc128s052.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/iio/adc/ti-adc128s052.c b/drivers/iio/adc/ti-adc128s052.c
+index 1e5a936b5b6a..d17e5ee81b36 100644
+--- a/drivers/iio/adc/ti-adc128s052.c
++++ b/drivers/iio/adc/ti-adc128s052.c
+@@ -37,7 +37,7 @@ static int adc128_adc_conversion(struct adc128 *adc, u8 channel)
+ 
+ 	mutex_lock(&adc->lock);
+ 
+-	adc->buffer[0] = channel << 3;
++	adc->buffer[0] = channel << 4;
+ 	adc->buffer[1] = 0;
+ 
+ 	ret = spi_write(adc->spi, &adc->buffer, 2);
+-- 
+2.25.1
+

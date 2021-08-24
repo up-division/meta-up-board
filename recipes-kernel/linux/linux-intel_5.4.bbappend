@@ -37,7 +37,9 @@ SRC_URI += " \
        file://0029-upboard-fpga-support-upn-apl01-project.patch \
        file://0030-upboard-fix-NULL-pointer-after-modifying-up_spi_cs_g.patch \
        file://0001-support-upx-tgl01-project.patch \   
-       file://0001-Add-the-missing-GPIO-community2.patch \   
+       file://0001-Add-the-missing-GPIO-community2.patch \
+       file://0001-WMI-Add-support-for-IO-functions-of-AAEON-devices.patch \
+       file://0001-ADC-Add-the-workaround-to-read-all-ADC-values.patch \
        file://intel/ishtp-5.4.scc \
        file://intel/io-5.4.scc \
        file://intel/gfx-5.4.scc \
