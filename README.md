@@ -37,11 +37,11 @@ Supported hardware versions for Yocto 3.1 (dunfell)
 Downloading the meta-up-board BSP layer
 ========================================
 
-[Yocto 3.1.6]
+[Yocto 3.1.7]
 
 Commit ID:
 
-Poky : a13bda44fcda4e79e9aed39ca1495eabecb6a7b7
+Poky : 13f4ddf50eccaeed96a40a5f1a1d4173e677e98a
 
 meta-intel : 4922e10c7b8169585ff9322b0d913dadc525c68e
 
