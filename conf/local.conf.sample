@@ -15,6 +15,7 @@
 # Machine Selection
 # MACHINE ?= "up-board"
 # MACHINE ?= "up-squared"
+# MACHUNE ?= "up-4000"
 # MACHINE ?= "up-core"
 # MACHINE ?= "up-core-plus"
 # MACHINE ?= "up-xtreme"

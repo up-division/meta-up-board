@@ -40,6 +40,10 @@ SRC_URI += " \
        file://0001-Add-the-missing-GPIO-community2.patch \
        file://0001-WMI-Add-support-for-IO-functions-of-AAEON-devices.patch \
        file://0001-ADC-Add-the-workaround-to-read-all-ADC-values.patch \
+       file://0001-upboard-fpga-support-up-apl03-project.patch \
+       file://0002-GPIO-Add-workaround-to-enable-Open-Drain-GPIO-pins.patch \
+       file://0003-Revert-ACPI-LPSS-Exclude-I2C-busses-shared-with-PUNI.patch \
+       file://0004-LED-Add-additional-led-for-UP-APL03.patch \
        file://intel/ishtp-5.4.scc \
        file://intel/io-5.4.scc \
        file://intel/gfx-5.4.scc \

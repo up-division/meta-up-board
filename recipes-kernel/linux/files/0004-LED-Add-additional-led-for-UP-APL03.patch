@@ -1,0 +1,84 @@
+From 8c7b5592c7f171b535454a627718f2bbe525b38a Mon Sep 17 00:00:00 2001
+From: AaeonCM <aaeon_cm@aaeon.com>
+Date: Fri, 7 Jan 2022 09:07:34 +0000
+Subject: [PATCH 4/4] LED: Add additional led for UP-APL03
+
+Since there is a addtional LED device controlled by a GPIO,
+add the additional led device for blue light LED function.
+
+Signed-off-by: AaeonCM <aaeon_cm@aaeon.com>
+---
+ drivers/mfd/upboard-fpga.c | 36 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 35 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mfd/upboard-fpga.c b/drivers/mfd/upboard-fpga.c
+index 500eb7106f4b..e2ccd6c75361 100644
+--- a/drivers/mfd/upboard-fpga.c
++++ b/drivers/mfd/upboard-fpga.c
+@@ -14,6 +14,7 @@
+ #include <linux/dmi.h>
+ #include <linux/gpio.h>
+ #include <linux/kernel.h>
++#include <linux/leds.h>
+ #include <linux/mfd/core.h>
+ #include <linux/mfd/upboard-fpga.h>
+ #include <linux/module.h>
+@@ -315,6 +316,7 @@ MODULE_DEVICE_TABLE(acpi, upboard_fpga_acpi_match);
+ 
+ #define UPFPGA_QUIRK_UNINITIALISED  BIT(0)
+ #define UPFPGA_QUIRK_HRV1_IS_PROTO2 BIT(1)
++#define UPFPGA_QUIRK_GPIO_LED       BIT(2)
+ 
+ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
+ 	{
+@@ -370,7 +372,8 @@ static const struct dmi_system_id upboard_dmi_table[] __initconst = {
+            DMI_EXACT_MATCH(DMI_BOARD_NAME, "UP-APL03"),
+            DMI_EXACT_MATCH(DMI_BOARD_VERSION, "V1.0"),
+        },
+-       .driver_data = (void *)UPFPGA_QUIRK_HRV1_IS_PROTO2,
++       .driver_data = (void *)(UPFPGA_QUIRK_HRV1_IS_PROTO2 |
++           UPFPGA_QUIRK_GPIO_LED),
+ 	},
+ 	{ },
+ };
+@@ -440,6 +443,37 @@ static int __init upboard_fpga_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		return ret;
+ 
++	if (quirks & UPFPGA_QUIRK_GPIO_LED) {
++#define APL_GPIO_218	507
++		static struct gpio_led upboard_gpio_leds[] = {
++			{
++				.name = "upboard:blue:",
++				.gpio = APL_GPIO_218,
++				.default_state = LEDS_GPIO_DEFSTATE_KEEP,
++			},
++		};
++		static struct gpio_led_platform_data upboard_gpio_led_platform_data = {
++			.num_leds = ARRAY_SIZE(upboard_gpio_leds),
++			.leds = upboard_gpio_leds,
++		};
++		static const struct mfd_cell upboard_gpio_led_cells[] = {
++			{
++				.name = "leds-gpio",
++				.id = 0,
++				.platform_data = &upboard_gpio_led_platform_data,
++				.pdata_size = sizeof(upboard_gpio_led_platform_data),
++			},
++		};
++
++		ret =  devm_mfd_add_devices(&pdev->dev, 0, upboard_gpio_led_cells,
++                                    ARRAY_SIZE(upboard_gpio_led_cells), NULL, 0, NULL);
++		if (ret) {
++			dev_err(&pdev->dev, "Failed to add GPIO leds");
++			return ret;
++		}
++
++	}
++
+ 	return devm_mfd_add_devices(&pdev->dev, 0, fpga_data->cells,
+ 				    fpga_data->ncells, NULL, 0, NULL);
+ }
+-- 
+2.17.1
+

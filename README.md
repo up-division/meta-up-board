@@ -151,6 +151,15 @@ TEMPLATECONF=meta-up-board/conf source oe-init-build-env
 MACHINE=up-xtreme-i11 bitbake upboard-image-sato
 ```
 
+UP 4000 Board:
+-----------------
+From the poky directory:
+
+```
+TEMPLATECONF=meta-up-board/conf source oe-init-build-env
+MACHINE=up-4000 bitbake upboard-image-sato
+```
+
 At the end of a successfull build, you should have a live image that
 you can boot from a USB flash drive (see instructions on how to do
 that below, in the section 'Booting the live USB image').
