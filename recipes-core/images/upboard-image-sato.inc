@@ -19,6 +19,8 @@ IMAGE_INSTALL_append += " minicom"
 IMAGE_INSTALL_append += " f81534-mode"
 IMAGE_INSTALL_append += " xserver-xorg xserver-xf86-config xserver-nodm-config"
 IMAGE_INSTALL_append += " can-utils"
+IMAGE_INSTALL_append += " pulseaudio-init"
+IMAGE_INSTALL_append += " devmem2"
 
 LICENSE_FLAGS_WHITELIST = "commercial"
 

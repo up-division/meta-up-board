@@ -2,6 +2,8 @@
 GALLIUMDRIVERS_append_x86 = ",iris"
 GALLIUMDRIVERS_append_x86-64 = ",iris"
 
+SRC_URI_append = " file://0001-Allow-enable-DRI-without-DRI-drivers.patch \  
+                   file://0001-Workaround_push_constant_corruption_on_context_switch.patch"
 # mesa driver override settings
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 FILES_mesa-megadriver_append = " ${sysconfdir}"

@@ -44,9 +44,10 @@ SRC_URI += " \
        file://0002-GPIO-Add-workaround-to-enable-Open-Drain-GPIO-pins.patch \
        file://0003-Revert-ACPI-LPSS-Exclude-I2C-busses-shared-with-PUNI.patch \
        file://0004-LED-Add-additional-led-for-UP-APL03.patch \
+       file://0001-Fix-i225-not-working-issue.patch \
+       file://0001-ALSA-hda-Add-ElkhartLake-HDMI-codec-vid.patch \
+       file://0001-igc-Fix-null-pointer-dereference-upon-driver-probe.patch \
        file://intel/ishtp-5.4.scc \
-       file://intel/io-5.4.scc \
-       file://intel/gfx-5.4.scc \
 "
 # replace these SRCREVs with the real commit ids once you've had
 # the appropriate changes committed to the upstream linux-yocto repo
