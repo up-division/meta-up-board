@@ -33,6 +33,7 @@ Supported hardware versions for Yocto 3.1 (dunfell)
 * UP Core Plus
 * UP Xtreme
 * UP Xtreme i11
+* UP Squared 6000
 
 Downloading the meta-up-board BSP layer
 ========================================
@@ -160,6 +161,14 @@ TEMPLATECONF=meta-up-board/conf source oe-init-build-env
 MACHINE=up-4000 bitbake upboard-image-sato
 ```
 
+UP Squared 6000 Board:
+-----------------
+From the poky directory:
+
+```
+TEMPLATECONF=meta-up-board/conf source oe-init-build-env
+MACHINE=up-squared-6000 bitbake upboard-image-sato
+```
 At the end of a successfull build, you should have a live image that
 you can boot from a USB flash drive (see instructions on how to do
 that below, in the section 'Booting the live USB image').
