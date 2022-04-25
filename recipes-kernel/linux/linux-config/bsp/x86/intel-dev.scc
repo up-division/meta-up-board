@@ -1,0 +1,9 @@
+define KFEATURE_DESCRIPTION "Intel Reference Board feature set"
+define KFEATURE_COMPATIBILITY board
+
+kconf hardware wireless.cfg
+kconf hardware ethernet.cfg
+kconf hardware intel-dev.cfg
+kconf hardware usb.cfg
+kconf hardware audio.cfg
+

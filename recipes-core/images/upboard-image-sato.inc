@@ -14,7 +14,7 @@ IMAGE_INSTALL += "picocom"
 
 DISTRO_FEATURES_append = " bluez5 bluetooth wifi"
 IMAGE_INSTALL_append += " bluez5 systemd"
-IMAGE_INSTALL_append += " hostapd dhcp-client iw wpa-supplicant"
+IMAGE_INSTALL_append += " hostapd iw wpa-supplicant"
 IMAGE_INSTALL_append += " minicom"
 IMAGE_INSTALL_append += " f81534-mode"
 IMAGE_INSTALL_append += " xserver-xorg xserver-xf86-config xserver-nodm-config"
