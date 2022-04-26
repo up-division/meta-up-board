@@ -1,0 +1,1501 @@
+From ab7553c3b5de6a97dad4f4735525cb3bb625982c Mon Sep 17 00:00:00 2001
+From: AaeonCM <aaeon_cm@aaeon.com>
+Date: Tue, 26 Apr 2022 09:13:03 +0800
+Subject: [PATCH] WMI: Add support for IO functions of AAEON devices
+
+This adds the supports for multiple IO functions of the
+AAEON x86 devices and makes use of the WMI interface to
+control the these IO devices including:
+
+- GPIO
+- LED
+- Watchdog
+- HWMON
+
+It also adds the mfd child device drivers to support
+the above IO functions.
+---
+ MAINTAINERS                  |  12 +
+ drivers/gpio/Kconfig         |  11 +
+ drivers/gpio/Makefile        |   1 +
+ drivers/gpio/gpio-aaeon.c    | 205 ++++++++++++++++
+ drivers/hwmon/Kconfig        |  10 +
+ drivers/hwmon/Makefile       |   1 +
+ drivers/hwmon/hwmon-aaeon.c  | 568 +++++++++++++++++++++++++++++++++++++++++++
+ drivers/leds/Kconfig         |  11 +
+ drivers/leds/Makefile        |   1 +
+ drivers/leds/leds-aaeon.c    | 142 +++++++++++
+ drivers/mfd/Kconfig          |  10 +
+ drivers/mfd/Makefile         |   2 +-
+ drivers/mfd/mfd-aaeon.c      |  77 ++++++
+ drivers/watchdog/Kconfig     |  12 +
+ drivers/watchdog/Makefile    |   1 +
+ drivers/watchdog/wdt_aaeon.c | 242 ++++++++++++++++++
+ 16 files changed, 1305 insertions(+), 1 deletion(-)
+ create mode 100755 drivers/gpio/gpio-aaeon.c
+ create mode 100755 drivers/hwmon/hwmon-aaeon.c
+ create mode 100755 drivers/leds/leds-aaeon.c
+ create mode 100755 drivers/mfd/mfd-aaeon.c
+ create mode 100755 drivers/watchdog/wdt_aaeon.c
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index eea0af0..186ff8f 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -257,6 +257,18 @@ W:	http://www.adaptec.com/
+ F:	Documentation/scsi/aacraid.rst
+ F:	drivers/scsi/aacraid/
+ 
++AAEON DEVICE DRIVER WITH WMI INTERFACE
++M:	Edward Lin<edward1_lin@asus.com>
++M:	Kunyang Fan <kunyang_fan@asus.com>
++M:	Frank Hsieh <frank2_hsieh@asus.com>
++M:	Jacob Wu <jacob_wu@asus.com>
++S:	Supported
++F:	drivers/gpio/gpio-aaeon.c
++F:	drivers/hwmon/hwmon-aaeon.c
++F:	drivers/leds/leds-aaeon.c
++F:	drivers/mfd/mfd-aaeon.c
++F:	drivers/watchdog/wdt_aaeon.c
++
+ ABI/API
+ L:	linux-api@vger.kernel.org
+ F:	include/linux/syscalls.h
+diff --git a/drivers/gpio/Kconfig b/drivers/gpio/Kconfig
+index 88a0421..3df327c 100644
+--- a/drivers/gpio/Kconfig
++++ b/drivers/gpio/Kconfig
+@@ -1413,6 +1413,17 @@ endmenu
+ menu "PCI GPIO expanders"
+ 	depends on PCI
+ 
++config GPIO_AAEON
++	tristate "AAEON GPIO support"
++	depends on ASUS_WMI
++	select MFD_AAEON
++	help
++	  Say yes here to support GPIO pins on Single Board Computers produced
++	  by AAEON.
++
++	  This driver leverages the ASUS WMI interface to access device
++	  resources.
++
+ config GPIO_AMD8111
+ 	tristate "AMD 8111 GPIO driver"
+ 	depends on X86 || COMPILE_TEST
+diff --git a/drivers/gpio/Makefile b/drivers/gpio/Makefile
+index aefa3c4..635bc64 100644
+--- a/drivers/gpio/Makefile
++++ b/drivers/gpio/Makefile
+@@ -23,6 +23,7 @@ obj-$(CONFIG_GPIO_104_IDI_48)		+= gpio-104-idi-48.o
+ obj-$(CONFIG_GPIO_104_IDIO_16)		+= gpio-104-idio-16.o
+ obj-$(CONFIG_GPIO_74X164)		+= gpio-74x164.o
+ obj-$(CONFIG_GPIO_74XX_MMIO)		+= gpio-74xx-mmio.o
++obj-$(CONFIG_GPIO_AAEON)                += gpio-aaeon.o
+ obj-$(CONFIG_GPIO_ADNP)			+= gpio-adnp.o
+ obj-$(CONFIG_GPIO_ADP5520)		+= gpio-adp5520.o
+ obj-$(CONFIG_GPIO_ADP5588)		+= gpio-adp5588.o
+diff --git a/drivers/gpio/gpio-aaeon.c b/drivers/gpio/gpio-aaeon.c
+new file mode 100755
+index 00000000..3183c45
+--- /dev/null
++++ b/drivers/gpio/gpio-aaeon.c
+@@ -0,0 +1,205 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * AAEON GPIO driver
++ * Copyright (c) 2021, AAEON Ltd.
++ *
++ * Author: Edward Lin <edward1_lin@aaeon.com.tw>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++#include <linux/acpi.h>
++#include <linux/bitops.h>
++#include <linux/gpio/driver.h>
++#include <linux/init.h>
++#include <linux/io.h>
++#include <linux/module.h>
++#include <linux/platform_data/x86/asus-wmi.h>
++#include <linux/platform_device.h>
++
++#define DRVNAME "gpio_aaeon"
++#define ASUS_NB_WMI_EVENT_GUID   "0B3CBB35-E3C2-45ED-91C2-4C5A6D195D1C"
++#define AAEON_WMI_MGMT_GUID      "97845ED0-4E6D-11DE-8A39-0800200C9A66"
++
++#define GET_GPIO_NUMBER_ID       0x00010000
++#define GET_LEVEL_METHOD_ID      0x00010001
++#define SET_LEVEL_METHOD_ID      0x00010002
++#define GET_DIRECTION_METHOD_ID  0x00010003
++#define SET_DIRECTION_METHOD_ID  0x00010004
++#define GET_SIO_NUMBER_METHOD_ID 0xF0010
++
++struct aaeon_gpio_bank {
++	struct gpio_chip chip;
++	unsigned int regbase;
++	struct aaeon_gpio_data *data;
++};
++
++struct aaeon_gpio_data {
++	int nr_bank;
++	struct aaeon_gpio_bank *bank;
++};
++
++static int aaeon_gpio_get_number(void);
++static int aaeon_gpio_get_direction(struct gpio_chip *chip,
++				 unsigned int offset);
++static int aaeon_gpio_output_set_direction(struct gpio_chip *chip,
++				 unsigned int offset, int value);
++static int aaeon_gpio_input_set_direction(struct gpio_chip *chip,
++				 unsigned int offset);
++static int aaeon_gpio_get(struct gpio_chip *chip,
++				 unsigned int offset);
++static void aaeon_gpio_set(struct gpio_chip *chip, unsigned int offset,
++				 int value);
++
++#define AAEON_GPIO_BANK(_base, _ngpio, _regbase)			\
++{									\
++	.chip = {							\
++		.label            = DRVNAME,				\
++		.owner            = THIS_MODULE,			\
++		.get_direction    = aaeon_gpio_get_direction,		\
++		.direction_input  = aaeon_gpio_input_set_direction,     \
++		.direction_output = aaeon_gpio_output_set_direction,    \
++		.get              = aaeon_gpio_get,			\
++		.set              = aaeon_gpio_set,			\
++		.base             = _base,				\
++		.ngpio            = _ngpio,				\
++		.can_sleep        = true,				\
++	},								\
++	.regbase = _regbase,						\
++}
++
++static struct aaeon_gpio_bank aaeon_gpio_bank[] = {
++	AAEON_GPIO_BANK(0, 0, 0xF0),
++};
++
++static int aaeon_gpio_get_direction(struct gpio_chip *chip, unsigned int offset)
++{
++	int err, retval;
++	u32 dev_id = 0x0;
++
++	dev_id |= offset;
++	err = asus_wmi_evaluate_method(GET_DIRECTION_METHOD_ID, dev_id,
++				       0, &retval);
++	if (err)
++		return err;
++
++	return retval;
++}
++
++static int aaeon_gpio_input_set_direction(struct gpio_chip *chip,
++					  unsigned int offset)
++{
++	int err, retval;
++	u32 dev_id;
++
++	dev_id = BIT(16) | offset;
++	err = asus_wmi_evaluate_method(SET_DIRECTION_METHOD_ID, dev_id,
++				       0, &retval);
++	if (err)
++		return err;
++
++	return retval;
++}
++
++static int aaeon_gpio_output_set_direction(struct gpio_chip *chip,
++					   unsigned int offset, int value)
++{
++	int err, retval;
++	u32 dev_id = 0x0;
++
++	dev_id |= offset;
++	err = asus_wmi_evaluate_method(SET_DIRECTION_METHOD_ID, dev_id,
++				       0, &retval);
++	if (err)
++		return err;
++
++	return retval;
++}
++
++static int aaeon_gpio_get(struct gpio_chip *chip, unsigned int offset)
++{
++	int err, retval;
++	u32 dev_id = 0x0;
++
++	dev_id |= offset;
++	err = asus_wmi_evaluate_method(GET_LEVEL_METHOD_ID, dev_id, 0, &retval);
++	if (err)
++		return err;
++
++	return retval;
++}
++
++static void aaeon_gpio_set(struct gpio_chip *chip, unsigned int offset,
++			   int value)
++{
++	int retval;
++	u32 dev_id = offset;
++
++	if (value)
++		dev_id = BIT(16) | dev_id;
++
++	asus_wmi_evaluate_method(SET_LEVEL_METHOD_ID, dev_id, 0, &retval);
++}
++
++static int aaeon_gpio_get_number(void)
++{
++	int err, retval;
++
++	err = asus_wmi_evaluate_method(GET_GPIO_NUMBER_ID,
++				       GET_SIO_NUMBER_METHOD_ID,
++				       0, &retval);
++	if (err)
++		return err;
++
++	return retval;
++}
++
++static int __init aaeon_gpio_probe(struct platform_device *pdev)
++{
++	int err, i;
++	int dio_number = 0;
++	struct aaeon_gpio_data *data;
++	struct aaeon_gpio_bank *bank;
++
++	/* Prevent other drivers adding this platfom device */
++	if (!wmi_has_guid(AAEON_WMI_MGMT_GUID)) {
++		pr_debug("AAEON Management GUID not found\n");
++		return -ENODEV;
++	}
++
++	dio_number = aaeon_gpio_get_number();
++	if (dio_number < 0)
++		return -ENODEV;
++
++	data = devm_kzalloc(&pdev->dev, sizeof(*data), GFP_KERNEL);
++	if (!data)
++		return -ENOMEM;
++
++	data->nr_bank = ARRAY_SIZE(aaeon_gpio_bank);
++	data->bank = aaeon_gpio_bank;
++	platform_set_drvdata(pdev, data);
++	bank = &data->bank[0];
++	bank->chip.parent = &pdev->dev;
++	bank->chip.ngpio = dio_number;
++	bank->data = data;
++	err = devm_gpiochip_add_data(&pdev->dev, &bank->chip, bank);
++	if (err)
++		pr_debug("Failed to register gpiochip %d: %d\n", i, err);
++
++	return err;
++}
++
++static struct platform_driver aaeon_gpio_driver = {
++	.driver = {
++		.name = "gpio-aaeon",
++	},
++};
++
++module_platform_driver_probe(aaeon_gpio_driver, aaeon_gpio_probe);
++
++MODULE_ALIAS("platform:gpio-aaeon");
++MODULE_DESCRIPTION("AAEON GPIO Driver");
++MODULE_AUTHOR("Edward Lin <edward1_lin@aaeon.com.tw>");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/hwmon/Kconfig b/drivers/hwmon/Kconfig
+index 0c2b032..4efa8ef 100644
+--- a/drivers/hwmon/Kconfig
++++ b/drivers/hwmon/Kconfig
+@@ -38,6 +38,16 @@ config HWMON_DEBUG_CHIP
+ 
+ comment "Native drivers"
+ 
++config SENSORS_AAEON
++	tristate "AAEON hwmon driver"
++	depends on X86
++	select MFD_AAEON
++	help
++	  This hwmon driver adds support for reporting temperature or fan
++	  speed and voltage on Single Board Computers produced by AAEON.
++
++	  This driver leverages the ASUS WMI interface to access device
++	  resources.
+ config SENSORS_AB8500
+ 	tristate "AB8500 thermal monitoring"
+ 	depends on AB8500_GPADC && AB8500_BM && (IIO = y)
+diff --git a/drivers/hwmon/Makefile b/drivers/hwmon/Makefile
+index 9db2903..6ce194a 100644
+--- a/drivers/hwmon/Makefile
++++ b/drivers/hwmon/Makefile
+@@ -80,6 +80,7 @@ obj-$(CONFIG_SENSORS_GL520SM)	+= gl520sm.o
+ obj-$(CONFIG_SENSORS_GSC)	+= gsc-hwmon.o
+ obj-$(CONFIG_SENSORS_GPIO_FAN)	+= gpio-fan.o
+ obj-$(CONFIG_SENSORS_HIH6130)	+= hih6130.o
++obj-$(CONFIG_SENSORS_AAEON)     += hwmon-aaeon.o
+ obj-$(CONFIG_SENSORS_ULTRA45)	+= ultra45_env.o
+ obj-$(CONFIG_SENSORS_I5500)	+= i5500_temp.o
+ obj-$(CONFIG_SENSORS_I5K_AMB)	+= i5k_amb.o
+diff --git a/drivers/hwmon/hwmon-aaeon.c b/drivers/hwmon/hwmon-aaeon.c
+new file mode 100755
+index 00000000..146da10
+--- /dev/null
++++ b/drivers/hwmon/hwmon-aaeon.c
+@@ -0,0 +1,568 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * AAEON HWMON driver
++ * Copyright (c) 2021, AAEON Ltd.
++ *
++ * Author: Edward Lin	<edward1_lin@aaeon.com.tw>
++ * Author: Kunyang Fan	<kunyang_fan@aaeon.com.tw>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++#include <linux/acpi.h>
++#include <linux/err.h>
++#include <linux/jiffies.h>
++#include <linux/hwmon.h>
++#include <linux/hwmon-sysfs.h>
++#include <linux/module.h>
++#include <linux/mutex.h>
++#include <linux/platform_data/x86/asus-wmi.h>
++#include <linux/platform_device.h>
++
++#define DRVNAME "hwmon-aaeon"
++
++#define AAEON_WMI_MGMT_GUID		"97845ED0-4E6D-11DE-8A39-0800200C9A66"
++
++#define AAEON_VERSION_METHOD_ID		0x00000000
++#define HWM_INFORMATION_METHOD_ID	0x00030000
++#define HWM_METHOD_ID				0x00030001
++
++#define BITMAP_TEMP_ARG			0x12
++#define BITMAP_FAN_ARG			0x13
++#define BITMAP_VOLTAGE_ARG		0x14
++
++#define SENSOR_TEMP_NUMBER		0
++#define SENSOR_FAN_NUMBER		1
++#define SENSOR_VOLTAGE_NUMBER	2
++#define SENSOR_MAX_NUMBER		2
++
++static ssize_t aaeon_show_sensor(struct device *dev,
++			       struct device_attribute *devattr, char *buf);
++static ssize_t aaeon_show_sensor_name(struct device *dev,
++				    struct device_attribute *devattr,
++				    char *buf);
++static ssize_t aaeon_show_version(struct device *dev,
++				  struct device_attribute *devattr, char *buf);
++static ssize_t name_show(struct device *dev, struct device_attribute *devattr,
++			 char *buf);
++static int aaeon_get_version(void);
++static int aaeon_hwmon_probe(struct platform_device *pdev);
++static int aaeon_hwmon_remove(struct platform_device *pdev);
++
++static const char * const temp_sensors_name_table[] = {
++			"CPU_Temp",
++			"SYS1_Temp",
++			"SYS2_Temp",
++};
++
++static const char * const temp_sensors_name_table_V3[] = {
++			"SYS_Temp",
++			"CPU_Temp",
++};
++
++static const char * const fan_sensors_name_table[] = {
++			"CPU_FAN",
++			"SYS1_FAN",
++			"SYS2_FAN",
++			"Chasis1_FAN",
++			"Chasis2_FAN",
++};
++
++static const char * const fan_sensors_name_table_V3[] = {
++			"Chasis_FAN",
++			"CPU_FAN",
++};
++
++static const char * const voltage_sensors_name_table[] = {
++			"VCORE_Voltage",
++			"VMEM_Voltage",
++			"+12_Voltage",
++			"+5_Voltage",
++			"+3.3_Voltage",
++			"+1.8_Voltage",
++			"5VSB_Voltage",
++			"3VSB_Voltage",
++			"VBAT_Voltage",
++};
++
++static const char * const voltage_sensors_name_table_V3[] = {
++			"VCORE_Voltage",
++			"+5_Voltage",
++			"AVCC_Voltage",
++			"+3.3_Voltage",
++			"+12_Voltage",
++			"VCOREREFIN_Voltage",
++			"VIN4_Voltage",
++			"3VSB_Voltage",
++			"VBAT_Voltage",
++};
++
++struct aaeon_hwmon_data {
++	struct device *hwmon_dev;
++	int bfpi_version;
++	u32 temp_bitmap;
++	u32 fan_bitmap;
++	u32 voltage_bitmap;
++	unsigned int sensors_number[SENSOR_MAX_NUMBER + 1];
++	const char * const *temp_names;
++	const char * const *fan_names;
++	const char * const *voltage_names;
++};
++
++/* Temperature attributes */
++static struct sensor_device_attribute_2 temp_sys_nodes_atts[] = {
++	SENSOR_ATTR_2(temp1_input, 0444, aaeon_show_sensor, NULL,
++				SENSOR_TEMP_NUMBER, 0),
++	SENSOR_ATTR_2(temp1_label, 0444, aaeon_show_sensor_name, NULL,
++				SENSOR_TEMP_NUMBER, 0),
++	SENSOR_ATTR_2(temp2_input, 0444, aaeon_show_sensor, NULL,
++				SENSOR_TEMP_NUMBER, 1),
++	SENSOR_ATTR_2(temp2_label, 0444, aaeon_show_sensor_name, NULL,
++				SENSOR_TEMP_NUMBER, 1),
++	SENSOR_ATTR_2(temp3_input, 0444, aaeon_show_sensor, NULL,
++				SENSOR_TEMP_NUMBER, 2),
++	SENSOR_ATTR_2(temp3_label, 0444, aaeon_show_sensor_name, NULL,
++				SENSOR_TEMP_NUMBER, 2),
++};
++
++/* Cooler Fan attributes */
++static struct sensor_device_attribute_2 fan_sys_nodes_atts[] = {
++	SENSOR_ATTR_2(fan1_input, 0444, aaeon_show_sensor, NULL,
++				SENSOR_FAN_NUMBER, 0),
++	SENSOR_ATTR_2(fan1_label, 0444, aaeon_show_sensor_name, NULL,
++				SENSOR_FAN_NUMBER, 0),
++	SENSOR_ATTR_2(fan2_input, 0444, aaeon_show_sensor, NULL,
++				SENSOR_FAN_NUMBER, 1),
++	SENSOR_ATTR_2(fan2_label, 0444, aaeon_show_sensor_name, NULL,
++				SENSOR_FAN_NUMBER, 1),
++	SENSOR_ATTR_2(fan3_input, 0444, aaeon_show_sensor, NULL,
++				SENSOR_FAN_NUMBER, 2),
++	SENSOR_ATTR_2(fan3_label, 0444, aaeon_show_sensor_name, NULL,
++				SENSOR_FAN_NUMBER, 2),
++	SENSOR_ATTR_2(fan4_input, 0444, aaeon_show_sensor, NULL,
++				SENSOR_FAN_NUMBER, 3),
++	SENSOR_ATTR_2(fan4_label, 0444, aaeon_show_sensor_name, NULL,
++				SENSOR_FAN_NUMBER, 3),
++	SENSOR_ATTR_2(fan5_input, 0444, aaeon_show_sensor, NULL,
++				SENSOR_FAN_NUMBER, 4),
++	SENSOR_ATTR_2(fan5_label, 0444, aaeon_show_sensor_name, NULL,
++				SENSOR_FAN_NUMBER, 4),
++};
++
++/* Voltage attributes */
++static struct sensor_device_attribute_2 voltage_sys_nodes_atts[] = {
++	SENSOR_ATTR_2(in1_input, 0444, aaeon_show_sensor, NULL,
++			SENSOR_VOLTAGE_NUMBER, 0),
++	SENSOR_ATTR_2(in1_label, 0444, aaeon_show_sensor_name, NULL,
++			SENSOR_VOLTAGE_NUMBER, 0),
++	SENSOR_ATTR_2(in2_input, 0444, aaeon_show_sensor, NULL,
++			SENSOR_VOLTAGE_NUMBER, 1),
++	SENSOR_ATTR_2(in2_label, 0444, aaeon_show_sensor_name, NULL,
++			SENSOR_VOLTAGE_NUMBER, 1),
++	SENSOR_ATTR_2(in3_input, 0444, aaeon_show_sensor, NULL,
++			SENSOR_VOLTAGE_NUMBER, 2),
++	SENSOR_ATTR_2(in3_label, 0444, aaeon_show_sensor_name, NULL,
++			SENSOR_VOLTAGE_NUMBER, 2),
++	SENSOR_ATTR_2(in4_input, 0444, aaeon_show_sensor, NULL,
++			SENSOR_VOLTAGE_NUMBER, 3),
++	SENSOR_ATTR_2(in4_label, 0444, aaeon_show_sensor_name, NULL,
++			SENSOR_VOLTAGE_NUMBER, 3),
++	SENSOR_ATTR_2(in5_input, 0444, aaeon_show_sensor, NULL,
++			SENSOR_VOLTAGE_NUMBER, 4),
++	SENSOR_ATTR_2(in5_label, 0444, aaeon_show_sensor_name, NULL,
++			SENSOR_VOLTAGE_NUMBER, 4),
++	SENSOR_ATTR_2(in6_input, 0444, aaeon_show_sensor, NULL,
++			SENSOR_VOLTAGE_NUMBER, 5),
++	SENSOR_ATTR_2(in6_label, 0444, aaeon_show_sensor_name, NULL,
++			SENSOR_VOLTAGE_NUMBER, 5),
++	SENSOR_ATTR_2(in7_input, 0444, aaeon_show_sensor, NULL,
++			SENSOR_VOLTAGE_NUMBER, 6),
++	SENSOR_ATTR_2(in7_label, 0444, aaeon_show_sensor_name, NULL,
++			SENSOR_VOLTAGE_NUMBER, 6),
++	SENSOR_ATTR_2(in8_input, 0444, aaeon_show_sensor, NULL,
++			SENSOR_VOLTAGE_NUMBER, 7),
++	SENSOR_ATTR_2(in8_label, 0444, aaeon_show_sensor_name, NULL,
++			SENSOR_VOLTAGE_NUMBER, 7),
++	SENSOR_ATTR_2(in9_input, 0444, aaeon_show_sensor, NULL,
++			SENSOR_VOLTAGE_NUMBER, 8),
++	SENSOR_ATTR_2(in9_label, 0444, aaeon_show_sensor_name, NULL,
++			SENSOR_VOLTAGE_NUMBER, 8),
++
++};
++
++static struct sensor_device_attribute_2 info_sys_nodes_atts[] = {
++	/* WMI version Information */
++	SENSOR_ATTR_2(AAEON_VERSION, 0444, aaeon_show_version, NULL, 0, 0),
++};
++
++DEVICE_ATTR_RO(name);
++static ssize_t name_show(struct device *dev, struct device_attribute *devattr,
++			 char *buf)
++{
++	return sprintf(buf, "%s\n", DRVNAME);
++}
++
++static ssize_t aaeon_show_version(struct device *dev,
++				  struct device_attribute *devattr, char *buf)
++{
++	struct aaeon_hwmon_data *data =
++			(struct aaeon_hwmon_data *)dev_get_drvdata(dev);
++
++	return sprintf(buf, "%d\n", data->bfpi_version);
++}
++
++static ssize_t aaeon_show_sensor_name(struct device *dev,
++				    struct device_attribute *devattr, char *buf)
++{
++	u8 nr = to_sensor_dev_attr_2(devattr)->nr;
++	u8 index = to_sensor_dev_attr_2(devattr)->index;
++	struct aaeon_hwmon_data *data =
++			(struct aaeon_hwmon_data *)dev_get_drvdata(dev);
++
++	if (nr > SENSOR_MAX_NUMBER || index >= data->sensors_number[nr]) {
++		pr_debug("Can not check the device");
++		return -1;
++	}
++
++	switch (nr) {
++	case SENSOR_TEMP_NUMBER:
++		return sprintf(buf, "%s\n", data->temp_names[index]);
++	case SENSOR_FAN_NUMBER:
++		return sprintf(buf, "%s\n", data->fan_names[index]);
++	case SENSOR_VOLTAGE_NUMBER:
++		return sprintf(buf, "%s\n", data->voltage_names[index]);
++	default:
++		break;
++	}
++
++	return 0;
++}
++
++static ssize_t aaeon_show_sensor(struct device *dev,
++			       struct device_attribute *devattr, char *buf)
++{
++	u8 nr = to_sensor_dev_attr_2(devattr)->nr;
++	u8 index = to_sensor_dev_attr_2(devattr)->index;
++	u32 dev_id;
++	int retval, err;
++	struct aaeon_hwmon_data *data =
++			(struct aaeon_hwmon_data *)dev_get_drvdata(dev);
++
++	if (nr > SENSOR_MAX_NUMBER || index >= data->sensors_number[nr]) {
++		pr_debug("Can not check the device");
++		return -1;
++	}
++
++	/* For the V3 version, index need offset */
++	if (data->bfpi_version == 0x03 && nr != SENSOR_VOLTAGE_NUMBER)
++		index++;
++
++	dev_id = (index << 12) | (nr << 8);
++	err = asus_wmi_evaluate_method(HWM_METHOD_ID, dev_id, 0, &retval);
++	if (err)
++		return err;
++
++	/* For the V3 version, need to convert the raw value*/
++	if (nr == SENSOR_VOLTAGE_NUMBER && data->bfpi_version == 0x03) {
++		switch (index) {
++		case 0: /* VCORE */
++			retval = retval * 16;
++			break;
++		case 1: /* +5V */
++			retval = (retval * 2008) / 50;
++			break;
++		case 2: /* AVCC */
++			retval = retval * 16;
++			break;
++		case 3: /* +3.3V */
++			retval = retval * 16;
++			break;
++		case 4: /* +12V */
++			retval = retval * 96;
++			break;
++		case 5: /* VCOREREFIN */
++			retval = (retval * 552) / 41;
++			break;
++		case 6: /* VIN4 */
++			retval = retval * 8;
++			break;
++		case 7: /* 3VSB */
++			retval = retval * 16;
++			break;
++		case 8: /* VBAT */
++			retval = retval * 16;
++			break;
++		default:
++			break;
++		}
++	} else if (nr == SENSOR_TEMP_NUMBER && data->bfpi_version == 0x03)
++		retval = retval * 1000;
++
++	return sprintf(buf, "%d\n", retval);
++}
++
++static int aaeon_hwmon_create_sub_sysfs_fs(struct platform_device *pdev,
++					struct sensor_device_attribute_2 *attr,
++					int sensor_number,
++					u32 sensor_mask,
++					int bfpi_version)
++{
++	int i, err = 0;
++
++	for (i = 0; i < sensor_number; i++) {
++		if (bfpi_version == 0x03 || sensor_mask & BIT(i)) {
++			err = device_create_file(&pdev->dev, &attr[2 * i].dev_attr);
++			if (err)
++				break;
++			err = device_create_file(&pdev->dev, &attr[2 * i + 1].dev_attr);
++			if (err)
++				break;
++		}
++	}
++
++	return err;
++}
++
++static int
++aaeon_hwmon_create_sysfs_files(struct platform_device *pdev, struct aaeon_hwmon_data *data)
++{
++	int err;
++
++	/* register sysfs interface files */
++	err = device_create_file(&pdev->dev, &dev_attr_name);
++	if (err)
++		return err;
++
++	/* registe sysfs to dump sensors BFPI version */
++	err = device_create_file(&pdev->dev, &info_sys_nodes_atts[0].dev_attr);
++	if (err)
++		return err;
++
++	/* create temperature name and value node */
++	err = aaeon_hwmon_create_sub_sysfs_fs(pdev, temp_sys_nodes_atts,
++				data->sensors_number[SENSOR_TEMP_NUMBER],
++				data->temp_bitmap, data->bfpi_version);
++	if (err)
++		return err;
++
++	/* create fan name and value node */
++	err = aaeon_hwmon_create_sub_sysfs_fs(pdev, fan_sys_nodes_atts,
++				data->sensors_number[SENSOR_FAN_NUMBER],
++				data->fan_bitmap, data->bfpi_version);
++	if (err)
++		return err;
++
++	/* create voltage name and value node */
++	err = aaeon_hwmon_create_sub_sysfs_fs(pdev, voltage_sys_nodes_atts,
++				data->sensors_number[SENSOR_VOLTAGE_NUMBER],
++				data->voltage_bitmap, data->bfpi_version);
++	if (err)
++		return err;
++
++	return 0;
++}
++
++static void aaeon_hwmon_remove_sub_sysfs_fs(struct platform_device *pdev,
++					struct sensor_device_attribute_2 *attr,
++					int sensor_number,
++					u32 sensor_mask,
++					int bfpi_version)
++{
++	int i;
++
++	for (i = 0; i < sensor_number; i++) {
++		if (bfpi_version == 0x03 || sensor_mask & BIT(i)) {
++			device_remove_file(&pdev->dev, &attr[2 * i].dev_attr);
++			device_remove_file(&pdev->dev, &attr[2 * i + 1].dev_attr);
++		}
++	}
++}
++
++static void
++aaeon_hwmon_remove_sysfs_files(struct platform_device *pdev,
++			       struct aaeon_hwmon_data *data)
++{
++	/* degister sysfs interface files */
++	device_remove_file(&pdev->dev, &dev_attr_name);
++
++	/* degiste sysfs to dump sensors BFPI version */
++	device_remove_file(&pdev->dev, &info_sys_nodes_atts[0].dev_attr);
++
++	/* remove temperature name and value node */
++	aaeon_hwmon_remove_sub_sysfs_fs(pdev, temp_sys_nodes_atts,
++				data->sensors_number[SENSOR_TEMP_NUMBER],
++				data->temp_bitmap,
++				data->bfpi_version);
++
++	/* remove fan name and value node */
++	aaeon_hwmon_remove_sub_sysfs_fs(pdev, fan_sys_nodes_atts,
++				data->sensors_number[SENSOR_FAN_NUMBER],
++				data->fan_bitmap,
++				data->bfpi_version);
++
++	/* remove voltage name and value node */
++	aaeon_hwmon_remove_sub_sysfs_fs(pdev, voltage_sys_nodes_atts,
++				data->sensors_number[SENSOR_VOLTAGE_NUMBER],
++				data->voltage_bitmap,
++				data->bfpi_version);
++}
++
++static int aaeon_hwmon_remove(struct platform_device *pdev)
++{
++	struct aaeon_hwmon_data *data = platform_get_drvdata(pdev);
++
++	if (data->hwmon_dev)
++		hwmon_device_unregister(data->hwmon_dev);
++
++	aaeon_hwmon_remove_sysfs_files(pdev, data);
++
++	return 0;
++}
++
++static int aaeon_get_version(void)
++{
++	int err, retval;
++	u32 dev_id = 0x00;
++
++	err = asus_wmi_evaluate_method(AAEON_VERSION_METHOD_ID, dev_id, 0,
++				       &retval);
++	if (err)
++		return err;
++
++	return retval;
++}
++
++static int aaeon_hwmon_init_drv_data(struct aaeon_hwmon_data *data)
++{
++	int err;
++
++	data->bfpi_version = aaeon_get_version();
++	if (data->bfpi_version < 0) {
++		pr_debug("Error BFPI verion\n");
++		return -1;
++	}
++
++	if (data->bfpi_version == 0x03) {
++		/* set the number of bits in temp bitmap */
++		data->sensors_number[SENSOR_TEMP_NUMBER] =
++				ARRAY_SIZE(temp_sensors_name_table_V3);
++		data->temp_names = temp_sensors_name_table_V3;
++
++		/* set the number of bits in fan bitmap */
++		data->sensors_number[SENSOR_FAN_NUMBER] =
++				ARRAY_SIZE(fan_sensors_name_table_V3);
++		data->fan_names = fan_sensors_name_table_V3;
++
++		/* set the number of bits in voltage bitmap */
++		data->sensors_number[SENSOR_VOLTAGE_NUMBER] =
++				ARRAY_SIZE(voltage_sensors_name_table_V3);
++		data->voltage_names = voltage_sensors_name_table_V3;
++	} else {
++		/* set the number of bits in temp bitmap */
++		data->sensors_number[SENSOR_TEMP_NUMBER] =
++				ARRAY_SIZE(temp_sensors_name_table);
++		data->temp_names = temp_sensors_name_table;
++
++		/* set the number of bits in fan bitmap */
++		data->sensors_number[SENSOR_FAN_NUMBER] =
++				ARRAY_SIZE(fan_sensors_name_table);
++		data->fan_names = fan_sensors_name_table;
++
++		/* set the number of bits in voltage bitmap */
++		data->sensors_number[SENSOR_VOLTAGE_NUMBER] =
++				ARRAY_SIZE(voltage_sensors_name_table);
++		data->voltage_names = voltage_sensors_name_table;
++	}
++
++	/* get temp supported bitmap */
++	err = asus_wmi_evaluate_method(HWM_INFORMATION_METHOD_ID,
++				BITMAP_TEMP_ARG, 0, &data->temp_bitmap);
++	if (err)
++		return err;
++
++	/* get fan supported bitmap */
++	err = asus_wmi_evaluate_method(HWM_INFORMATION_METHOD_ID,
++				BITMAP_FAN_ARG, 0, &data->fan_bitmap);
++	if (err)
++		return err;
++
++	/* get voltage supported bitmap */
++	err = asus_wmi_evaluate_method(HWM_INFORMATION_METHOD_ID,
++				BITMAP_VOLTAGE_ARG, 0, &data->voltage_bitmap);
++	if (err)
++		return err;
++
++	return 0;
++}
++
++static int aaeon_hwmon_probe(struct platform_device *pdev)
++{
++	int err;
++	struct aaeon_hwmon_data *data;
++
++	pr_debug("aaeon hwomon device probe (support V3)!\n");
++	if (!wmi_has_guid(AAEON_WMI_MGMT_GUID)) {
++		pr_info("AAEON Management GUID not found\n");
++		return -ENODEV;
++	}
++
++	data = devm_kzalloc(&pdev->dev, sizeof(struct aaeon_hwmon_data),
++			    GFP_KERNEL);
++	if (!data)
++		return -ENOMEM;
++
++	err = aaeon_hwmon_init_drv_data(data);
++	if (err) {
++		pr_info("Error to get sensor support bitmap\n");
++		goto exit;
++	}
++
++	if (data->bfpi_version != 0x03 && data->temp_bitmap == 0 &&
++		data->fan_bitmap == 0 && data->voltage_bitmap == 0) {
++		pr_debug("No sensors found\n");
++		err = -ENODEV;
++		goto exit;
++	}
++
++	platform_set_drvdata(pdev, data);
++	err = aaeon_hwmon_create_sysfs_files(pdev, data);
++	if (err)
++		goto exit;
++
++	data->hwmon_dev = devm_hwmon_device_register_with_info(&pdev->dev,
++							  "AAEON_HWM",
++							  data,
++							  NULL,
++							  NULL);
++	if (IS_ERR(data->hwmon_dev)) {
++		err = PTR_ERR(data->hwmon_dev);
++		data->hwmon_dev = NULL;
++		goto exit_unregister_sysfs;
++	}
++
++	return 0;
++
++exit_unregister_sysfs:
++	aaeon_hwmon_remove(pdev);
++exit:
++	return err;
++}
++
++static struct platform_driver aaeon_hwmon_driver = {
++	.driver = {
++		.name = DRVNAME,
++		.owner = THIS_MODULE,
++	},
++	.probe = aaeon_hwmon_probe,
++	.remove = aaeon_hwmon_remove,
++};
++
++module_platform_driver_probe(aaeon_hwmon_driver, aaeon_hwmon_probe);
++
++MODULE_ALIAS("platform:hwmon-aaeon");
++MODULE_DESCRIPTION("AAEON Hardware Monitoring Driver");
++MODULE_AUTHOR("Edward Lin <edward1_lin@aaeon.com.tw>");
++MODULE_AUTHOR("Kunyang Fan <kunyang_fan@aaeon.com.tw>");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/leds/Kconfig b/drivers/leds/Kconfig
+index 56e8198..9a43f8b 100644
+--- a/drivers/leds/Kconfig
++++ b/drivers/leds/Kconfig
+@@ -59,6 +59,17 @@ config LEDS_88PM860X
+ 	  This option enables support for on-chip LED drivers found on Marvell
+ 	  Semiconductor 88PM8606 PMIC.
+ 
++config LEDS_AAEON
++	tristate "AAEON LED driver"
++	depends on X86
++	select MFD_AAEON
++	help
++	  This led driver adds support for LED brightness control on Single
++	  Board Computers produced by AAEON.
++
++	  This driver leverages the ASUS WMI interface to access device
++	  resources.
++
+ config LEDS_AAT1290
+ 	tristate "LED support for the AAT1290"
+ 	depends on LEDS_CLASS_FLASH
+diff --git a/drivers/leds/Makefile b/drivers/leds/Makefile
+index 73e603e..9af4812 100644
+--- a/drivers/leds/Makefile
++++ b/drivers/leds/Makefile
+@@ -9,6 +9,7 @@ obj-$(CONFIG_LEDS_TRIGGERS)		+= led-triggers.o
+ 
+ # LED Platform Drivers (keep this sorted, M-| sort)
+ obj-$(CONFIG_LEDS_88PM860X)		+= leds-88pm860x.o
++obj-$(CONFIG_LEDS_AAEON)		+= leds-aaeon.o
+ obj-$(CONFIG_LEDS_AAT1290)		+= leds-aat1290.o
+ obj-$(CONFIG_LEDS_ACER_A500)		+= leds-acer-a500.o
+ obj-$(CONFIG_LEDS_ADP5520)		+= leds-adp5520.o
+diff --git a/drivers/leds/leds-aaeon.c b/drivers/leds/leds-aaeon.c
+new file mode 100755
+index 00000000..10090a4
+--- /dev/null
++++ b/drivers/leds/leds-aaeon.c
+@@ -0,0 +1,142 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * AAEON LED driver
++ *
++ * Copyright (c) 2021, AAEON Ltd.
++ *
++ * Author: Kunyang Fan <kunyang_fan@aaeon.com.tw>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++#include <linux/acpi.h>
++#include <linux/bitops.h>
++#include <linux/leds.h>
++#include <linux/module.h>
++#include <linux/platform_data/x86/asus-wmi.h>
++#include <linux/platform_device.h>
++
++#define DRVNAME "led_aaeon"
++#define ASUS_NB_WMI_EVENT_GUID   "0B3CBB35-E3C2-45ED-91C2-4C5A6D195D1C"
++#define AAEON_WMI_MGMT_GUID      "97845ED0-4E6D-11DE-8A39-0800200C9A66"
++
++#define GET_LED_NUMBER_ID        0x00060000
++#define GET_LED_METHOD_ID        0x00060001
++#define SET_LED_METHOD_ID        0x00060002
++#define GET_LED_NUMBER_METHOD_ID 0x10
++
++
++struct aaeon_led_data {
++	int id;
++	struct led_classdev cdev;
++};
++
++static int aaeon_led_get_number(void)
++{
++	int err, retval;
++
++	err = asus_wmi_evaluate_method(GET_LED_NUMBER_ID,
++				       GET_LED_NUMBER_METHOD_ID,
++				       0, &retval);
++	if (err)
++		return err;
++
++	return retval;
++}
++
++static enum led_brightness aaeon_led_brightness_get(struct led_classdev
++						      *cdev)
++{
++	int err, brightness;
++	struct aaeon_led_data *led =
++			container_of(cdev, struct aaeon_led_data, cdev);
++	u32 arg0;
++
++	arg0 = (u32)(led->id & 0xF);
++	err = asus_wmi_evaluate_method(GET_LED_METHOD_ID, arg0, 0, &brightness);
++	if (err)
++		return err;
++
++	return brightness;
++};
++
++static void aaeon_led_brightness_set(struct led_classdev *cdev,
++				       enum led_brightness brightness)
++{
++	int err, retval;
++	struct aaeon_led_data *led =
++			container_of(cdev, struct aaeon_led_data, cdev);
++	u32 arg0;
++
++	arg0 = (u32)(led->id & 0xF);
++	if (brightness != LED_OFF)
++		arg0 |= BIT(16);
++
++	err = asus_wmi_evaluate_method(SET_LED_METHOD_ID, arg0, 0, &retval);
++};
++
++static int __init aaeon_add_led_device(struct platform_device *pdev,
++					   int id)
++{
++	struct aaeon_led_data *led;
++
++	led = devm_kzalloc(&pdev->dev, sizeof(struct aaeon_led_data), GFP_KERNEL);
++	if (!led)
++		return -ENOMEM;
++
++	led->id = id;
++	led->cdev.brightness_get = aaeon_led_brightness_get;
++	led->cdev.brightness_set = aaeon_led_brightness_set;
++	led->cdev.name = devm_kasprintf(&pdev->dev, GFP_KERNEL, "led:%d:", id);
++
++	if (!led->cdev.name)
++		return -ENOMEM;
++
++	return devm_led_classdev_register(&pdev->dev, &led->cdev);
++}
++
++static int aaeon_led_probe(struct platform_device *pdev)
++{
++	int err = -ENODEV, i;
++	int led_number = 0;
++
++	pr_debug("aaeon led device probe!\n");
++	/* Prevent other drivers adding this platfom device */
++	if (!wmi_has_guid(AAEON_WMI_MGMT_GUID)) {
++		pr_debug("AAEON Management GUID not found\n");
++		return -ENODEV;
++	}
++
++	/* Query the number of led devices board support */
++	led_number = aaeon_led_get_number();
++
++	/*
++	 * If the number is 0 or can't get the number of leds,
++	 * no need to register any led device node.
++	 */
++	if (led_number <= 0)
++		return -ENODEV;
++
++	for (i = 0; i < led_number; i++) {
++		err = aaeon_add_led_device(pdev, i);
++		if (err)
++			break;
++	}
++
++	return err;
++}
++
++static struct platform_driver aaeon_led_driver = {
++	.driver = {
++		.name = "leds-aaeon",
++	},
++};
++
++module_platform_driver_probe(aaeon_led_driver, aaeon_led_probe);
++
++MODULE_ALIAS("platform:leds-aaeon");
++MODULE_DESCRIPTION("AAEON LED Driver");
++MODULE_AUTHOR("Kunyang Fan <kunyang_fan@asus.com>");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/mfd/Kconfig b/drivers/mfd/Kconfig
+index dbb9d83..134fd23 100644
+--- a/drivers/mfd/Kconfig
++++ b/drivers/mfd/Kconfig
+@@ -2120,7 +2120,17 @@ config MFD_KHADAS_MCU
+ 	  This driver provides common support for accessing the device,
+ 	  additional drivers must be enabled in order to use the functionality
+ 	  of the device.
++	  
++config MFD_AAEON
++	tristate "AAEON WMI MFD devices"
++	depends on ASUS_WMI
++	help
++	  Say yes here to support mltiple IO devices on Single Board Computers
++	  produced by AAEON.
+ 
++	  This driver leverages the ASUS WMI interface to access device
++	  resources.
++	  
+ menu "Multimedia Capabilities Port drivers"
+ 	depends on ARCH_SA1100
+ 
+diff --git a/drivers/mfd/Makefile b/drivers/mfd/Makefile
+index f302c9a..39ef031 100644
+--- a/drivers/mfd/Makefile
++++ b/drivers/mfd/Makefile
+@@ -264,7 +264,7 @@ obj-$(CONFIG_MFD_ROHM_BD70528)	+= rohm-bd70528.o
+ obj-$(CONFIG_MFD_ROHM_BD71828)	+= rohm-bd71828.o
+ obj-$(CONFIG_MFD_ROHM_BD718XX)	+= rohm-bd718x7.o
+ obj-$(CONFIG_MFD_STMFX) 	+= stmfx.o
+-obj-$(CONFIG_MFD_KHADAS_MCU) 	+= khadas-mcu.o
++obj-$(CONFIG_MFD_AAEON)		+= mfd-aaeon.o
+ 
+ obj-$(CONFIG_SGI_MFD_IOC3)	+= ioc3.o
+ obj-$(CONFIG_MFD_SIMPLE_MFD_I2C)	+= simple-mfd-i2c.o
+diff --git a/drivers/mfd/mfd-aaeon.c b/drivers/mfd/mfd-aaeon.c
+new file mode 100755
+index 00000000..9d2efde
+--- /dev/null
++++ b/drivers/mfd/mfd-aaeon.c
+@@ -0,0 +1,77 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * UP Board main platform driver and FPGA configuration support
++ *
++ * Copyright (c) 2021, AAEON Ltd.
++ *
++ * Author: Kunyang_Fan <knuyang_fan@aaeon.com.tw>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include <linux/acpi.h>
++#include <linux/gpio.h>
++#include <linux/kernel.h>
++#include <linux/mfd/core.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/leds.h>
++#include <linux/wmi.h>
++
++#define AAEON_WMI_MGMT_GUID      "97845ED0-4E6D-11DE-8A39-0800200C9A66"
++
++struct aaeon_wmi_priv {
++	const struct mfd_cell *cells;
++	size_t ncells;
++};
++
++static const struct mfd_cell aaeon_mfd_cells[] = {
++	{ .name = "gpio-aaeon" },
++	{ .name = "hwmon-aaeon"},
++	{ .name = "leds-aaeon"},
++	{ .name = "wdt-aaeon"},
++};
++
++static const struct aaeon_wmi_priv aaeon_wmi_priv_data = {
++	.cells = aaeon_mfd_cells,
++	.ncells = ARRAY_SIZE(aaeon_mfd_cells),
++};
++
++static int aaeon_wmi_probe(struct wmi_device *wdev, const void *context)
++{
++	struct aaeon_wmi_priv *priv;
++
++	if (!wmi_has_guid(AAEON_WMI_MGMT_GUID)) {
++		dev_info(&wdev->dev, "AAEON Management GUID not found\n");
++		return -ENODEV;
++	}
++
++
++	priv = (struct aaeon_wmi_priv *)context;
++	dev_set_drvdata(&wdev->dev, priv);
++
++	return devm_mfd_add_devices(&wdev->dev, 0, priv->cells,
++				    priv->ncells, NULL, 0, NULL);
++}
++
++static const struct wmi_device_id aaeon_wmi_id_table[] = {
++	{ AAEON_WMI_MGMT_GUID, (void *)&aaeon_wmi_priv_data },
++	{}
++};
++
++static struct wmi_driver aaeon_wmi_driver = {
++	.driver = {
++		.name = "mfd-aaeon",
++	},
++	.id_table = aaeon_wmi_id_table,
++	.probe = aaeon_wmi_probe,
++};
++
++module_wmi_driver(aaeon_wmi_driver);
++
++MODULE_DEVICE_TABLE(wmi, aaeon_wmi_id_table);
++MODULE_AUTHOR("Kunyang Fan <kunyang_fan@aaeon.com.tw>");
++MODULE_DESCRIPTION("AAEON Board WMI driver");
++MODULE_LICENSE("GPL v2");
+diff --git a/drivers/watchdog/Kconfig b/drivers/watchdog/Kconfig
+index 01ce3f4..596fdc2 100644
+--- a/drivers/watchdog/Kconfig
++++ b/drivers/watchdog/Kconfig
+@@ -1636,6 +1636,18 @@ config NIC7018_WDT
+ 	  To compile this driver as a module, choose M here: the module will be
+ 	  called nic7018_wdt.
+ 
++config AAEON_IWMI_WDT
++	tristate "AAEON Watchdog Timer"
++	depends on ASUS_WMI
++	select MFD_AAEON
++	help
++	  This is the driver for the hardware watchdog on Single Board
++	  Computers produced by AAEON.Say `Y' here to support its built-in
++	  watchdog timer feature.
++
++	  This driver leverages the ASUS WMI interface to access device
++	  resources.
++
+ # M68K Architecture
+ 
+ config M54xx_WATCHDOG
+diff --git a/drivers/watchdog/Makefile b/drivers/watchdog/Makefile
+index 071a2e5..2c6e7f2 100644
+--- a/drivers/watchdog/Makefile
++++ b/drivers/watchdog/Makefile
+@@ -146,6 +146,7 @@ obj-$(CONFIG_INTEL_MEI_WDT) += mei_wdt.o
+ obj-$(CONFIG_NI903X_WDT) += ni903x_wdt.o
+ obj-$(CONFIG_NIC7018_WDT) += nic7018_wdt.o
+ obj-$(CONFIG_MLX_WDT) += mlx_wdt.o
++obj-$(CONFIG_AAEON_IWMI_WDT) += wdt_aaeon.o
+ 
+ # M68K Architecture
+ obj-$(CONFIG_M54xx_WATCHDOG) += m54xx_wdt.o
+diff --git a/drivers/watchdog/wdt_aaeon.c b/drivers/watchdog/wdt_aaeon.c
+new file mode 100755
+index 00000000..41c6880
+--- /dev/null
++++ b/drivers/watchdog/wdt_aaeon.c
+@@ -0,0 +1,242 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * AAEON WDT driver
++ *
++ * Author: Edward Lin <edward1_lin@aaeon.com.tw>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++#include <linux/acpi.h>
++#include <linux/fs.h>
++#include <linux/err.h>
++#include <linux/miscdevice.h>
++#include <linux/module.h>
++#include <linux/mutex.h>
++#include <linux/notifier.h>
++#include <linux/platform_data/x86/asus-wmi.h>
++#include <linux/platform_device.h>
++#include <linux/reboot.h>
++#include <linux/uaccess.h>
++#include <linux/watchdog.h>
++
++#define AAEON_WMI_MGMT_GUID      "97845ED0-4E6D-11DE-8A39-0800200C9A66"
++#define WMI_WDT_GETMAX_METHOD_ID	0x00020000
++#define WMI_WDT_GETVALUE_METHOD_ID	0x00020001
++#define WMI_WDT_SETANDSTOP_METHOD_ID	0x00020002
++
++#define WMI_WDT_SUPPORTED_DEVICE_ID                                            \
++	0x12 /* Dev_Id for WDT_WMI supported or not */
++#define WMI_WDT_GETMAX_DEVICE_ID  0x10  /* Dev_Id for WDT_WMI get Max timeout */
++#define WMI_WDT_STOP_DEVICE_ID    0x00  /* Dev_Id for WDT_WMI stop watchdog*/
++
++/* Default values */
++#define WATCHDOG_TIMEOUT  60000  /* 1 minute default timeout */
++#define WATCHDOG_MAX_TIMEOUT  (60000 * 255) /* WD_TIME is a byte long */
++#define WATCHDOG_PULSE_WIDTH  5000 /* default pulse width for watchdog signal */
++
++static const int max_timeout = WATCHDOG_MAX_TIMEOUT;
++static int timeout = WATCHDOG_TIMEOUT;    /* default timeout in seconds */
++module_param(timeout, int, 0);
++MODULE_PARM_DESC(timeout, "Initial watchdog timeout in mini-seconds");
++
++static bool nowayout = WATCHDOG_NOWAYOUT;
++module_param(nowayout, bool, 0444);
++MODULE_PARM_DESC(nowayout, " Disable watchdog shutdown on close");
++
++/* Wdog internal data information */
++struct watchdog_data {
++	unsigned long       opened;       /* driver open state */
++	struct mutex        lock;         /* concurrency control */
++	char                expect_close; /* controlled close */
++	struct watchdog_info ident;       /* wdog information*/
++	unsigned short      timeout;      /* current wdog timeout */
++	u8                  timer_val;    /* content for the WD_TIME register */
++	char                minutes_mode;
++	u8                  pulse_val;    /* pulse width flag */
++	char                pulse_mode;   /* enable pulse output mode? */
++	char                caused_reboot;/* last reboot was by the watchdog */
++};
++
++static long aaeon_watchdog_ioctl(struct file *file, unsigned int cmd,
++			  unsigned long arg);
++static int aaeon_watchdog_notify_sys(struct notifier_block *this,
++			       unsigned long code, void *unused);
++
++static struct watchdog_data watchdog = {
++	.lock = __MUTEX_INITIALIZER(watchdog.lock),
++};
++
++/* /dev/watchdog api available options */
++static const struct file_operations watchdog_fops = {
++	.owner              = THIS_MODULE,
++	.unlocked_ioctl     = aaeon_watchdog_ioctl,
++};
++
++static struct miscdevice watchdog_miscdev = {
++	.minor      = WATCHDOG_MINOR,
++	.name       = "watchdog",
++	.fops       = &watchdog_fops,
++};
++
++static struct notifier_block watchdog_notifier = {
++	.notifier_call = aaeon_watchdog_notify_sys,
++};
++
++/* Internal Configuration functions */
++static int aaeon_watchdog_set_timeout(int timeout)
++{
++	int err = 0;
++	u32 retval, dev_id = timeout;
++
++	if (timeout <= 0 || timeout >  max_timeout) {
++		pr_debug("watchdog timeout out of range\n");
++		return -EINVAL;
++	}
++
++	mutex_lock(&watchdog.lock);
++	err = asus_wmi_evaluate_method(WMI_WDT_SETANDSTOP_METHOD_ID,
++				       dev_id, 0, &retval);
++	mutex_unlock(&watchdog.lock);
++
++	return err;
++}
++
++static int aaeon_watchdog_get_timeout(void)
++{
++	int err = 0;
++	u32 retval;
++
++	if (timeout <= 0 || timeout >  max_timeout) {
++		pr_debug("watchdog timeout out of range\n");
++		return -EINVAL;
++	}
++	mutex_lock(&watchdog.lock);
++	err = asus_wmi_evaluate_method(WMI_WDT_GETVALUE_METHOD_ID,
++				       0, 0, &retval);
++	mutex_unlock(&watchdog.lock);
++
++	return err ? err : retval;
++}
++
++static int aaeon_watchdog_stop(void)
++{
++	int err = 0;
++
++	mutex_lock(&watchdog.lock);
++	err = asus_wmi_evaluate_method(WMI_WDT_SETANDSTOP_METHOD_ID,
++				       0, 0, NULL);
++	mutex_unlock(&watchdog.lock);
++
++	return err;
++}
++
++static int aaeon_watchdog_get_maxsupport(void)
++{
++	int err;
++	u32 retval;
++
++	mutex_lock(&watchdog.lock);
++	err = asus_wmi_evaluate_method(WMI_WDT_GETMAX_METHOD_ID,
++				       WMI_WDT_GETMAX_DEVICE_ID,
++				       0, &retval);
++	mutex_unlock(&watchdog.lock);
++
++	return err ? err : retval;
++
++}
++
++static long aaeon_watchdog_ioctl(struct file *file, unsigned int cmd,
++			  unsigned long arg)
++{
++	int new_timeout;
++
++	union {
++		struct watchdog_info __user *ident;
++		int __user *i;
++	} uarg;
++
++	uarg.i = (int __user *) arg;
++	switch (cmd) {
++	case WDIOC_SETTIMEOUT:
++		if (get_user(new_timeout, uarg.i))
++			return -EFAULT;
++		if (aaeon_watchdog_set_timeout(new_timeout))
++			return -EINVAL;
++		return 0;
++	case WDIOC_GETTIMEOUT:
++		return aaeon_watchdog_get_timeout();
++	case WDIOS_DISABLECARD:
++		return aaeon_watchdog_stop();
++	case WDIOC_GETSUPPORT:
++		return aaeon_watchdog_get_maxsupport();
++	default:
++		return -ENOTTY;
++	}
++}
++
++static int aaeon_watchdog_notify_sys(struct notifier_block *this,
++			       unsigned long code, void *unused)
++{
++	if (code == SYS_DOWN || code == SYS_HALT)
++		aaeon_watchdog_stop();
++	return NOTIFY_DONE;
++}
++
++static int aaeon_wdt_probe(struct platform_device *pdev)
++{
++	int err = 0;
++	int retval = 0;
++
++	pr_debug("aaeon watchdog device probe!\n");
++	if (!wmi_has_guid(AAEON_WMI_MGMT_GUID)) {
++		pr_debug("AAEON Management GUID not found\n");
++		return -ENODEV;
++	}
++	err = asus_wmi_evaluate_method(WMI_WDT_GETMAX_METHOD_ID,
++				       WMI_WDT_SUPPORTED_DEVICE_ID, 0, &retval);
++	if (err)
++		goto exit;
++
++	/*
++	 * This driver imitates the old type SIO watchdog driver to
++	 * provide the basic control for watchdog functions and only
++	 * access by customized userspace tool
++	 */
++	err = misc_register(&watchdog_miscdev);
++	if (err) {
++		pr_debug(" cannot register miscdev on minor=%d\n",
++			 watchdog_miscdev.minor);
++		goto exit;
++	}
++
++	err = register_reboot_notifier(&watchdog_notifier);
++	if (err)
++		goto exit_miscdev;
++
++	if (nowayout)
++		__module_get(THIS_MODULE);
++
++	return 0;
++
++exit_miscdev:
++	misc_deregister(&watchdog_miscdev);
++exit:
++	return err;
++}
++
++static struct platform_driver aaeon_wdt_driver = {
++	.driver = {
++		.name = "wdt-aaeon",
++	},
++};
++
++module_platform_driver_probe(aaeon_wdt_driver, aaeon_wdt_probe);
++
++MODULE_ALIAS("platform:wdt-aaeon");
++MODULE_DESCRIPTION("AAEON WDT Driver");
++MODULE_AUTHOR("Edward Lin <edward1_lin@aaeon.com.tw>");
++MODULE_LICENSE("GPL v2");
+-- 
+2.7.4
+
