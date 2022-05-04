@@ -1,7 +1,7 @@
 Yocto BSP meta layer
 ======================================
-**Note: This branch dunfell for Yocto 'dunfell' is for development purposes
-only. Please refer to 'dunfell' branch in this repository for non-experimental
+**Note: This branch hardknott for Yocto 'hardknott' is for development purposes
+only. Please refer to 'hardknott' branch in this repository for non-experimental
 purposes.**
 
 This README file contains information on building the meta-up-board BSP
@@ -15,7 +15,7 @@ Table of Contents
 
 1. Prerequisites
 2. Downloading the meta-up-board BSP layer
-3. Building your Yocto image for UP Xtreme
+3. Building your Yocto image
 4. Booting the live USB image
 5. Connectivity firmware
 6. Enabling Secure Boot
@@ -25,149 +25,57 @@ Table of Contents
 Prerequisites
 ================
 
-Supported hardware versions for Yocto 3.1 (dunfell)
+Supported hardware versions for Yocto 3.3 (hardknott)
 ------------------------------------------------
-* UP Board
-* UP Squared/UP Squared Pro
-* UP Core
-* UP Core Plus
-* UP Xtreme
-* UP Xtreme i11
-* UP Squared 6000
+* UPX-ADLP01
 
 Downloading the meta-up-board BSP layer
 ========================================
 
-[Yocto 3.1.7]
-
-Commit ID:
-
-Poky : 13f4ddf50eccaeed96a40a5f1a1d4173e677e98a
-
-meta-intel : 4922e10c7b8169585ff9322b0d913dadc525c68e
-
-meta-openembedded : f2d02cb71eaff8eb285a1997b30be52486c160ae
-
-meta-virtualization : 92cd3467502bd27b98a76862ca6525ce425a8479
-
-openembedded-core : 72431ee8de5e3a53d259cebf420a7713ac9e1f14
-
-
-[Yocto 3.1.3]
-
-Commit ID:
-
-Poky : 012ad10a89a889c21e67c27dc37d22520212548f
-
-meta-intel : d7134e86574172784f90117c03a012e0048d8bcb
-
-Download the Dunfell release and enter the poky directory:
+Download the Hardknott release and enter the poky directory:
 ```
-git clone -b dunfell git://git.yoctoproject.org/poky.git
+git clone -b hardknott git://git.yoctoproject.org/poky.git
 cd poky
 git checkout $[Commit ID]
 ```
-Download the Intel BSP layer version for Dunfell:
+Download the Intel BSP layer version for Hardknott:
 
 ```
-git clone -b dunfell git://git.yoctoproject.org/meta-intel.git
+git clone -b hardknott git://git.yoctoproject.org/meta-intel.git
 cd meta-intel
 git checkout $[Commit ID]
 cd ..
 ```
 
-Download the latest collection of layers for OE-core universe for Dunfell:
+Download the latest collection of layers for OE-core universe for Hardknott:
 ```
-git clone -b dunfell git://git.openembedded.org/meta-openembedded
+git clone -b hardknott git://git.openembedded.org/meta-openembedded
 ```
 Download meta-virtualization and openembedded-core for Docker containers:
 ```
-git clone -b dunfell git://git.yoctoproject.org/meta-virtualization
+git clone -b hardknott git://git.yoctoproject.org/meta-virtualization
 ```
 
 ```
-git clone -b dunfell git://git.openembedded.org/openembedded-core
+git clone -b hardknott git://git.openembedded.org/openembedded-core
 ```
 
-Download this UP Board BSP layer for Dunfell:
+Download this UP Board BSP layer for Hardknott:
 
 ```
-git clone -b dunfell https://github.com/AaeonCM/meta-up-board.git
+git clone -b hardknott https://github.com/AaeonCM/meta-up-board.git
 ```
 
 
 Building your Yocto image for each UP machine
 =============================================
-UP Board:
----------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-board bitbake upboard-image-sato
-```
-
-UP Squared Board:
+UPX-ADLP01 Board:
 -----------------
 From the poky directory:
 
 ```
 TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-squared bitbake upboard-image-sato
-```
-
-UP Core Board:
---------------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-core bitbake upboard-image-sato
-```
-
-UP Core  Plus Board:
---------------------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-core-plus bitbake upboard-image-sato
-```
-
-UP Xtreme:
---------------------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-xtreme bitbake upboard-image-sato
-```
-
-UP Xtreme i11:
---------------------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-xtreme-i11 bitbake upboard-image-sato
-```
-
-UP 4000 Board:
------------------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-4000 bitbake upboard-image-sato
-```
-
-UP Squared 6000 Board:
------------------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-squared-6000 bitbake upboard-image-sato
+MACHINE=upx-adlp01 bitbake upboard-image-sato
 ```
 At the end of a successfull build, you should have a live image that
 you can boot from a USB flash drive (see instructions on how to do
