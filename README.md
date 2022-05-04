@@ -344,6 +344,3 @@ and additional documentation:
 * http://up-board.org
 * https://up-community.org
 * https://wiki.up-community.org/
-
-Please submit any patches against this BSP to the maintainer:
-Maintainer: Ubilinux Team <ubilinux@emutex.com>
