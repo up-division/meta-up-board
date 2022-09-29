@@ -70,7 +70,7 @@ git clone -b kirkstone git://git.openembedded.org/openembedded-core
 Download this UP Board BSP layer for Kirkstone:
 
 ```
-git clone -b kirkstone https://github.com/AaeonCM/meta-up-board.git
+git clone -b kirkstone https://github.com/up-division/meta-up-board.git
 ```
 
 Enter recipes-kernel directory of the meta-up-board and download the pinctrl-upboard
