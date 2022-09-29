@@ -5,8 +5,8 @@ DESCRIPTION = "This will generate an initrd including ACPI tables\
  you want to add new devices to buses like I2C and SPI but not limited\
  to that."
 
-LICENSE = "BSD"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/BSD;md5=3775480a712fc46a69647678acb234cb"
+LICENSE = "BSD-4-Clause"
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/BSD-4-Clause;md5=624d9e67e8ac41a78f6b6c2c55a83a2b"
 
 DEPENDS = "intel-microcode acpica-native"
 

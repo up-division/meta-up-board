@@ -7,7 +7,7 @@ do_install() {
 	${S}/intel-ucode/* ${S}/intel-ucode-with-caveats/*
 }
 
-do_install_append_class-target() {
+do_install:append_class-target() {
 	install -d ${D}/boot
 	${STAGING_DIR_NATIVE}${sbindir_native}/iucode_tool \
 		${UCODE_FILTER_PARAMETERS} \

@@ -1,7 +1,7 @@
 Yocto BSP meta layer
 ======================================
-**Note: This branch dunfell for Yocto 'dunfell' is for development purposes
-only. Please refer to 'dunfell' branch in this repository for non-experimental
+**Note: This branch kirkstone for Yocto 'kirkstone' is for development purposes
+only. Please refer to 'kirkstone' branch in this repository for non-experimental
 purposes.**
 
 This README file contains information on building the meta-up-board BSP
@@ -25,88 +25,63 @@ Table of Contents
 Prerequisites
 ================
 
-Supported hardware versions for Yocto 3.1 (dunfell)
+Supported hardware versions for Yocto 4.0 (kirkstone)
 ------------------------------------------------
-* UP Board
 * UP Squared/UP Squared Pro
 * UP Core
 * UP Core Plus
 * UP Xtreme
 * UP Xtreme i11
+* UP Squared 4000
 * UP Squared 6000
+* UP Xtreme i12
 
 Downloading the meta-up-board BSP layer
 ========================================
 
-[Yocto 3.1.7]
-
-Commit ID:
-
-Poky : 13f4ddf50eccaeed96a40a5f1a1d4173e677e98a
-
-meta-intel : 4922e10c7b8169585ff9322b0d913dadc525c68e
-
-meta-openembedded : f2d02cb71eaff8eb285a1997b30be52486c160ae
-
-meta-virtualization : 92cd3467502bd27b98a76862ca6525ce425a8479
-
-openembedded-core : 72431ee8de5e3a53d259cebf420a7713ac9e1f14
-
-
-[Yocto 3.1.3]
-
-Commit ID:
-
-Poky : 012ad10a89a889c21e67c27dc37d22520212548f
-
-meta-intel : d7134e86574172784f90117c03a012e0048d8bcb
-
-Download the Dunfell release and enter the poky directory:
+Download the Kirkstone release and enter the poky directory:
 ```
-git clone -b dunfell git://git.yoctoproject.org/poky.git
+git clone -b kirkstone git://git.yoctoproject.org/poky.git
 cd poky
 git checkout $[Commit ID]
 ```
-Download the Intel BSP layer version for Dunfell:
+Download the Intel BSP layer version for Kirkstone:
 
 ```
-git clone -b dunfell git://git.yoctoproject.org/meta-intel.git
+git clone -b kirkstone git://git.yoctoproject.org/meta-intel.git
 cd meta-intel
 git checkout $[Commit ID]
 cd ..
 ```
 
-Download the latest collection of layers for OE-core universe for Dunfell:
+Download the latest collection of layers for OE-core universe for Kirkstone:
 ```
-git clone -b dunfell git://git.openembedded.org/meta-openembedded
+git clone -b kirkstone git://git.openembedded.org/meta-openembedded
 ```
 Download meta-virtualization and openembedded-core for Docker containers:
 ```
-git clone -b dunfell git://git.yoctoproject.org/meta-virtualization
+git clone -b kirkstone git://git.yoctoproject.org/meta-virtualization
 ```
 
 ```
-git clone -b dunfell git://git.openembedded.org/openembedded-core
+git clone -b kirkstone git://git.openembedded.org/openembedded-core
 ```
 
-Download this UP Board BSP layer for Dunfell:
+Download this UP Board BSP layer for Kirkstone:
 
 ```
-git clone -b dunfell https://github.com/AaeonCM/meta-up-board.git
+git clone -b kirkstone https://github.com/AaeonCM/meta-up-board.git
 ```
 
+Enter recipes-kernel directory of the meta-up-board and download the pinctrl-upboard
+
+```
+cd meta-up-board/recipes-kernel
+git clone https://github.com/up-division/pinctrl-upboard.git
+```
 
 Building your Yocto image for each UP machine
 =============================================
-UP Board:
----------
-From the poky directory:
-
-```
-TEMPLATECONF=meta-up-board/conf source oe-init-build-env
-MACHINE=up-board bitbake upboard-image-sato
-```
-
 UP Squared Board:
 -----------------
 From the poky directory:
@@ -168,6 +143,15 @@ From the poky directory:
 ```
 TEMPLATECONF=meta-up-board/conf source oe-init-build-env
 MACHINE=up-squared-6000 bitbake upboard-image-sato
+```
+
+UP Xtreme i12:
+-----------------
+From the poky directory:
+
+```
+TEMPLATECONF=meta-up-board/conf source oe-init-build-env
+MACHINE=up-xtreme-i12 bitbake upboard-image-sato
 ```
 At the end of a successfull build, you should have a live image that
 you can boot from a USB flash drive (see instructions on how to do
