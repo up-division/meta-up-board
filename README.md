@@ -43,15 +43,11 @@ Download the Kirkstone release and enter the poky directory:
 ```
 git clone -b kirkstone git://git.yoctoproject.org/poky.git
 cd poky
-git checkout $[Commit ID]
 ```
 Download the Intel BSP layer version for Kirkstone:
 
 ```
 git clone -b kirkstone git://git.yoctoproject.org/meta-intel.git
-cd meta-intel
-git checkout $[Commit ID]
-cd ..
 ```
 
 Download the latest collection of layers for OE-core universe for Kirkstone:
