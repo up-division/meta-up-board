@@ -132,6 +132,12 @@ TEMPLATECONF=meta-up-board/conf source oe-init-build-env
 MACHINE=up-4000 bitbake upboard-image-sato
 ```
 
+Building RT image
+
+```
+MACHINE=up-4000-rt bitbake upboard-image-sato
+```
+
 UP Squared 6000 Board:
 -----------------
 From the poky directory:
@@ -141,6 +147,12 @@ TEMPLATECONF=meta-up-board/conf source oe-init-build-env
 MACHINE=up-squared-6000 bitbake upboard-image-sato
 ```
 
+Building RT image
+
+```
+MACHINE=up-squared-6000-rt bitbake upboard-image-sato
+```
+
 UP Xtreme i12:
 -----------------
 From the poky directory:
@@ -148,6 +160,12 @@ From the poky directory:
 ```
 TEMPLATECONF=meta-up-board/conf source oe-init-build-env
 MACHINE=up-xtreme-i12 bitbake upboard-image-sato
+```
+
+Building RT image
+
+```
+MACHINE=up-xtreme-i12-rt bitbake upboard-image-sato
 ```
 At the end of a successfull build, you should have a live image that
 you can boot from a USB flash drive (see instructions on how to do

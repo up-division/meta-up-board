@@ -21,6 +21,8 @@ IMAGE_INSTALL:append = " f81534-mode"
 IMAGE_INSTALL:append = " can-utils"
 #IMAGE_INSTALL:append = " pulseaudio-init"
 IMAGE_INSTALL:append = " devmem2"
+IMAGE_INSTALL:append = " rt-tests"
+IMAGE_INSTALL:append = " spitools"
 
 LICENSE_FLAGS_ACCEPTED = "commercial"
 
