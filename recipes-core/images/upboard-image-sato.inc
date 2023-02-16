@@ -23,6 +23,7 @@ IMAGE_INSTALL:append = " can-utils"
 IMAGE_INSTALL:append = " devmem2"
 IMAGE_INSTALL:append = " rt-tests"
 IMAGE_INSTALL:append = " spitools"
+IMAGE_INSTALL:append = " packagegroup-core-buildessential"
 
 LICENSE_FLAGS_ACCEPTED = "commercial"
 
