@@ -19,11 +19,12 @@ IMAGE_INSTALL:append = " minicom"
 IMAGE_INSTALL:append = " f81534-mode"
 #IMAGE_INSTALL:append = " xserver-xorg xserver-xf86-config xserver-nodm-config"
 IMAGE_INSTALL:append = " can-utils"
-#IMAGE_INSTALL:append = " pulseaudio-init"
+IMAGE_INSTALL:append = " pulseaudio"
 IMAGE_INSTALL:append = " devmem2"
 IMAGE_INSTALL:append = " rt-tests"
 IMAGE_INSTALL:append = " spitools"
 IMAGE_INSTALL:append = " packagegroup-core-buildessential"
+IMAGE_INSTALL:append = " amixeron"
 
 LICENSE_FLAGS_ACCEPTED = "commercial"
 

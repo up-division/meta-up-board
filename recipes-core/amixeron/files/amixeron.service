@@ -1,0 +1,8 @@
+[Unit]
+Description=Turn On Amixer IEC958 
+
+[Service]
+ExecStart=/usr/sbin/amixeron.sh
+
+[Install]
+WantedBy=multi-user.target
