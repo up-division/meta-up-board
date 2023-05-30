@@ -69,13 +69,6 @@ Download this UP Board BSP layer for Kirkstone:
 git clone -b kirkstone https://github.com/up-division/meta-up-board.git
 ```
 
-Enter recipes-kernel directory of the meta-up-board and download the pinctrl-upboard
-
-```
-cd meta-up-board/recipes-kernel
-git clone https://github.com/up-division/pinctrl-upboard.git
-```
-
 Building your Yocto image for each UP machine
 =============================================
 UP Squared Board:
