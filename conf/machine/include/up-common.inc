@@ -17,7 +17,7 @@ SERIAL_CONSOLES="115200;ttyS0"
 
 IMAGE_FSTYPES += " hddimg"
 
-MACHINE_EXTRA_RDEPENDS += "kernel-module-upboard-fpga"
+MACHINE_EXTRA_RDEPENDS += "kernel-module-upboard-cpld"
 MACHINE_EXTRA_RDEPENDS += "kernel-module-upboard-ec"
 MACHINE_EXTRA_RDEPENDS += "kernel-module-leds-upboard"
 MACHINE_EXTRA_RDEPENDS += "kernel-module-pinctrl-upboard"
