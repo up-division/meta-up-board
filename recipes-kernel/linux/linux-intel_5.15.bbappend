@@ -11,6 +11,7 @@ SRC_URI += " \
        file://intel-dev.cfg \
        file://intel-dev.scc \
        file://usb.cfg \
+       file://ipu.cfg \
        file://wireless.cfg \
 "
 

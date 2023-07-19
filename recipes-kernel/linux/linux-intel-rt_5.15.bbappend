@@ -6,6 +6,7 @@ SRC_URI += " \
        file://up-board.cfg \
        file://up-board-user-config.cfg \
        file://up-board-pinctrl.cfg \
+       file://ipu.cfg \
 "
 # replace these SRCREVs with the real commit ids once you've had
 # the appropriate changes committed to the upstream linux-yocto repo
