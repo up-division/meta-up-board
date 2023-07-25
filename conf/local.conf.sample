@@ -241,3 +241,8 @@ PREFERRED_PROVIDER_iasl-native = "acpica-native"
 ## Enable UP security features
 ##
 UP_SECURE_BOOT = "0"
+
+# Minimal 32GB system memery required, if hang when building change the value according to your system spec, 
+#PARALLEL_MAKE = "-j4"
+#BB_NUMBER_THREADS = "8"
+
