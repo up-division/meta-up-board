@@ -92,7 +92,7 @@ git clone -b dunfell git://git.openembedded.org/openembedded-core
 Download this UP Board BSP layer for Dunfell:
 
 ```
-git clone -b dunfell https://github.com/AaeonCM/meta-up-board.git
+git clone -b dunfell https://github.com/up-division/meta-up-board.git
 ```
 
 
