@@ -27,14 +27,20 @@ Prerequisites
 
 Supported hardware versions for Yocto 4.0 (kirkstone)
 ------------------------------------------------
-* UP Squared/UP Squared Pro
+* UP Squared
+* UP Squared Pro
+* UP Squared V2
 * UP Core
 * UP Core Plus
 * UP Xtreme
 * UP Xtreme i11
-* UP Squared 4000
-* UP Squared 6000
 * UP Xtreme i12
+* UP Squared 6000
+* UP 4000
+* UP 7000
+* UP Element i12
+* UP Squared Pro 7000
+* UP Squared i12
 
 Downloading the meta-up-board BSP layer
 ========================================
