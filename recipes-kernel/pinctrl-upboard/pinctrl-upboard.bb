@@ -13,7 +13,7 @@ inherit module
 # The inherit of module.bbclass will automatically name module packages with
 # "kernel-module-" prefix as required by the oe-core build environment.
 
-RPROVIDES:${PN} += "kernel-module-upboard-cpld"
+RPROVIDES:${PN} += "kernel-module-upboard-fpga"
 RPROVIDES:${PN} += "kernel-module-upboard-ec"
 RPROVIDES:${PN} += "kernel-module-leds-upboard"
 RPROVIDES:${PN} += "kernel-module-pinctrl-upboard"

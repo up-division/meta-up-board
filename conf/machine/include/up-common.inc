@@ -17,12 +17,7 @@ SERIAL_CONSOLES="115200;ttyS0"
 
 IMAGE_FSTYPES += " hddimg"
 
-MACHINE_EXTRA_RDEPENDS += "kernel-module-upboard-cpld"
-MACHINE_EXTRA_RDEPENDS += "kernel-module-upboard-ec"
-MACHINE_EXTRA_RDEPENDS += "kernel-module-leds-upboard"
-MACHINE_EXTRA_RDEPENDS += "kernel-module-pinctrl-upboard"
-MACHINE_EXTRA_RDEPENDS += "kernel-module-pinctrl-upelement"
-MACHINE_EXTRA_RDEPENDS += "kernel-module-spi-pxa2xx-platform"
+IMAGE_INSTALL:append = " kernel-module-upboard-fpga kernel-module-upboard-ec kernel-module-leds-upboard kernel-module-pinctrl-upboard kernel-module-pinctrl-upelement kernel-module-pwm-upboard kernel-module-spi-pxa2xx-up"
 
 
 WKS_FILE = "${@bb.utils.contains_any("EFI_PROVIDER", "systemd-boot rmc-boot", "systemd-bootdisk-initrd.wks", "grub-bootdisk-initrd.wks", d)}"

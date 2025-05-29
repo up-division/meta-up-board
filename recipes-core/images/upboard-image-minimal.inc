@@ -1,0 +1,14 @@
+IMAGE_FEATURES += "package-management"
+
+IMAGE_INSTALL += "kernel-modules"
+IMAGE_INSTALL += "python3"
+IMAGE_INSTALL += "python3-pip"
+IMAGE_INSTALL += "alsa-lib alsa-utils alsa-tools"
+IMAGE_INSTALL += "i2c-tools git vim"
+IMAGE_INSTALL += "file"
+IMAGE_INSTALL += "dosfstools"
+IMAGE_INSTALL += "connman connman-client"
+
+DISTRO_FEATURES:append = " bluez5 bluetooth wifi"
+IMAGE_INSTALL:append += " bluez5 systemd"
+IMAGE_INSTALL:append += " hostapd dhcpcd iw wpa-supplicant"
