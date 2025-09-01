@@ -28,6 +28,7 @@ IMAGE_INSTALL:append = " amixeron"
 IMAGE_INSTALL:append = " lmsensors"
 IMAGE_INSTALL:append = " bmaptool"
 IMAGE_INSTALL:append = " dnsmasq"
+IMAGE_INSTALL:append = " 88x2cu"
 
 # for mipi, browser, ...
 IMAGE_INSTALL:append = " gstreamer1.0 gstreamer1.0-plugins-base-dev gstreamer1.0-plugins-bad v4l-utils media-ctl libdrm-dev"
