@@ -2,8 +2,8 @@ SUMMARY = "UP boards pin controller modules"
 DESCRIPTION = "${SUMMARY}"
 LICENSE = "CLOSED"
 
-SRCREV = "${AUTOREV}"
-PV = "1.0.0-git${SRCPV}"
+SRCREV = "b2194d8821eb781be85c232be042004cff4daac9"
+PV = "1.1.8-git${SRCPV}"
 SRC_URI = "git://github.com/up-division/pinctrl-upboard.git;protocol=https;branch=master"
 
 S = "${WORKDIR}/git/files"
