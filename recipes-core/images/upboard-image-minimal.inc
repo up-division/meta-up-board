@@ -10,5 +10,5 @@ IMAGE_INSTALL += "dosfstools"
 IMAGE_INSTALL += "connman connman-client"
 
 DISTRO_FEATURES:append = " bluez5 bluetooth wifi"
-IMAGE_INSTALL:append += " bluez5 systemd"
-IMAGE_INSTALL:append += " hostapd dhcpcd iw wpa-supplicant"
+IMAGE_INSTALL:append = " bluez5 systemd"
+IMAGE_INSTALL:append = " hostapd dhcpcd iw wpa-supplicant"

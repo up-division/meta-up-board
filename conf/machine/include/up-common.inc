@@ -21,4 +21,4 @@ IMAGE_INSTALL:append = " kernel-module-upboard-fpga kernel-module-upboard-ec ker
 
 
 WKS_FILE = "${@bb.utils.contains_any("EFI_PROVIDER", "systemd-boot rmc-boot", "systemd-bootdisk-initrd.wks", "grub-bootdisk-initrd.wks", d)}"
-WKS_FILE_DEPENDS:append += " acpi-tables"
+WKS_FILE_DEPENDS:append = " acpi-tables"
