@@ -36,4 +36,4 @@ The following boards are supported in this release.
 
 For instructions on setting up a build folder and building/booting an image,
 see the meta-up-demo-distro README:
-https://github.com/up-division/meta-up-demo-distro/blob/wrynose/README.md
+https://github.com/up-division/meta-up-demo-distro/blob/master/README.md
