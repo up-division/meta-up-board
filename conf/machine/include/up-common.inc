@@ -9,7 +9,7 @@ MACHINE_FEATURES += "alsa"
 
 MACHINE_EXTRA_RRECOMMENDS += "linux-firmware v86d"
 
-EXTRA_OECONF:append_pn-matchbox-panel-2 = " --with-battery=acpi"
+EXTRA_OECONF:append:pn-matchbox-panel-2 = " --with-battery=acpi"
 
 GLIBC_ADDONS = "nptl"
 
