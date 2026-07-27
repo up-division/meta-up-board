@@ -1,6 +1,7 @@
 SUMMARY = "UP boards pin controller modules"
 DESCRIPTION = "${SUMMARY}"
-LICENSE = "CLOSED"
+LICENSE = "GPL-2.0-only"
+LIC_FILES_CHKSUM = "file://COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e"
 
 SRCREV = "b2194d8821eb781be85c232be042004cff4daac9"
 PV = "1.1.8-git${SRCPV}"
