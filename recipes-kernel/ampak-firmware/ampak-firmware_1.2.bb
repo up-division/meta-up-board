@@ -9,7 +9,7 @@ PACKAGE_ARCH = "all"
 
 inherit allarch
 
-FILES:${PN} += " ${base_libdir}/modprobe.d/* ${base_libdir}/firmware/ampak/brcm/* ${sysconfdir}/firmware/* ${systemd_system_unitdir}/* "
+FILES:${PN} += " ${base_libdir}/modprobe.d/* ${base_libdir}/firmware/ampak/brcm/* ${sysconfdir}/firmware/* "
 
 INHIBIT_PACKAGE_STRIP = "1"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
@@ -44,6 +44,3 @@ do_install () {
     ln -s brcmfmac43430-sdio.txt ${D}${base_libdir}/firmware/ampak/brcm/brcmfmac43430-sdio.AAEON-UPC-PLUS.txt
     ln -s brcmfmac43430-sdio.txt ${D}${base_libdir}/firmware/ampak/brcm/brcmfmac43430-sdio.AAEON-UP-CHCR1.txt
 }
-
-NATIVE_SYSTEMD_SUPPORT = "1"
-SYSTEMD_PACKAGES = "${PN}"
