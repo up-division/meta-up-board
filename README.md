@@ -25,7 +25,7 @@ Table of Contents
 Prerequisites
 ================
 
-Supported hardware versions for Yocto 5.0 (Wrynose)
+Supported hardware versions for Yocto 6.0 (Wrynose)
 ------------------------------------------------
 * UP Squared
 * UP Squared Pro
