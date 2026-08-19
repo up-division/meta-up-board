@@ -1,7 +1,7 @@
 Yocto BSP meta layer
 ======================================
-**Note: This branch Scarthgap for Yocto 'scarthgap' is for development purposes
-only. Please refer to 'scarthgap' branch in this repository for non-experimental
+**Note: This branch Wrynose for Yocto 'wrynose' is for development purposes
+only. Please refer to 'wrynose' branch in this repository for non-experimental
 purposes.**
 
 This README file contains information on building the meta-up-board BSP
@@ -25,7 +25,7 @@ Table of Contents
 Prerequisites
 ================
 
-Supported hardware versions for Yocto 5.0 (Scarthgap)
+Supported hardware versions for Yocto 5.0 (Wrynose)
 ------------------------------------------------
 * UP Squared
 * UP Squared Pro
@@ -48,34 +48,33 @@ Supported hardware versions for Yocto 5.0 (Scarthgap)
 Downloading the meta-up-board BSP layer
 ========================================
 
-Download the Scarthgap release and enter the poky directory:
+Download the core build engine for Wrynose:
 ```
-git clone -b scarthgap git://git.yoctoproject.org/poky.git
-cd poky
+git clone -b 2.18 https://git.openembedded.org/bitbake
 ```
-Download the Intel BSP layer version for Scarthgap:
+Download the Intel BSP layer version for Wrynose:
 
 ```
-git clone -b scarthgap git://git.yoctoproject.org/meta-intel.git
+git clone -b wrynose https://git.yoctoproject.org/meta-intel
 ```
 
-Download the latest collection of layers for OE-core universe for Scarthgap:
+Download the latest collection of layers for OE-core universe for Wrynose:
 ```
-git clone -b scarthgap git://git.openembedded.org/meta-openembedded
+git clone -b wrynose https://git.openembedded.org/meta-openembedded
 ```
 Download meta-virtualization and openembedded-core for Docker containers (optional):
 ```
-git clone -b scarthgap git://git.yoctoproject.org/meta-virtualization
+git clone -b wrynose https://git.yoctoproject.org/meta-virtualization
 ```
 
 ```
-git clone -b scarthgap git://git.openembedded.org/openembedded-core
+git clone -b wrynose https://git.openembedded.org/openembedded-core
 ```
 
-Download this UP Board BSP layer for Scarthgap:
+Download this UP Board BSP layer for Wrynose:
 
 ```
-git clone -b scarthgap https://github.com/up-division/meta-up-board.git
+git clone -b wrynose https://github.com/up-division/meta-up-board.git
 ```
 
 Building your Yocto image for each UP machine
@@ -85,7 +84,7 @@ UP Squared Board:
 From the poky directory:
 
 ```
-TEMPLATECONF=meta-up-board/conf/templates/default source oe-init-build-env
+TEMPLATECONF=$PWD/meta-up-board/conf/templates/default source openembedded-core/oe-init-build-env build
 MACHINE=up-squared bitbake upboard-image-sato
 ```
 
@@ -94,7 +93,7 @@ UP Core Board:
 From the poky directory:
 
 ```
-TEMPLATECONF=meta-up-board/conf/templates/default source oe-init-build-env
+TEMPLATECONF=$PWD/meta-up-board/conf/templates/default source openembedded-core/oe-init-build-env build
 MACHINE=up-core bitbake upboard-image-sato
 ```
 
@@ -103,7 +102,7 @@ UP Core  Plus Board:
 From the poky directory:
 
 ```
-TEMPLATECONF=meta-up-board/conf/templates/default source oe-init-build-env
+TEMPLATECONF=$PWD/meta-up-board/conf/templates/default source openembedded-core/oe-init-build-env build
 MACHINE=up-core-plus bitbake upboard-image-sato
 ```
 
@@ -112,7 +111,7 @@ UP Xtreme:
 From the poky directory:
 
 ```
-TEMPLATECONF=meta-up-board/conf/templates/default source oe-init-build-env
+TEMPLATECONF=$PWD/meta-up-board/conf/templates/default source openembedded-core/oe-init-build-env build
 MACHINE=up-xtreme bitbake upboard-image-sato
 ```
 
@@ -121,7 +120,7 @@ UP Xtreme i11:
 From the poky directory:
 
 ```
-TEMPLATECONF=meta-up-board/conf/templates/default source oe-init-build-env
+TEMPLATECONF=$PWD/meta-up-board/conf/templates/default source openembedded-core/oe-init-build-env build
 MACHINE=up-xtreme-i11 bitbake upboard-image-sato
 ```
 
@@ -130,7 +129,7 @@ UP 4000 Board:
 From the poky directory:
 
 ```
-TEMPLATECONF=meta-up-board/conf/templates/default source oe-init-build-env
+TEMPLATECONF=$PWD/meta-up-board/conf/templates/default source openembedded-core/oe-init-build-env build
 MACHINE=up-4000 bitbake upboard-image-sato
 ```
 
@@ -145,7 +144,7 @@ UP Squared 6000 Board:
 From the poky directory:
 
 ```
-TEMPLATECONF=meta-up-board/conf/templates/default source oe-init-build-env
+TEMPLATECONF=$PWD/meta-up-board/conf/templates/default source openembedded-core/oe-init-build-env build
 MACHINE=up-squared-6000 bitbake upboard-image-sato
 ```
 
@@ -160,7 +159,7 @@ UP Xtreme i12:
 From the poky directory:
 
 ```
-TEMPLATECONF=meta-up-board/conf/templates/default source oe-init-build-env
+TEMPLATECONF=$PWD/meta-up-board/conf/templates/default source openembedded-core/oe-init-build-env build
 MACHINE=up-xtreme-i12 bitbake upboard-image-sato
 ```
 
@@ -178,7 +177,7 @@ UP Xtreme i14:
 From the poky directory:
 
 ```
-TEMPLATECONF=meta-up-board/conf/templates/default source oe-init-build-env
+TEMPLATECONF=$PWD/meta-up-board/conf/templates/default source openembedded-core/oe-init-build-env build
 MACHINE=up-xtreme-i14 bitbake upboard-image-sato
 ```
 
@@ -206,7 +205,7 @@ takes device /dev/sdf, use dd to copy the live image to it.  For
 example:
 
 ```
-dd if=upboard-image-sato-up-xtreme.hddimg of=/dev/sdf
+dd if=upboard-image-sato-up-xtreme.rootfs.wic of=/dev/sdf
 sync
 eject /dev/sdf
 ```

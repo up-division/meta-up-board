@@ -3,7 +3,7 @@ LICENSE = "CLOSED"
 PR = "r0"
 PN = "ampak-firmware"
 PV = "0.1"
-S = "${WORKDIR}"
+S = "${UNPACKDIR}"
 
 PACKAGE_ARCH = "all"
 
@@ -26,17 +26,17 @@ SRC_URI:append = " file://BCM43430A1.hcd \
 
 do_install () {
    install -d ${D}${base_libdir}/modprobe.d
-   install -m 755 ${WORKDIR}/brcmfmac-ampak.conf ${D}${base_libdir}/modprobe.d/
+   install -m 755 ${S}/brcmfmac-ampak.conf ${D}${base_libdir}/modprobe.d/
 
    install -d ${D}${base_libdir}/firmware/ampak/brcm
-   install -m 755 ${WORKDIR}/brcmfmac43430-sdio.bin ${D}${base_libdir}/firmware/ampak/brcm/
-   install -m 755 ${WORKDIR}/brcmfmac43430-sdio.txt ${D}${base_libdir}/firmware/ampak/brcm/
-   install -m 755 ${WORKDIR}/brcmfmac43455-sdio.bin ${D}${base_libdir}/firmware/ampak/brcm/
-   install -m 755 ${WORKDIR}/brcmfmac43455-sdio.txt ${D}${base_libdir}/firmware/ampak/brcm/
+   install -m 755 ${S}/brcmfmac43430-sdio.bin ${D}${base_libdir}/firmware/ampak/brcm/
+   install -m 755 ${S}/brcmfmac43430-sdio.txt ${D}${base_libdir}/firmware/ampak/brcm/
+   install -m 755 ${S}/brcmfmac43455-sdio.bin ${D}${base_libdir}/firmware/ampak/brcm/
+   install -m 755 ${S}/brcmfmac43455-sdio.txt ${D}${base_libdir}/firmware/ampak/brcm/
 
    install -d ${D}${sysconfdir}/firmware/
-   install -m 755 ${WORKDIR}/BCM43430A1.hcd ${D}${sysconfdir}/firmware/
-   install -m 755 ${WORKDIR}/BCM4345C0.hcd ${D}${sysconfdir}/firmware/
+   install -m 755 ${S}/BCM43430A1.hcd ${D}${sysconfdir}/firmware/
+   install -m 755 ${S}/BCM4345C0.hcd ${D}${sysconfdir}/firmware/
 
     # Refer to meta-raspberrypi, file inux-firmware-rpidistro_git.bb to add compat links. Fixes errors like
     # brcmfmac mmc1:0001:1: Direct firmware load for brcm/brcmfmac43455-sdio.AAEON-UPC-PLU.txt failed with error -2

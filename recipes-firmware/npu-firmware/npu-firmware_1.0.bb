@@ -3,7 +3,7 @@ LICENSE = "CLOSED"
 PR = "r0"
 PN = "npu-firmware"
 PV = "0.0"
-S = "${WORKDIR}"
+S = "${UNPACKDIR}"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI:append = " file://vpu_37xx_v0.0.bin "

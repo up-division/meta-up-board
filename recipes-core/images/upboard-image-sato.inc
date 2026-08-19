@@ -30,7 +30,7 @@ IMAGE_INSTALL:append = " bmaptool"
 
 # for mipi, browser, ...
 IMAGE_INSTALL:append = " gstreamer1.0 gstreamer1.0-plugins-base-dev gstreamer1.0-plugins-bad v4l-utils media-ctl libdrm-dev"
-IMAGE_INSTALL:append = " wget curl nss cups nspr gnupg udev libstdc++ libc6-dev libudev lsb-release intel-vaapi-driver tbb clinfo"
+IMAGE_INSTALL:append = " wget curl nss cups nspr gnupg udev libstdc++ libc6-dev libudev lsb-release intel-media-driver tbb clinfo"
 IMAGE_INSTALL:append = " gflags pango xdg-utils opencl-icd-loader"
 
 CORE_IMAGE_EXTRA_INSTALL += " wayland"

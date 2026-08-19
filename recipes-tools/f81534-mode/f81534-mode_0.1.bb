@@ -8,7 +8,8 @@ PROVIDES = " f81534-mode"
 FILES_${PN} += "${bindir}/set_gpio"
 FILES_${PN} += "${bindir}/set_mode"
 
-S = "${WORKDIR}"
+S = "${UNPACKDIR}"
+
 SRC_URI = "file://set_mode.c \
            file://set_gpio.c \
           "

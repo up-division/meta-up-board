@@ -5,6 +5,8 @@
 #include <linux/serial.h>
 #include <string.h>
 #include <asm-generic/ioctls.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
 
 #define VERSION "$Revision: 1440 $"
 #define F81534_MODE_SYSFS	"/dev/%s"

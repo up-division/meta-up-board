@@ -5,6 +5,8 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/BSD-4-Clause;m
 
 inherit systemd 
 
+S = "${UNPACKDIR}"
+
 SRC_URI = "file://amixeron.service \
            file://amixeron.sh \
           "
@@ -16,9 +18,9 @@ RDEPENDS:${PN} += "bash"
 
 do_install() {
 	install -d ${D}${sysconfdir}/systemd/system
-	install -m 0755 ${WORKDIR}/amixeron.service ${D}${sysconfdir}/systemd/system
+	install -m 0755 ${S}/amixeron.service ${D}${sysconfdir}/systemd/system
         install -d ${D}${sbindir}/
-	install -m 0755 ${WORKDIR}/amixeron.sh ${D}${sbindir}/
+	install -m 0755 ${S}/amixeron.sh ${D}${sbindir}/
 }
 
 
