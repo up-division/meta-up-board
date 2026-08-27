@@ -74,7 +74,7 @@ git clone -b wrynose https://git.openembedded.org/openembedded-core
 Download this UP Board BSP layer for Wrynose:
 
 ```
-git clone -b wrynose https://github.com/up-division/meta-up-board.git
+git clone -b wcl_wrynose https://github.com/up-division/meta-up-board.git
 ```
 
 Building your Yocto image for each UP machine
