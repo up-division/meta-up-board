@@ -1,6 +1,6 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-PR := "${PR}.2"
+PR := "${PR}.3"
 
 SRC_URI += " \
        file://up-board.cfg \
@@ -37,3 +37,8 @@ do_shared_workdir:append () {
 	fi
 }
 
+# UP Nexus WCL: Xe3 display + disable SoundWire SOF (link modpost failures).
+SRC_URI:append:up-nexus-wcl = " \
+    file://xe3.cfg \
+    file://wcl-soundwire-off.cfg \
+"
